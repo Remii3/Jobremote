@@ -1,0 +1,45 @@
+services:
+  client:
+    container_name: client
+    image: client
+    build: 
+      context: ./client
+      target: dev
+    command: npm run dev
+    depends_on:
+      - server
+    develop:
+      watch:
+        - path: ./client
+          action: sync
+          target: /client
+          ignore: 
+          - node_modules
+          - .next
+          - package-lock.json
+          - package.json
+        - path: ./client/package.json
+          action: rebuild
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./client/.env.local
+  server:
+    container_name: server
+    image: server
+    build: 
+      context: ./server
+    command: npm run dev
+    restart: unless-stopped
+    develop:
+      watch:
+        - path: ./server/src
+          action: sync
+          target: /server/src
+        - path: ./server/package.json
+          action: rebuild
+          target: /server
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./server/.env
