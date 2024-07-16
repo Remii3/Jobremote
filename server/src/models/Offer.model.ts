@@ -1,11 +1,12 @@
-import { Schema, model, Document } from "mongoose";
+import { Schema, model, Types } from "mongoose";
 
-interface OfferType {
+export interface OfferType {
+  _id: Types.ObjectId;
   title: string;
   description: string;
 }
 
-const offerSchema = new Schema({
+const offerSchema = new Schema<OfferType>({
   title: {
     type: String,
     required: true,

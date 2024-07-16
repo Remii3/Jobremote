@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Rubik as FontSans } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import MainLayout from "@/components/layout/MainLayout";
+import { createTRPCClient, httpBatchLink } from "@trpc/client";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -69,7 +71,7 @@ export default function RootLayout({
           fontSans.variable
         )}
       >
-        {children}
+        <MainLayout>{children}</MainLayout>
       </body>
     </html>
   );
