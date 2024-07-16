@@ -1,6 +1,7 @@
-import { TRPCClientError } from "@trpc/client";
+import { createTRPCClient, httpBatchLink, TRPCClientError } from "@trpc/client";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { AppRouter } from "../../../server/src/routes/_app";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -16,3 +17,11 @@ export function handleError(err: unknown) {
     return err;
   }
 }
+
+export const trpc = createTRPCClient<AppRouter>({
+  links: [
+    httpBatchLink({
+      url: "http://localhost:5000/trpc",
+    }),
+  ],
+});

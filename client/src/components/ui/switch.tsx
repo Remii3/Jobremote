@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import * as SwitchPrimitives from "@radix-ui/react-switch";
 import { Moon, Sun } from "lucide-react";
@@ -9,7 +7,6 @@ const Switch = React.forwardRef<
   React.ElementRef<typeof SwitchPrimitives.Root>,
   React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root>
 >(({ className, ...props }, ref) => {
-  const [isChecked, setIsChecked] = React.useState(false);
   return (
     <SwitchPrimitives.Root
       className={cn(
@@ -18,7 +15,6 @@ const Switch = React.forwardRef<
       )}
       {...props}
       ref={ref}
-      onCheckedChange={(e) => setIsChecked(e)}
     >
       <SwitchPrimitives.Thumb
         className={cn(
@@ -27,12 +23,12 @@ const Switch = React.forwardRef<
       >
         <Moon
           className={`h-4 w-4 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 duration-100 absolute ease-out transition-[opacity,scale] ${
-            isChecked ? "opacity-100 scale-100" : "opacity-0 scale-50"
+            props.checked ? "opacity-100 scale-100" : "opacity-0 scale-50"
           }`}
         />
         <Sun
           className={`h-4 w-4 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 duration-100 absolute ease-out transition-[opacity,scale] ${
-            isChecked ? "opacity-0 scale-50" : "opacity-100 scale-100"
+            props.checked ? "opacity-0 scale-50" : "opacity-100 scale-100"
           }`}
         />
       </SwitchPrimitives.Thumb>
