@@ -1,19 +1,21 @@
-import { Schema, model, Types } from "mongoose";
+import { Schema, model } from "mongoose";
+import { z } from "zod";
+import { allowedTechnologies, OfferSchema } from "../schemas/offerSchemas";
 
-export interface OfferType {
-  _id: Types.ObjectId;
-  title: string;
-  description: string;
-}
+export type OfferType = z.infer<typeof OfferSchema>;
 
 const offerSchema = new Schema<OfferType>({
   title: {
     type: String,
     required: true,
   },
-  description: {
+  content: {
     type: String,
     required: true,
+  },
+  categories: {
+    type: [String],
+    enum: allowedTechnologies,
   },
 });
 

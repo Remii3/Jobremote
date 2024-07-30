@@ -1,27 +1,25 @@
-import { createTRPCClient, httpBatchLink, TRPCClientError } from "@trpc/client";
+import { initQueryClient } from "@ts-rest/react-query";
+
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { AppRouter } from "../../../server/src/routes/_app";
+import { mainContract } from "../../../server/src/contracts/_app";
+
+interface ClientErrorType {
+  status: number;
+  body: string | unknown;
+}
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function handleError(err: unknown) {
+export function showError(err: unknown) {
   if (process.env.NODE_ENV !== "production") {
     console.error(err);
   }
-  if (err instanceof TRPCClientError) {
-    return err;
-  } else {
-    return err;
-  }
 }
 
-export const trpc = createTRPCClient<AppRouter>({
-  links: [
-    httpBatchLink({
-      url: "http://localhost:5000/trpc",
-    }),
-  ],
+export const client = initQueryClient(mainContract, {
+  baseUrl: "http://localhost:5000",
+  baseHeaders: {},
 });

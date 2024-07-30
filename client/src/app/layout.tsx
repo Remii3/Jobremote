@@ -1,12 +1,14 @@
-import type { Metadata } from "next";
-import { Rubik as FontSans } from "next/font/google";
 import "./globals.css";
+import { Rubik as FontSans } from "next/font/google";
+import type { Metadata } from "next";
 import { cn } from "@/lib/utils";
 import MainLayout from "@/components/layout/MainLayout";
 
 const fontSans = FontSans({
   subsets: ["latin"],
   variable: "--font-sans",
+  display: "swap",
+  weight: "400",
 });
 
 export const metadata: Metadata = {

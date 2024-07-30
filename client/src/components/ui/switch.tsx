@@ -22,13 +22,13 @@ const Switch = React.forwardRef<
         )}
       >
         <Moon
-          className={`h-4 w-4 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 duration-100 absolute ease-out transition-[opacity,scale] ${
-            props.checked ? "opacity-100 scale-100" : "opacity-0 scale-50"
+          className={`h-4 w-4 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2  absolute transition-[opacity] ${
+            props.checked ? "opacity-100" : "opacity-0"
           }`}
         />
         <Sun
-          className={`h-4 w-4 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 duration-100 absolute ease-out transition-[opacity,scale] ${
-            props.checked ? "opacity-0 scale-50" : "opacity-100 scale-100"
+          className={`h-4 w-4 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 absolute transition-[opacity] ${
+            props.checked ? "opacity-0" : "opacity-100"
           }`}
         />
       </SwitchPrimitives.Thumb>

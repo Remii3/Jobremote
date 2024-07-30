@@ -2,7 +2,10 @@
 import { useEffect } from "react";
 import { Toaster } from "../ui/toaster";
 import Header from "./Header";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  QueryClientProvider,
+  QueryClient,
+} from "@ts-rest/react-query/tanstack";
 
 const queryClient = new QueryClient();
 

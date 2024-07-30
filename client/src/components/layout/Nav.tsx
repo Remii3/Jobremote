@@ -13,9 +13,7 @@ const Nav = () => {
   return (
     <nav className="flex gap-3 items-center">
       <Button variant={"outline"}>Login</Button>
-      <Button variant={"default"} className="">
-        Post a job
-      </Button>
+      <Button variant={"default"}>Post a job</Button>
       <Sheet>
         <SheetTrigger asChild>
           <Button variant={"outline"} className="px-2">

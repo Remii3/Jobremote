@@ -1,17 +1,12 @@
-import { TRPCError } from "@trpc/server";
+import { initContract } from "@ts-rest/core";
+import { initServer } from "@ts-rest/express";
 
-export function handleError(err: unknown, message?: string): never {
+export function handleError(err: unknown, message?: string) {
   if (process.env.NODE_ENV !== "production") {
     console.error(err);
   }
-
-  if (err instanceof TRPCError) {
-    throw new TRPCError({
-      code: err.code,
-      message: message || err.message,
-      cause: err.cause,
-    });
-  } else {
-    throw err;
-  }
 }
+
+export const tsServer = initServer();
+
+export const c = initContract();

@@ -26,7 +26,7 @@ const Header = () => {
   };
 
   return (
-    <header className="px-5 py-4 flex justify-between items-center">
+    <header className="px-4 py-3 flex justify-between items-center shadow-sm">
       <div className="flex gap-3 items-center">
         <h1 className="text-2xl font-semibold">Jobremote.com</h1>
         <div className="pt-1 flex items-center gap-3">

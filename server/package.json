@@ -12,7 +12,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@trpc/server": "^11.0.0-rc.461",
+    "@ts-rest/core": "^3.46.0",
+    "@ts-rest/express": "^3.46.0",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",

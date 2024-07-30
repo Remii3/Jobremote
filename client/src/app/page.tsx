@@ -1,11 +1,10 @@
-import OffersList from "@/components/layout/OffersList";
+import Filters from "@/components/filters/Filters";
+import Offers from "@/components/offers/Offers";
 
 export default function Home() {
   return (
     <main>
-      <h1>Home</h1>
-      <p>Welcome to the home page.</p>
-      {/* <OffersList /> */}
+      <Offers />
     </main>
   );
 }
