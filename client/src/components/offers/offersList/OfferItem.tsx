@@ -1,7 +1,7 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import usePriceFormatter from "@/hooks/usePriceFormatter";
+import { useCurrency } from "@/context/CurrencyContext";
 import { OfferType } from "@/types/types";
 
 type OfferItemTypes = Pick<
@@ -31,11 +31,12 @@ export default function OfferItem({
   technologies,
   _id,
 }: OfferItemTypes) {
-  const { customFormatter } = usePriceFormatter();
+  const { formatCurrency } = useCurrency();
 
   function showOfferHandler() {
     changeCurrentOffer(_id);
   }
+
   return (
     <li>
       <button
@@ -55,11 +56,11 @@ export default function OfferItem({
           </div>
           <div className="col-start-2 col-end-3 text-end row-start-1 row-end-2">
             {minSalary === maxSalary ? (
-              <span>{customFormatter(minSalary, currency)}</span>
+              <span>{formatCurrency(minSalary, currency)}</span>
             ) : (
               <div>
-                <span>{customFormatter(minSalary, currency)}</span> -{" "}
-                <span>{customFormatter(maxSalary, currency)}</span>
+                <span>{formatCurrency(minSalary, currency)}</span> -{" "}
+                <span>{formatCurrency(maxSalary, currency)}</span>
               </div>
             )}
           </div>

@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import {
   DialogContent,
   DialogDescription,
@@ -12,6 +13,17 @@ const MobileOfferDetails = ({ offer }: { offer: OfferType }) => {
       <DialogHeader>
         <DialogTitle>{offer.title}</DialogTitle>
         <DialogDescription>{offer.content}</DialogDescription>
+        <div>
+          <p className="text-sm font-semibold">Offer details:</p>
+          <p>
+            {offer.technologies &&
+              offer.technologies.map((technology) => (
+                <Badge key={technology} variant={"secondary"}>
+                  {technology}
+                </Badge>
+              ))}
+          </p>
+        </div>
       </DialogHeader>
     </DialogContent>
   );

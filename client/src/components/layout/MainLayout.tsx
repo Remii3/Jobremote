@@ -6,6 +6,8 @@ import {
   QueryClientProvider,
   QueryClient,
 } from "@ts-rest/react-query/tanstack";
+import { CurrencyProvider } from "@/context/CurrencyContext";
+import { UserContextProvider } from "@/context/UserContext";
 
 const queryClient = new QueryClient();
 
@@ -23,9 +25,13 @@ const MainLayout = ({
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Header />
-      <main className="h-[calc(100vh-66px)]">{children}</main>
-      <Toaster />
+      <UserContextProvider>
+        <CurrencyProvider>
+          <Header />
+          <main className="h-[calc(100vh-66px)]">{children}</main>
+          <Toaster />
+        </CurrencyProvider>
+      </UserContextProvider>
     </QueryClientProvider>
   );
 };

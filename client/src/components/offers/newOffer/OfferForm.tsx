@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import { useEffect } from "react";
 
 const OfferForm = ({ handleAddAnother }: { handleAddAnother: () => void }) => {
   const { form, handleSubmit, handleTechnologies, technologies } =

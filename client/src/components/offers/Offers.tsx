@@ -59,14 +59,12 @@ const Offers = () => {
     }
   };
 
-  console.log(filters);
-
   const searchOffers = () => {
     refetch();
   };
   return (
     <>
-      <div className="">
+      <div>
         <Filters
           filters={filters}
           changeFilters={changeFilters}

@@ -13,9 +13,13 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Badge } from "../ui/badge";
+import { useCurrency } from "@/context/CurrencyContext";
+import { allowedCurrencies } from "../../../../server/src/schemas/offerSchemas";
+import { CurrencyTypes } from "@/types/types";
 
 const Header = () => {
   const [theme, setTheme] = useState<string | null>(null);
+  const { currency, changeCurrency } = useCurrency();
   useLayoutEffect(() => {
     const storedTheme = window.localStorage.getItem("theme");
     setTheme(storedTheme);
@@ -43,6 +47,27 @@ const Header = () => {
         <div className="pt-1 flex items-center gap-3">
           <small className="text-zinc-400">Best job board</small>
           <Switch onClick={setDarkMode} checked={theme == "dark"} />
+        </div>
+        <div>
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <Badge variant={"outline"}>{currency}</Badge>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuRadioGroup
+                value={currency}
+                onValueChange={(newCurrency) =>
+                  changeCurrency(newCurrency as CurrencyTypes)
+                }
+              >
+                {allowedCurrencies.map((currency) => (
+                  <DropdownMenuRadioItem key={currency} value={currency}>
+                    {currency}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
       <Nav />

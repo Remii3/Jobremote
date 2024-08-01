@@ -24,3 +24,8 @@ export type FilterSwitch = {
 };
 
 export type CurrencyTypes = z.infer<typeof CurrencySchema>;
+
+export type UserTypes = {
+  email: string;
+  password: string;
+};
