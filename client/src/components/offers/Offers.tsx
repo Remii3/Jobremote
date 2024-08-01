@@ -14,7 +14,9 @@ const Offers = () => {
   const [filters, setFilters] = useState<OfferFiltersType>({});
 
   const { data, error, isLoading, isError, refetch } =
-    client.offers.getOffers.useQuery(["offersList"], { query: { filters } });
+    client.offers.getOffers.useQuery(["offersList", filters.localization], {
+      query: { filters, limit: "100" },
+    });
 
   const isMobile = useIsMobile();
 
@@ -29,7 +31,7 @@ const Offers = () => {
   }: FilterSwitch) => {
     switch (operation) {
       case "multi-choice": {
-        const newTypeOfWork = filters[newFilterKey] || [];
+        const newTypeOfWork = filters[newFilterKey] || ([] as string[]);
 
         if (!Array.isArray(newTypeOfWork)) {
           return setFilters((prev) => prev);
@@ -47,7 +49,10 @@ const Offers = () => {
         }));
       }
       case "single-choice": {
-        return setFilters((prev) => prev);
+        return setFilters((prev) => ({
+          ...prev,
+          [newFilterKey]: newFilterValue,
+        }));
       }
       default:
         return setFilters((prev) => prev);
@@ -61,15 +66,15 @@ const Offers = () => {
   };
   return (
     <>
-      <div className="h-[10vh]">
+      <div className="">
         <Filters
           filters={filters}
           changeFilters={changeFilters}
           searchOffers={searchOffers}
         />
       </div>
-      <div className="flex h-[80vh]">
-        <div className="w-1/2">
+      <div className="flex">
+        <div className="md:w-1/2 w-full">
           <OffersList
             changeCurrentOffer={changeCurrentOffer}
             data={data}
@@ -80,13 +85,11 @@ const Offers = () => {
         </div>
 
         {selectedOffer && (
-          <div className="w-1/2">
-            <OfferDetails
-              isMobile={isMobile}
-              selectedOffer={selectedOffer}
-              changeCurrentOffer={changeCurrentOffer}
-            />
-          </div>
+          <OfferDetails
+            isMobile={isMobile}
+            selectedOffer={selectedOffer}
+            changeCurrentOffer={changeCurrentOffer}
+          />
         )}
       </div>
     </>

@@ -24,7 +24,7 @@ const MainLayout = ({
   return (
     <QueryClientProvider client={queryClient}>
       <Header />
-      {children}
+      <main className="h-[calc(100vh-66px)]">{children}</main>
       <Toaster />
     </QueryClientProvider>
   );

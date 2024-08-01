@@ -1,13 +1,32 @@
 import { offersContract } from "../contracts/offers.contract";
 import OfferModel, { OfferType } from "../models/Offer.model";
-import redisClient from "../utils/redisClient";
 import { tsServer } from "../utils/utils";
 
 export const offersRouter = tsServer.router(offersContract, {
   createOffer: async ({ body }) => {
-    const { title, content, categories } = body;
+    const {
+      title,
+      content,
+      experience,
+      localization,
+      typeOfWork,
+      minSalary,
+      maxSalary,
+      technologies,
+      currency,
+    } = body;
     try {
-      const offer = await OfferModel.create({ title, content, categories });
+      const offer = await OfferModel.create({
+        title,
+        content,
+        experience,
+        localization,
+        typeOfWork,
+        minSalary,
+        maxSalary,
+        technologies,
+        currency,
+      });
       return {
         status: 201,
         body: {
@@ -31,8 +50,26 @@ export const offersRouter = tsServer.router(offersContract, {
     try {
       const filters: any = {};
 
-      if (query.filters?.categories && query.filters.categories.length > 0) {
-        filters.categories = { $in: query.filters.categories };
+      if (query.filters?.typeOfWork && query.filters.typeOfWork.length > 0) {
+        filters.typeOfWork = { $in: query.filters.typeOfWork };
+      }
+
+      if (
+        query.filters?.localization &&
+        query.filters.localization.length > 0
+      ) {
+        filters.localization = { $in: query.filters.localization };
+      }
+
+      if (query.filters?.experience && query.filters.experience.length > 0) {
+        filters.experience = { $in: query.filters.experience };
+      }
+
+      if (
+        query.filters?.technologies &&
+        query.filters.technologies.length > 0
+      ) {
+        filters.technologies = { $in: query.filters.technologies };
       }
 
       if (query.filters?.keyword) {
@@ -42,30 +79,9 @@ export const offersRouter = tsServer.router(offersContract, {
         ];
       }
 
-      const filtersKey = query.filters
-        ? JSON.stringify(query.filters)
-        : "no-filters";
-
-      const offersKey = `offers:${page}:${limit}:${filtersKey}`;
-      const totalKey = `offers:total:${filtersKey}`;
-
-      const cachedOffers = await redisClient.get(offersKey);
-      const cachedTotal = await redisClient.get(totalKey);
-
-      if (cachedOffers && cachedTotal) {
-        return {
-          status: 200,
-          body: {
-            offers: JSON.parse(cachedOffers) as OfferType[],
-            msg: "Offers fetched successfully from cache",
-            pagination: {
-              total: parseInt(cachedTotal),
-              page,
-              pages: Math.ceil(parseInt(cachedTotal) / limit),
-            },
-            fromCache: true,
-          },
-        };
+      if (query.filters?.minSalary && query.filters?.maxSalary) {
+        filters.minSalary = { $gte: query.filters.minSalary };
+        filters.maxSalary = { $lte: query.filters.maxSalary };
       }
 
       const [fetchedOffers, total]: [fetchedOffers: OfferType[], number] =
@@ -88,11 +104,6 @@ export const offersRouter = tsServer.router(offersContract, {
           },
         };
       }
-
-      await Promise.all([
-        redisClient.setEx(offersKey, 3600, JSON.stringify(fetchedOffers)),
-        redisClient.setEx(totalKey, 3600, total.toString()),
-      ]);
 
       return {
         status: 200,

@@ -1,5 +1,5 @@
 import { Menu } from "lucide-react";
-import { Button } from "../ui/button";
+import { Button, buttonVariants } from "../ui/button";
 import {
   Sheet,
   SheetContent,
@@ -8,12 +8,18 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "../ui/sheet";
+import Link from "next/link";
 
 const Nav = () => {
   return (
     <nav className="flex gap-3 items-center">
       <Button variant={"outline"}>Login</Button>
-      <Button variant={"default"}>Post a job</Button>
+      <Link
+        href={"/hire-remotely"}
+        className={buttonVariants({ variant: "default" })}
+      >
+        Post a job
+      </Link>
       <Sheet>
         <SheetTrigger asChild>
           <Button variant={"outline"} className="px-2">

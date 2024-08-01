@@ -2,6 +2,7 @@
 
 import { ClientInferResponses } from "@ts-rest/core";
 import { mainContract } from "../../../../../server/src/contracts/_app";
+import OfferItem from "./OfferItem";
 
 type OffersDataType = ClientInferResponses<
   typeof mainContract.offers.getOffers,
@@ -29,17 +30,21 @@ const OffersList = ({
       {isLoading && <p>Loading...</p>}
       {isError && <p>Error: {error.status}</p>}
       {data && (
-        <ul>
+        <ul className="space-y-2">
           {data.body.offers.map((offer) => (
-            <li key={offer._id}>
-              <button
-                type="button"
-                onClick={() => changeCurrentOffer(offer._id)}
-              >
-                <h3>{offer.title}</h3>
-                <p>{offer.content}</p>
-              </button>
-            </li>
+            <OfferItem
+              key={offer._id}
+              _id={offer._id}
+              title={offer.title}
+              typeOfWork={offer.typeOfWork}
+              experience={offer.experience}
+              localization={offer.localization}
+              changeCurrentOffer={changeCurrentOffer}
+              maxSalary={offer.maxSalary}
+              minSalary={offer.minSalary}
+              currency={offer.currency}
+              technologies={offer.technologies}
+            />
           ))}
         </ul>
       )}

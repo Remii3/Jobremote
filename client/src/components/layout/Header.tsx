@@ -3,10 +3,19 @@
 import { useLayoutEffect, useState } from "react";
 import { Switch } from "../ui/switch";
 import Nav from "./Nav";
+import Link from "next/link";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { Badge } from "../ui/badge";
 
 const Header = () => {
   const [theme, setTheme] = useState<string | null>(null);
-
   useLayoutEffect(() => {
     const storedTheme = window.localStorage.getItem("theme");
     setTheme(storedTheme);
@@ -28,7 +37,9 @@ const Header = () => {
   return (
     <header className="px-4 py-3 flex justify-between items-center shadow-sm">
       <div className="flex gap-3 items-center">
-        <h1 className="text-2xl font-semibold">Jobremote.com</h1>
+        <Link href={"/"}>
+          <h1 className="text-2xl font-semibold">Jobremote.com</h1>
+        </Link>
         <div className="pt-1 flex items-center gap-3">
           <small className="text-zinc-400">Best job board</small>
           <Switch onClick={setDarkMode} checked={theme == "dark"} />

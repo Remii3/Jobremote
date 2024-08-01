@@ -32,6 +32,13 @@ const Filters = ({
   changeFilters,
   searchOffers,
 }: FiltersPropsType) => {
+  function changeLocalizationHandler(localization: string) {
+    changeFilters({
+      operation: "multi-choice",
+      newFilterKey: "localization",
+      newFilterValue: localization,
+    });
+  }
   return (
     <section className="flex">
       <div>
@@ -61,11 +68,7 @@ const Filters = ({
                   key={localization}
                   checked={filters.localization?.includes(localization)}
                   onCheckedChange={() =>
-                    changeFilters({
-                      operation: "multi-choice",
-                      newFilterKey: "localization",
-                      newFilterValue: localization,
-                    })
+                    changeLocalizationHandler(localization)
                   }
                 >
                   {localization}

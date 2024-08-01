@@ -5,7 +5,7 @@ import {
   DialogDescription,
   DialogTitle,
 } from "../../ui/dialog";
-import React from "react";
+import React, { useEffect } from "react";
 import DesktopOfferDetails from "./DesktopOfferDetails";
 import MobileOfferDetails from "./MobileOfferDetails";
 import { Loader2 } from "lucide-react";
@@ -38,12 +38,10 @@ const OfferDetails = ({
   changeCurrentOffer,
   isMobile,
 }: OfferDetailsProps) => {
-  const { data, isLoading, isError, error } = client.offers.getOffer.useQuery(
-    ["currentOffer"],
-    {
+  const { data, isLoading, isError, error, refetch } =
+    client.offers.getOffer.useQuery(["currentOffer", selectedOffer], {
       params: { id: selectedOffer },
-    }
-  );
+    });
 
   if (isMobile) {
     return (
@@ -59,7 +57,7 @@ const OfferDetails = ({
   }
 
   return (
-    <>
+    <div className="w-1/2">
       {isLoading && (
         <div className="w-full h-full flex items-center justify-center">
           <Loader2 className="w-7 h-7 animate-spin" />
@@ -72,7 +70,7 @@ const OfferDetails = ({
         </div>
       )}
       {data && <DesktopOfferDetails offer={data.body.offer} />}
-    </>
+    </div>
   );
 };
 

@@ -1,6 +1,10 @@
 import { ClientInferResponseBody } from "@ts-rest/core";
 import { mainContract } from "../../../server/src/contracts/_app";
-import { offerFiltersSchema } from "../../../server/src/schemas/offerSchemas";
+import {
+  allowedCurrencies,
+  CurrencySchema,
+  offerFiltersSchema,
+} from "../../../server/src/schemas/offerSchemas";
 import { z } from "zod";
 
 export type OfferType = ClientInferResponseBody<
@@ -18,3 +22,5 @@ export type FilterSwitch = {
   newFilterKey: keyof OfferFiltersType;
   newFilterValue: any;
 };
+
+export type CurrencyTypes = z.infer<typeof CurrencySchema>;
