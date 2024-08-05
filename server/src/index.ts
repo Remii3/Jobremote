@@ -8,7 +8,7 @@ const port = process.env.PORT || 5000;
 import { createExpressEndpoints, initServer } from "@ts-rest/express";
 import { mainRouter } from "./routes/_app";
 import { mainContract } from "./contracts/_app";
-
+import cookieParser from "cookie-parser";
 const app: Express = express();
 
 app.use(
@@ -21,7 +21,7 @@ app.use(
 );
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-
+app.use(cookieParser());
 createExpressEndpoints(mainContract, mainRouter, app);
 
 connect(process.env.MONGO_URI as string, {})

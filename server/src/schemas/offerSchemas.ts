@@ -70,8 +70,6 @@ export const OfferSchema = z.object({
   technologies: z.array(TechnologySchema).optional(),
 });
 
-export const UserSchema = z.string();
-
 export const offerFiltersSchema = z.object({
   categories: z.array(TechnologySchema).optional(),
   keyword: z.string().optional(),
