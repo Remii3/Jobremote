@@ -6,7 +6,7 @@ export function middleware(req: NextRequest) {
     path === "/login" || path === "/register" || path === "/";
   const token = req.cookies.get("token")?.value || ""; // Replace 'yourCookieName' with the actual cookie name
 
-  if (isPublicPath && token) {
+  if (isPublicPath && token && path !== "/") {
     return NextResponse.redirect(new URL("/", req.nextUrl));
   }
   if (!isPublicPath && !token) {

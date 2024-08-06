@@ -6,7 +6,7 @@ const userConsentSchema = new Schema({
   consentType: {
     type: String,
     required: true,
-    enum: ["privacyPolicy", "emailMarketing"],
+    enum: ["privacyPolicy", "commercialConsent"],
   },
   consentStatus: { type: Boolean, required: true },
   consentTimestamp: { type: String, default: () => new Date().toISOString() },

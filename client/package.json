@@ -25,7 +25,6 @@
     "@ts-rest/react-query": "^3.46.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
-    "exchange-rates-api": "^1.1.0",
     "lucide-react": "^0.408.0",
     "next": "14.2.5",
     "react": "^18",

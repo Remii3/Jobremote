@@ -8,8 +8,30 @@ export const UserSchema = z.object({
   commercialConsent: z.boolean(),
   createdAt: z.string(),
   updatedAt: z.string(),
+  loginAttempts: z.number(),
+  lockUntil: z.number().optional(),
+  isLocked: z.function(),
+  lockCount: z.number(),
+  banned: z.boolean(),
+  isBanned: z.function(),
+  resetPasswordToken: z.string().optional(),
+  resetPasswordExpires: z.number().optional(),
 });
-export const BaseUserFormSchema = UserSchema.pick({
+
+export const PublicUserSchema = UserSchema.pick({
+  email: true,
+  createdAt: true,
+  updatedAt: true,
+  _id: true,
+  commercialConsent: true,
+});
+
+export const LoginUserSchema = UserSchema.pick({
+  email: true,
+  password: true,
+});
+
+export const RegisterUserSchema = UserSchema.pick({
   email: true,
   password: true,
   commercialConsent: true,
@@ -17,27 +39,37 @@ export const BaseUserFormSchema = UserSchema.pick({
 }).extend({
   passwordRepeat: z.string().min(6),
 });
-
-export const UserFormSchema = BaseUserFormSchema.superRefine((data, ctx) => {
-  if (data.password !== data.passwordRepeat) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: "Passwords don't match",
-      path: ["passwordRepeat"],
-    });
-  }
-  if (data.privacyPolicyConsent === false) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: "Privacy policy needs to be accepted",
-      path: ["privacyPolicyConsent"],
-    });
-  }
-});
-export const testSchema = BaseUserFormSchema.pick({
-  email: true,
+export const ChangeUserPasswordSchema = RegisterUserSchema.pick({
   password: true,
   passwordRepeat: true,
-  privacyPolicyConsent: true,
-  commercialConsent: true,
+}).extend({
+  resetToken: z.string().optional(),
 });
+export const ChangeUserPasswordSchemaRefined =
+  ChangeUserPasswordSchema.superRefine((data, ctx) => {
+    if (data.password !== data.passwordRepeat) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Passwords don't match",
+        path: ["passwordRepeat"],
+      });
+    }
+  });
+export const RegisterUserSchemaRefined = RegisterUserSchema.superRefine(
+  (data, ctx) => {
+    if (data.password !== data.passwordRepeat) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Passwords don't match",
+        path: ["passwordRepeat"],
+      });
+    }
+    if (data.privacyPolicyConsent === false) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Privacy policy needs to be accepted",
+        path: ["privacyPolicyConsent"],
+      });
+    }
+  }
+);

@@ -11,17 +11,41 @@ import {
 import Link from "next/link";
 import CurrencySelector from "../ui/currency-selector";
 import ThemeSelector from "../ui/theme-selector";
+import { useUser } from "@/context/UserContext";
+import { useState } from "react";
 
 const Nav = () => {
+  const [sheetOpen, setSheetOpen] = useState(false);
+
+  const { user, userDataIsLoading, logOut } = useUser();
+
+  function toggleSheet() {
+    setSheetOpen((prevState) => !prevState);
+  }
+
+  function logoutHandler() {
+    logOut();
+    toggleSheet();
+  }
+
   return (
     <nav className="flex gap-3 items-center">
       <div className="hidden md:flex gap-3 items-center">
-        <Link
-          href={"/login"}
-          className={buttonVariants({ variant: "outline" })}
-        >
-          Login
-        </Link>
+        {!user && !userDataIsLoading ? (
+          <Link
+            href={"/login"}
+            className={buttonVariants({ variant: "outline" })}
+          >
+            Login
+          </Link>
+        ) : (
+          <Link
+            href={"/profile"}
+            className={buttonVariants({ variant: "outline" })}
+          >
+            Profile
+          </Link>
+        )}
         <Link
           href={"/hire-remotely"}
           className={buttonVariants({ variant: "default" })}
@@ -29,7 +53,7 @@ const Nav = () => {
           Post a job
         </Link>
       </div>
-      <Sheet>
+      <Sheet open={sheetOpen} onOpenChange={toggleSheet}>
         <SheetTrigger asChild>
           <Button variant={"outline"} className="px-2">
             <Menu className="h-6 w-6" />
@@ -42,28 +66,46 @@ const Nav = () => {
           </SheetHeader>
           <div className="flex flex-col h-[calc(100%-28px)] pt-7">
             <ul className="flex-grow space-y-3">
-              <li>
-                <Link
-                  href={"/login"}
-                  className={`${buttonVariants({
-                    variant: "outline",
-                    size: "lg",
-                  })} w-full`}
-                >
-                  Sign in to Candidate profile
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href={"/login"}
-                  className={`${buttonVariants({
-                    variant: "outline",
-                    size: "lg",
-                  })} w-full`}
-                >
-                  Sign in to Employer&apos;s panel
-                </Link>
-              </li>
+              {!user && (
+                <>
+                  <li>
+                    <Link
+                      onClick={toggleSheet}
+                      href={"/login"}
+                      className={`${buttonVariants({
+                        variant: "outline",
+                        size: "lg",
+                      })} w-full`}
+                    >
+                      Sign in to Candidate profile
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      onClick={toggleSheet}
+                      href={"/login"}
+                      className={`${buttonVariants({
+                        variant: "outline",
+                        size: "lg",
+                      })} w-full`}
+                    >
+                      Sign in to Employer&apos;s panel
+                    </Link>
+                  </li>
+                </>
+              )}
+              {user && (
+                <li>
+                  <Button
+                    variant={"destructive"}
+                    className="w-full "
+                    size={"lg"}
+                    onClick={logoutHandler}
+                  >
+                    Logout
+                  </Button>
+                </li>
+              )}
             </ul>
             <div className="md:hidden flex items-center justify-between">
               <CurrencySelector />

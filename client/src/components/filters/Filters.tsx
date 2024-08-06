@@ -61,7 +61,7 @@ const Filters = ({
       <div>
         <DropdownMenu>
           <DropdownMenuTrigger>Localization</DropdownMenuTrigger>
-          <DropdownMenuContent onSelect={(e) => console.log(e)}>
+          <DropdownMenuContent>
             {localizations.map((localization) => {
               return (
                 <DropdownMenuCheckboxItem

@@ -22,4 +22,5 @@ export function showError(err: unknown) {
 export const client = initQueryClient(mainContract, {
   baseUrl: "http://localhost:5000",
   baseHeaders: {},
+  credentials: "include",
 });

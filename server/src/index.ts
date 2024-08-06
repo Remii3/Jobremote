@@ -13,10 +13,8 @@ const app: Express = express();
 
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      // process.env.CORS_URI as string
-    ],
+    origin: ["http://localhost:3000"],
+    credentials: true,
   })
 );
 app.use(bodyParser.urlencoded({ extended: false }));

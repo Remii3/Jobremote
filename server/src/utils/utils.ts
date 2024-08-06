@@ -17,7 +17,7 @@ export const getDataFromToken = (req: Request) => {
   try {
     const token = req.cookies.token || "";
     if (!token) {
-      throw new Error("You must be logged in!");
+      return null;
     }
     const decodedToken: any = jwt.verify(token, process.env.JWT_SECRET!);
     return decodedToken._id;

@@ -1,10 +1,15 @@
-import { UserTypes } from "@/types/types";
-import { createContext, useContext, useState } from "react";
-
+import { client } from "@/lib/utils";
+import { PublicUserSchema } from "../../../server/src/schemas/userSchemas";
+import { createContext, useContext, useEffect, useState } from "react";
+import { z } from "zod";
+import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
+type UserTypes = z.infer<typeof PublicUserSchema>;
 interface UserContextTypes {
   user: UserTypes | null;
-  logIn: (user: UserTypes) => void;
   logOut: () => void;
+  fetchUserData: () => void;
+  userDataIsLoading: boolean;
 }
 
 interface UserContextProviderTypes {
@@ -15,17 +20,69 @@ const UserContext = createContext<UserContextTypes | undefined>(undefined);
 
 function UserContextProvider({ children }: UserContextProviderTypes) {
   const [user, setUser] = useState<UserTypes | null>(null);
+  const [userDataIsLoading, setUserDataIsLoading] = useState(true);
+  const router = useRouter();
 
-  function logIn(user: UserTypes) {
-    setUser(user);
-  }
+  const { mutate: logout } = client.users.logoutUser.useMutation({
+    onSuccess: () => {
+      setUser(null);
+      router.push("/");
+    },
+  });
 
-  function logOut() {
-    setUser(null);
-  }
+  const { data: sessionState, isLoading } =
+    client.users.checkUserSession.useQuery(
+      ["userSession"],
+      {},
+      {
+        retry: false,
+        refetchOnWindowFocus: false,
+        onSuccess: () => {},
+      }
+    );
 
+  const { data, refetch, isError } = client.users.getUser.useQuery(
+    ["userData"],
+    {},
+    {
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+      retry: false,
+      refetchOnMount: false,
+      enabled: false,
+    }
+  );
+  useEffect(() => {
+    if (!isLoading && sessionState?.body.state === false) {
+      setUserDataIsLoading(false);
+    }
+  }, [isLoading, sessionState?.body.state]);
+  useEffect(() => {
+    if (sessionState?.body.state) {
+      refetch();
+    }
+  }, [sessionState, refetch]);
+
+  useEffect(() => {
+    if (data && data.body.user) {
+      setUser(data.body.user);
+      setUserDataIsLoading(false);
+    } else if (isError) {
+      setUser(null);
+    }
+  }, [data, isError]);
+
+  const fetchUserData = () => {
+    refetch();
+  };
+
+  const logOut = () => {
+    logout({});
+  };
   return (
-    <UserContext.Provider value={{ logIn, logOut, user }}>
+    <UserContext.Provider
+      value={{ logOut, user, fetchUserData, userDataIsLoading }}
+    >
       {children}
     </UserContext.Provider>
   );

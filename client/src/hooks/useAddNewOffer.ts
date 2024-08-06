@@ -55,7 +55,6 @@ export default function useAddNewOffer({ callback }: useAddNewOfferTypes) {
   }
   function handleSubmit(values: z.infer<typeof formSchemaTypes>) {
     let hasError = false;
-    console.log("first");
 
     if (values.experience === "") {
       form.setError("experience", {

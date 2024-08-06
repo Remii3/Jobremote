@@ -3,6 +3,7 @@
 import { ClientInferResponses } from "@ts-rest/core";
 import { mainContract } from "../../../../../server/src/contracts/_app";
 import OfferItem from "./OfferItem";
+import { client } from "@/lib/utils";
 
 type OffersDataType = ClientInferResponses<
   typeof mainContract.offers.getOffers,
