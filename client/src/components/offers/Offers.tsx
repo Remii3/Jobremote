@@ -2,7 +2,7 @@
 
 import OfferDetails from "./offerDetails/OfferDetails";
 import OffersList from "./offersList/OffersList";
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import Filters from "../filters/Filters";
 import { FilterSwitch, OfferFiltersType } from "@/types/types";
@@ -59,7 +59,8 @@ const Offers = () => {
     }
   };
 
-  const searchOffers = () => {
+  const searchOffers = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     refetch();
   };
   return (

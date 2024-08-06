@@ -7,6 +7,7 @@ import {
   typeOfWork,
 } from "../../../../../server/src/schemas/offerSchemas";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface MoreFiltersTypes {
   filters: OfferFiltersType;
@@ -111,6 +112,11 @@ const MoreFilters = ({ filters, changeFilters }: MoreFiltersTypes) => {
             );
           })}
         </div>
+      </div>
+      <div>
+        <Button variant={"default"} className="mt-4">
+          Search offers
+        </Button>
       </div>
     </div>
   );

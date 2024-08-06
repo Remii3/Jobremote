@@ -16,6 +16,9 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { localizations } from "../../../../server/src/schemas/offerSchemas";
+import { Search } from "lucide-react";
+import { Badge } from "../ui/badge";
+import { FormEvent } from "react";
 
 interface FiltersPropsType {
   filters: OfferFiltersType;
@@ -24,7 +27,7 @@ interface FiltersPropsType {
     newFilterKey,
     newFilterValue,
   }: FilterSwitch) => void;
-  searchOffers: () => void;
+  searchOffers: (e: FormEvent<HTMLFormElement>) => void;
 }
 
 const Filters = ({
@@ -40,12 +43,13 @@ const Filters = ({
     });
   }
   return (
-    <section className="flex">
-      <div>
+    <section className="flex px-2 py-4 gap-4">
+      <form onSubmit={searchOffers} className="relative">
         <Input
           name="keyword"
-          placeholder="Search..."
+          placeholder="Keyword..."
           value={filters.keyword}
+          className="pr-10"
           onChange={(e) =>
             changeFilters({
               operation: "single-choice",
@@ -54,13 +58,25 @@ const Filters = ({
             })
           }
         />
-        <Button variant={"default"} type="button" onClick={searchOffers}>
-          Find
-        </Button>
-      </div>
+        <button
+          className="absolute top-0.5 p-2 right-1 rounded-full"
+          type="submit"
+        >
+          <Search className="h-5 w-5" />
+        </button>
+      </form>
       <div>
         <DropdownMenu>
-          <DropdownMenuTrigger>Localization</DropdownMenuTrigger>
+          <DropdownMenuTrigger asChild>
+            <Button variant={"outline"} className="space-x-1">
+              <span>Localization</span>
+              {filters.localization && filters.localization.length > 0 && (
+                <Badge variant={"secondary"}>
+                  {filters.localization.length}
+                </Badge>
+              )}
+            </Button>
+          </DropdownMenuTrigger>
           <DropdownMenuContent>
             {localizations.map((localization) => {
               return (
@@ -79,13 +95,14 @@ const Filters = ({
         </DropdownMenu>
       </div>
       <Dialog>
-        <DialogTrigger>More filters</DialogTrigger>
+        <DialogTrigger asChild>
+          <Button variant={"outline"}>More filters</Button>
+        </DialogTrigger>
         <DialogContent>
           <DialogTitle>More fitlers</DialogTitle>
           <MoreFilters filters={filters} changeFilters={changeFilters} />
         </DialogContent>
       </Dialog>
-      {/* location */}
       {/* sort */}
     </section>
   );
