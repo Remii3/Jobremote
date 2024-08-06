@@ -19,6 +19,9 @@ const config = {
       },
     },
     extend: {
+      gridTemplateColumns: {
+        sideNav_1: "minmax(150px,200px) repeat(4, minmax(100px, 1fr))",
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

@@ -40,7 +40,7 @@ const Nav = () => {
           </Link>
         ) : (
           <Link
-            href={"/profile"}
+            href={"/account"}
             className={buttonVariants({ variant: "outline" })}
           >
             Profile
@@ -95,19 +95,33 @@ const Nav = () => {
                 </>
               )}
               {user && (
-                <li>
-                  <Button
-                    variant={"destructive"}
-                    className="w-full "
-                    size={"lg"}
-                    onClick={logoutHandler}
-                  >
-                    Logout
-                  </Button>
-                </li>
+                <>
+                  <li>
+                    <Link
+                      href="/account"
+                      onClick={toggleSheet}
+                      className={`${buttonVariants({
+                        variant: "outline",
+                        size: "lg",
+                      })} w-full`}
+                    >
+                      Profile
+                    </Link>
+                  </li>
+                  <li>
+                    <Button
+                      variant={"destructive"}
+                      className="w-full "
+                      size={"lg"}
+                      onClick={logoutHandler}
+                    >
+                      Logout
+                    </Button>
+                  </li>
+                </>
               )}
             </ul>
-            <div className="md:hidden flex items-center justify-between">
+            <div className="flex items-center justify-between">
               <CurrencySelector />
               <ThemeSelector />
             </div>
