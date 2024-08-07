@@ -14,7 +14,7 @@ const Offers = () => {
   const [filters, setFilters] = useState<OfferFiltersType>({});
 
   const { data, error, isLoading, isError, refetch } =
-    client.offers.getOffers.useQuery(["offersList", filters.localization], {
+    client.offers.getOffers.useQuery(["offersList"], {
       query: { filters, limit: "100" },
     });
 
