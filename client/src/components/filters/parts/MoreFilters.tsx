@@ -6,8 +6,8 @@ import {
   experience,
   typeOfWork,
 } from "../../../../../server/src/schemas/offerSchemas";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { useCurrency } from "@/context/CurrencyContext";
+import { Slider } from "@/components/ui/slider";
 
 interface MoreFiltersTypes {
   filters: OfferFiltersType;
@@ -18,42 +18,38 @@ interface MoreFiltersTypes {
   }: FilterSwitch) => void;
 }
 const MoreFilters = ({ filters, changeFilters }: MoreFiltersTypes) => {
+  const { formatCurrency, currency } = useCurrency();
+  function changeSalaryHandler(salary: number) {
+    changeFilters({
+      operation: "single-choice",
+      newFilterKey: "minSalary",
+      newFilterValue: salary * 1000,
+    });
+  }
+
   return (
     <div className="">
       <div>
         <h2>Salary</h2>
         <Separator />
-        <div className="flex gap-4">
-          <div>
-            <Label htmlFor="minSalary">Salary Min</Label>
-            <Input
-              id="minSalary"
-              type="text"
-              defaultValue={"0"}
-              onChange={(e) =>
-                changeFilters({
-                  operation: "single-choice",
-                  newFilterKey: "minSalary",
-                  newFilterValue: e.target.value,
-                })
-              }
-            />
+        <div className="px-2 pb-2 pt-1">
+          <div className="flex justify-between gap-3 mb-3">
+            <span className="text-sm">Minimum</span>
+            <span className="text-sm">
+              {formatCurrency(
+                filters.minSalary ? Number(filters.minSalary) / 1000 : 0,
+                currency
+              )}
+              k/year
+            </span>
           </div>
-          <div>
-            <Label htmlFor="maxSalary">Salary Max</Label>
-            <Input
-              id="maxSalary"
-              type="text"
-              defaultValue={"100000"}
-              onChange={(e) =>
-                changeFilters({
-                  operation: "single-choice",
-                  newFilterKey: "maxSalary",
-                  newFilterValue: e.target.value,
-                })
-              }
-            />
-          </div>
+          <Slider
+            defaultValue={[0]}
+            onValueChange={(e) => changeSalaryHandler(e[0])}
+            max={250}
+            step={10}
+            min={0}
+          />
         </div>
       </div>
       <div>
@@ -72,6 +68,7 @@ const MoreFilters = ({ filters, changeFilters }: MoreFiltersTypes) => {
                     })
                   }
                   id={experience}
+                  checked={filters.experience?.includes(experience)}
                   className="h-5 w-5"
                 />
 
@@ -112,11 +109,6 @@ const MoreFilters = ({ filters, changeFilters }: MoreFiltersTypes) => {
             );
           })}
         </div>
-      </div>
-      <div>
-        <Button variant={"default"} className="mt-4">
-          Search offers
-        </Button>
       </div>
     </div>
   );

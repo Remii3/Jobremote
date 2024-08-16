@@ -17,10 +17,4 @@ export type OfferCategoriesType = OfferFiltersType["categories"];
 
 // Filters
 
-export type FilterSwitch = {
-  operation: "multi-choice" | "single-choice";
-  newFilterKey: keyof OfferFiltersType;
-  newFilterValue: any;
-};
-
 export type CurrencyTypes = z.infer<typeof CurrencySchema>;

@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { CurrencyTypes } from "@/types/types";
 
 interface CurrencyContextTypes {
-  currency: string;
+  currency: CurrencyTypes;
   changeCurrency: (newCurrency: CurrencyTypes) => void;
   formatCurrency: (amount: number, currency: CurrencyTypes) => string;
 }
@@ -22,10 +22,12 @@ const CurrencyProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const formatCurrency = (amount: number, productCurrency: CurrencyTypes) => {
-    if (!amount) return "N/A";
+    if (amount < 0 || typeof amount !== "number") return "N/A";
     if (!productCurrency) return amount.toString();
     const preparedAmount =
-      amount / currencyRates[productCurrency.toLowerCase()];
+      amount === 0
+        ? "0"
+        : amount / currencyRates[productCurrency.toLowerCase()];
 
     const locale =
       currency === "USD" ? "en-US" : currency === "EUR" ? "de-DE" : "pl-PL";
@@ -33,6 +35,8 @@ const CurrencyProvider = ({ children }: { children: React.ReactNode }) => {
     return new Intl.NumberFormat(locale, {
       style: "currency",
       currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     }).format(preparedAmount);
   };
 

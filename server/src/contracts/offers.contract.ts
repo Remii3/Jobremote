@@ -7,15 +7,6 @@ import {
 import { c } from "../utils/utils";
 
 const createOfferSchema = OfferSchema.omit({ _id: true }).strict();
-// z
-//   .object({
-//     title: z
-//       .string({ message: "Title field is required." })
-//       .min(1, "Title is required"),
-//     content: z.string(),
-//     categories: z.array(TechnologySchema).optional(),
-//   })
-//   .strict();
 
 export const offersContract = c.router({
   createOffer: {

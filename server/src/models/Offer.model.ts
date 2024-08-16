@@ -32,11 +32,11 @@ const offerSchema = new Schema<OfferType>({
     type: String,
     enum: typeOfWork,
   },
-  minSalary: {
+  maxSalary: {
     type: Number,
     required: true,
   },
-  maxSalary: {
+  minSalary: {
     type: Number,
     required: true,
   },

@@ -22,8 +22,8 @@ export const offersRouter = tsServer.router(offersContract, {
         experience,
         localization,
         typeOfWork,
-        minSalary,
         maxSalary,
+        minSalary,
         technologies,
         currency,
       });
@@ -79,9 +79,8 @@ export const offersRouter = tsServer.router(offersContract, {
         ];
       }
 
-      if (query.filters?.minSalary && query.filters?.maxSalary) {
+      if (query.filters?.minSalary) {
         filters.minSalary = { $gte: query.filters.minSalary };
-        filters.maxSalary = { $lte: query.filters.maxSalary };
       }
 
       const [fetchedOffers, total]: [fetchedOffers: OfferType[], number] =

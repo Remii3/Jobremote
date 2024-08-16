@@ -25,3 +25,18 @@ export const getDataFromToken = (req: Request) => {
     throw new Error("Invalid token");
   }
 };
+
+export const cleanEmptyData = (data: Record<string, any>) => {
+  const cleanedData: Record<string, any> = {};
+
+  for (let i = 0; i < Object.keys(data).length; i++) {
+    const key = Object.keys(data)[i];
+    if (
+      (typeof data[key] === "string" && data[key].trim() !== "") ||
+      (Array.isArray(data[key]) && data[key].length > 0)
+    ) {
+      cleanedData[key] = data[key];
+    }
+  }
+  return cleanedData;
+};

@@ -76,8 +76,7 @@ export const offerFiltersSchema = z.object({
   experience: z.array(ExperienceSchema).optional(),
   typeOfWork: z.array(TypeOfWorkSchema).optional(),
   localization: z.array(LocalizationSchema).optional(),
-  minSalary: z.string().optional(),
-  maxSalary: z.string().optional(),
+  minSalary: z.number().optional(),
   technologies: z.array(TechnologySchema).optional(),
 });
 

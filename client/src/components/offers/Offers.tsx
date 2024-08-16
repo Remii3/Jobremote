@@ -5,16 +5,16 @@ import OffersList from "./offersList/OffersList";
 import { FormEvent, useState } from "react";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import Filters from "../filters/Filters";
-import { FilterSwitch, OfferFiltersType } from "@/types/types";
 import { client } from "@/lib/utils";
+import useSearchFilters from "@/hooks/useSearchFilters";
 
 const Offers = () => {
   const [selectedOffer, setSelectedOffer] = useState<null | string>(null);
 
-  const [filters, setFilters] = useState<OfferFiltersType>({});
-
+  const { filters, updateFilters } = useSearchFilters();
+  console.log("first", filters);
   const { data, error, isLoading, isError, refetch } =
-    client.offers.getOffers.useQuery(["offersList"], {
+    client.offers.getOffers.useQuery(["offersList", filters], {
       query: { filters, limit: "100" },
     });
 
@@ -24,51 +24,17 @@ const Offers = () => {
     setSelectedOffer(newId);
   };
 
-  const changeFilters = ({
-    operation,
-    newFilterKey,
-    newFilterValue,
-  }: FilterSwitch) => {
-    switch (operation) {
-      case "multi-choice": {
-        const newTypeOfWork = filters[newFilterKey] || ([] as string[]);
-
-        if (!Array.isArray(newTypeOfWork)) {
-          return setFilters((prev) => prev);
-        }
-
-        const valueIndex = newTypeOfWork.indexOf(newFilterValue);
-        if (valueIndex > -1) {
-          newTypeOfWork.splice(valueIndex, 1);
-        } else {
-          newTypeOfWork.push(newFilterValue);
-        }
-        return setFilters((prev) => ({
-          ...prev,
-          [newFilterKey]: newTypeOfWork,
-        }));
-      }
-      case "single-choice": {
-        return setFilters((prev) => ({
-          ...prev,
-          [newFilterKey]: newFilterValue,
-        }));
-      }
-      default:
-        return setFilters((prev) => prev);
-    }
-  };
-
   const searchOffers = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     refetch();
   };
+
   return (
     <>
       <div>
         <Filters
           filters={filters}
-          changeFilters={changeFilters}
+          changeFilters={updateFilters}
           searchOffers={searchOffers}
         />
       </div>
