@@ -70,14 +70,18 @@ export const OfferSchema = z.object({
   technologies: z.array(TechnologySchema).optional(),
 });
 
-export const offerFiltersSchema = z.object({
+export const serverOfferFiltersSchema = z.object({
   categories: z.array(TechnologySchema).optional(),
   keyword: z.string().optional(),
   experience: z.array(ExperienceSchema).optional(),
   typeOfWork: z.array(TypeOfWorkSchema).optional(),
   localization: z.array(LocalizationSchema).optional(),
-  minSalary: z.number().optional(),
+  minSalary: z.string().optional(),
   technologies: z.array(TechnologySchema).optional(),
+});
+
+export const clientOfferFiltersSchema = serverOfferFiltersSchema.extend({
+  minSalary: z.number().optional(),
 });
 
 export const JobPositionSchema = z.object({

@@ -1,33 +1,40 @@
-"use client";
-
-import { ClientInferResponses } from "@ts-rest/core";
-import { mainContract } from "../../../../../server/src/contracts/_app";
+import { cleanEmptyData, client } from "@/lib/utils";
+import { debounce } from "lodash";
+import { useEffect, useMemo } from "react";
 import OfferItem from "./OfferItem";
-import { client } from "@/lib/utils";
+import { OfferFiltersType } from "@/types/types";
 
-type OffersDataType = ClientInferResponses<
-  typeof mainContract.offers.getOffers,
-  200
->;
-
-interface OffersListPropsType {
-  changeCurrentOffer: (newId: string) => void;
-  data?: OffersDataType;
-  isError: boolean;
-  error: any;
-  isLoading: boolean;
+interface OffersListProps {
+  filters: OfferFiltersType;
+  changeCurrentOffer: (newId: string | null) => void;
 }
 
-const OffersList = ({
+export default function OffersList({
+  filters,
   changeCurrentOffer,
-  data,
-  isError,
-  error,
-  isLoading,
-}: OffersListPropsType) => {
+}: OffersListProps) {
+  const { data, error, isLoading, isError, refetch } =
+    client.offers.getOffers.useQuery(
+      ["offersList"],
+      {
+        query: {
+          filters: cleanEmptyData(filters),
+          limit: "100",
+        },
+      },
+      {
+        refetchOnReconnect: false,
+        refetchOnWindowFocus: false,
+        refetchInterval: false,
+        refetchOnMount: false,
+      }
+    );
+  const debouncedFilters = useMemo(() => debounce(refetch, 400), [refetch]);
+  useEffect(() => {
+    debouncedFilters();
+  }, [filters, debouncedFilters]);
   return (
-    <section>
-      <h2>Offers</h2>
+    <>
       {isLoading && <p>Loading...</p>}
       {isError && <p>Error: {error.status}</p>}
       {data && (
@@ -49,8 +56,6 @@ const OffersList = ({
           ))}
         </ul>
       )}
-    </section>
+    </>
   );
-};
-
-export default OffersList;
+}

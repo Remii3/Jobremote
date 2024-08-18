@@ -1,9 +1,5 @@
 import { z } from "zod";
-import {
-  offerFiltersSchema,
-  OfferSchema,
-  TechnologySchema,
-} from "../schemas/offerSchemas";
+import { serverOfferFiltersSchema, OfferSchema } from "../schemas/offerSchemas";
 import { c } from "../utils/utils";
 
 const createOfferSchema = OfferSchema.omit({ _id: true }).strict();
@@ -24,7 +20,7 @@ export const offersContract = c.router({
     query: z.object({
       page: z.string().optional(),
       limit: z.string().optional(),
-      filters: offerFiltersSchema.optional(),
+      filters: serverOfferFiltersSchema.optional(),
     }),
     responses: {
       200: z.object({

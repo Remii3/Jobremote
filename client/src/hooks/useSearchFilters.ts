@@ -1,5 +1,5 @@
 import { OfferFiltersType } from "@/types/types";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 const initialFilters: Required<OfferFiltersType> = {
   categories: [],
@@ -44,6 +44,6 @@ export default function useSearchFilters() {
   const resetFilters = useCallback(() => {
     setFilters(initialFilters);
   }, []);
-
-  return { filters, updateFilters, resetFilters };
+  const memoizedFilters = useMemo(() => filters, [filters]);
+  return { filters: memoizedFilters, updateFilters, resetFilters };
 }
