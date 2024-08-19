@@ -7,6 +7,7 @@ import Filters from "../filters/Filters";
 import { checkIsFilterChanged, findFocusableElements } from "@/lib/utils";
 import useSearchFilters from "@/hooks/useSearchFilters";
 import OffersList from "./offersList/OffersList";
+import { OfferSortOptionsTypes } from "@/types/types";
 
 const Offers = () => {
   const [selectedOffer, setSelectedOffer] = useState<null | string>(null);
@@ -14,7 +15,7 @@ const Offers = () => {
   const offerDetailsRef = useRef<HTMLElement | null>(null);
   const offersListRef = useRef<HTMLElement | null>(null);
   const lastOfferRef = useRef<HTMLElement | null>(null);
-  const [sortOption, setSortOption] = useState("latest");
+  const [sortOption, setSortOption] = useState<OfferSortOptionsTypes>("latest");
   const isMobile = useIsMobile();
 
   const changeCurrentOffer = (newId: string | null) => {
@@ -72,6 +73,7 @@ const Offers = () => {
           <OffersList
             filters={filters}
             changeCurrentOffer={changeCurrentOffer}
+            sortOption={sortOption}
           />
         </section>
 

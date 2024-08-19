@@ -9,6 +9,7 @@ export const offersRouter = tsServer.router(offersContract, {
       content,
       experience,
       localization,
+      employmentType,
       typeOfWork,
       minSalary,
       maxSalary,
@@ -23,6 +24,7 @@ export const offersRouter = tsServer.router(offersContract, {
         localization,
         typeOfWork,
         maxSalary,
+        employmentType,
         minSalary,
         technologies,
         currency,
@@ -82,10 +84,24 @@ export const offersRouter = tsServer.router(offersContract, {
       if (query.filters?.minSalary) {
         filters.minSalary = { $gte: query.filters.minSalary };
       }
-
+      let sortValue = {};
+      switch (query.sortOption) {
+        case "salary_highest":
+          sortValue = { minSalary: -1 };
+          break;
+        case "salary_lowest":
+          sortValue = { minSalary: 1 };
+          break;
+        case "latest":
+          sortValue = { createdAt: -1 };
+          break;
+        default:
+          sortValue = { createdAt: -1 };
+          break;
+      }
       const [fetchedOffers, total]: [fetchedOffers: OfferType[], number] =
         await Promise.all([
-          OfferModel.find(filters).skip(skip).limit(limit),
+          OfferModel.find(filters).sort(sortValue).skip(skip).limit(limit),
           OfferModel.countDocuments(filters),
         ]);
 

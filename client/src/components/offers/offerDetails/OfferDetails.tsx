@@ -35,7 +35,7 @@ const OfferDetails = ({
             open={!!selectedOffer}
             onOpenChange={() => changeCurrentOffer(null)}
           >
-            {isLoading && (
+            {/* {!isLoading && (
               <DialogContent className="flex items-center justify-center flex-col gap-2">
                 <DialogTitle className="sr-only">Loading data</DialogTitle>
                 <div className="pt-6">
@@ -45,7 +45,7 @@ const OfferDetails = ({
                   Waiting for offer details.
                 </DialogDescription>
               </DialogContent>
-            )}
+            )} */}
             {isError && (error.status === 404 || error.status === 500) && (
               <DialogContent>
                 <DialogTitle>Error: {error.status}</DialogTitle>

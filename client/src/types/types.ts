@@ -3,6 +3,7 @@ import { mainContract } from "../../../server/src/contracts/_app";
 import {
   clientOfferFiltersSchema,
   CurrencySchema,
+  OfferSortOptionsSchema,
   serverOfferFiltersSchema,
 } from "../../../server/src/schemas/offerSchemas";
 import { z } from "zod";
@@ -18,3 +19,4 @@ export type OfferCategoriesType = OfferFiltersType["categories"];
 // Filters
 
 export type CurrencyTypes = z.infer<typeof CurrencySchema>;
+export type OfferSortOptionsTypes = z.infer<typeof OfferSortOptionsSchema>;

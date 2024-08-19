@@ -2,23 +2,26 @@ import { cleanEmptyData, client } from "@/lib/utils";
 import { debounce } from "lodash";
 import { useEffect, useMemo } from "react";
 import OfferItem from "./OfferItem";
-import { OfferFiltersType } from "@/types/types";
+import { OfferFiltersType, OfferSortOptionsTypes } from "@/types/types";
 
 interface OffersListProps {
   filters: OfferFiltersType;
+  sortOption: OfferSortOptionsTypes;
   changeCurrentOffer: (newId: string | null) => void;
 }
 
 export default function OffersList({
   filters,
   changeCurrentOffer,
+  sortOption,
 }: OffersListProps) {
   const { data, error, isLoading, isError, refetch } =
     client.offers.getOffers.useQuery(
-      ["offersList"],
+      ["offersList", sortOption],
       {
         query: {
           filters: cleanEmptyData(filters),
+          sortOption,
           limit: "100",
         },
       },

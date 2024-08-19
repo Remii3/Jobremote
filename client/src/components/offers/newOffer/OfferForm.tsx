@@ -11,6 +11,7 @@ import {
 import {
   allowedCurrencies,
   allowedTechnologies,
+  EmploymentTypeSchema,
   experience,
   localizations,
   typeOfWork,
@@ -123,6 +124,34 @@ const OfferForm = ({ handleAddAnother }: { handleAddAnother: () => void }) => {
                   {typeOfWork.map((workType) => (
                     <SelectItem key={workType} value={workType}>
                       {workType}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="employmentType"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Employment type</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                value={field.value}
+                defaultValue={field.value}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Employment type" />
+                  </SelectTrigger>
+                </FormControl>
+                <FormMessage />
+                <SelectContent>
+                  {EmploymentTypeSchema.options.map((employmentType) => (
+                    <SelectItem key={employmentType} value={employmentType}>
+                      {employmentType}
                     </SelectItem>
                   ))}
                 </SelectContent>

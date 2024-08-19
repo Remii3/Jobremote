@@ -129,9 +129,9 @@ export default function OfferDetailsContent({
             <Gauge className="h-full w-10 mr-2 text-amber-400/90" />
             <p className="flex flex-col">
               <span className="font-medium text-amber-400/90 text-sm">
-                Experience
+                Employmen type
               </span>
-              {offer.experience}
+              {offer.employmentType}
             </p>
           </div>
         </div>

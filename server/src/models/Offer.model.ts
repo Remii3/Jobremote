@@ -32,6 +32,10 @@ const offerSchema = new Schema<OfferType>({
     type: String,
     enum: typeOfWork,
   },
+  employmentType: {
+    type: String,
+    required: true,
+  },
   maxSalary: {
     type: Number,
     required: true,
@@ -48,6 +52,7 @@ const offerSchema = new Schema<OfferType>({
     type: String,
     enum: allowedCurrencies,
   },
+  createdAt: { type: String, default: () => new Date().toISOString() },
 });
 
 export default model<OfferType>("Offer", offerSchema);

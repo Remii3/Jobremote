@@ -1,5 +1,5 @@
 import { z } from "zod";
-export const allowedCurrencies = ["PLN", "USD", "EUR"] as const;
+export const allowedCurrencies = ["USD", "EUR"] as const;
 export const allowedTechnologies = [
   "JavaScript",
   "TypeScript",
@@ -39,6 +39,10 @@ export const localizations = [
   "Worldwide",
 ] as const;
 
+export const EmploymentTypeSchema = z.enum(["B2B", "UoP"], {
+  message: "Employment type is required.",
+});
+
 export const ExperienceSchema = z.enum(experience, {
   message: "Experience is required.",
 });
@@ -64,10 +68,12 @@ export const OfferSchema = z.object({
   experience: ExperienceSchema,
   typeOfWork: TypeOfWorkSchema,
   localization: LocalizationSchema,
+  employmentType: EmploymentTypeSchema,
   currency: CurrencySchema,
   minSalary: z.coerce.number().gt(0),
   maxSalary: z.coerce.number().gt(0),
   technologies: z.array(TechnologySchema).optional(),
+  createdAt: z.string(),
 });
 
 export const serverOfferFiltersSchema = z.object({
@@ -88,3 +94,9 @@ export const JobPositionSchema = z.object({
   title: z.string(),
   createdAt: z.string().optional(),
 });
+
+export const OfferSortOptionsSchema = z.enum([
+  "salary_highest",
+  "salary_lowest",
+  "latest",
+]);

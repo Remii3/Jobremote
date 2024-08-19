@@ -1,4 +1,4 @@
-import { OfferFiltersType } from "@/types/types";
+import { OfferFiltersType, OfferSortOptionsTypes } from "@/types/types";
 import { Button } from "../ui/button";
 import {
   Dialog,
@@ -22,6 +22,7 @@ import {
   allowedTechnologies,
   experience,
   localizations,
+  OfferSortOptionsSchema,
   typeOfWork,
 } from "../../../../server/src/schemas/offerSchemas";
 import { Search, Settings2 } from "lucide-react";
@@ -38,9 +39,15 @@ interface FiltersPropsType {
   filters: Required<OfferFiltersType>;
   changeFilters: (key: keyof OfferFiltersType, value: string | number) => void;
   resetFilters: () => void;
-  sortOption: string;
-  setSortOption: (value: string) => void;
+  sortOption: OfferSortOptionsTypes;
+  setSortOption: (value: OfferSortOptionsTypes) => void;
 }
+
+const SORT_OPTIONS: Record<OfferSortOptionsTypes, string> = {
+  latest: "Latest",
+  salary_highest: "Highest salary",
+  salary_lowest: "Lowest salary",
+};
 
 const Filters = ({
   filters,
@@ -60,8 +67,9 @@ const Filters = ({
     changeFilters("minSalary", salary * 1000);
   }
 
-  function searchOffers() {
-    queryClient.invalidateQueries(["offersList"]);
+  function searchOffers(e: FormEvent) {
+    e.preventDefault();
+    // queryClient.invalidateQueries(["offersList"]);
   }
 
   return (
@@ -261,20 +269,32 @@ const Filters = ({
           <DropdownMenuContent>
             <DropdownMenuRadioGroup
               value={sortOption}
-              onValueChange={setSortOption}
+              onValueChange={(option) =>
+                setSortOption(option as OfferSortOptionsTypes)
+              }
             >
-              <DropdownMenuRadioItem value="latest">
-                Latest
-              </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="highest_salary">
-                Highest salary
-              </DropdownMenuRadioItem>
+              {OfferSortOptionsSchema.options.map((option) => (
+                <DropdownMenuRadioItem key={option} value={option}>
+                  {SORT_OPTIONS[option]}
+                </DropdownMenuRadioItem>
+              ))}
             </DropdownMenuRadioGroup>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
       {checkIsFilterChanged(filters) && (
         <ul className="flex gap-2 flex-wrap lg:flex-nowrap lg:overflow-x-auto">
+          {filters.keyword.trim() !== "" && (
+            <li className={badgeVariants({ variant: "outline" })}>
+              <button
+                type="button"
+                onClick={() => changeTextsHandler("keyword", "")}
+                className="text-nowrap"
+              >
+                {filters.keyword}
+              </button>
+            </li>
+          )}
           {filters.localization?.map((item) => (
             <li key={item} className={badgeVariants({ variant: "outline" })}>
               <button
