@@ -227,6 +227,26 @@ const Filters = ({
                   step={5}
                   min={0}
                 />
+                <div>
+                  <div className="flex items-center justify-between text-sm mt-2 gap-4">
+                    <span>Minimum</span>
+                    <div className="flex items-center gap-1 text-sm">
+                      <Input
+                        type="number"
+                        max={250}
+                        min={0}
+                        step={5}
+                        className=""
+                        onChange={(e) =>
+                          changeSalaryHandler(Number(e.target.value))
+                        }
+                        value={
+                          filters.minSalary === 0 ? 0 : filters.minSalary / 1000
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
             </DropdownMenuContent>
           </DropdownMenu>
