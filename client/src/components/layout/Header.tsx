@@ -9,7 +9,7 @@ import { useUser } from "@/context/UserContext";
 
 const Header = () => {
   return (
-    <header className="px-2 py-3 flex justify-between items-center shadow-sm">
+    <header className="px-2 py-3 flex justify-between items-center shadow-sm sticky top-0 bg-background">
       <div className="flex gap-3 items-center">
         <Link href={"/"}>
           <h1 className="text-2xl font-semibold">Jobremote.com</h1>

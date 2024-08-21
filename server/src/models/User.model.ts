@@ -17,6 +17,7 @@ const userSchema = new Schema<UserType>({
   banned: { type: Boolean, default: false },
   resetPasswordToken: { type: String },
   resetPasswordExpires: { type: String },
+  createdOffers: [{ type: Schema.Types.ObjectId, ref: "Offer" }],
 });
 
 userSchema.methods.isLocked = function () {

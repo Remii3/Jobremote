@@ -16,6 +16,7 @@ export const UserSchema = z.object({
   isBanned: z.function(),
   resetPasswordToken: z.string().optional(),
   resetPasswordExpires: z.number().optional(),
+  createdOffers: z.array(z.string()),
 });
 
 export const PublicUserSchema = UserSchema.pick({
@@ -24,6 +25,7 @@ export const PublicUserSchema = UserSchema.pick({
   updatedAt: true,
   _id: true,
   commercialConsent: true,
+  createdOffers: true,
 });
 
 export const LoginUserSchema = UserSchema.pick({

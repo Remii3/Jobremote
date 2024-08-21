@@ -72,8 +72,8 @@ function UserContextProvider({ children }: UserContextProviderTypes) {
     }
   }, [data, isError]);
 
-  const fetchUserData = () => {
-    refetch();
+  const fetchUserData = async () => {
+    await refetch();
   };
 
   const logOut = () => {

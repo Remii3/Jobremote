@@ -1,6 +1,7 @@
 "use client";
 import Account from "@/components/account/Account";
 import Settings from "@/components/account/Settings";
+import YourOffers from "@/components/account/YourOffers";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -10,8 +11,8 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import { useState } from "react";
-type TabsTypes = "account" | "settings";
-const tabs: TabsTypes[] = ["account", "settings"];
+type TabsTypes = "account" | "settings" | "YourOffers";
+const tabs: TabsTypes[] = ["account", "settings", "YourOffers"];
 
 export default function AccountPage() {
   const [currentTab, setCurrentTab] = useState<TabsTypes>("account");
@@ -53,6 +54,7 @@ export default function AccountPage() {
       <section className="md:col-span-4">
         {currentTab === "account" && <Account />}
         {currentTab === "settings" && <Settings />}
+        {currentTab === "YourOffers" && <YourOffers />}
       </section>
     </div>
   );

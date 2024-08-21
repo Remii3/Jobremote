@@ -162,9 +162,9 @@ export const usersRouter = tsServer.router(userContract, {
       };
     }
   },
-  getUser: async ({ req }) => {
+  getUser: async ({ req, res }) => {
     try {
-      const userId = await getDataFromToken(req);
+      const userId = await getDataFromToken(req, res);
       if (!userId) {
         return {
           status: 401,
@@ -179,6 +179,7 @@ export const usersRouter = tsServer.router(userContract, {
         commercialConsent: 1,
         updatedAt: 1,
         createdAt: 1,
+        createdOffers: 1,
       });
       if (!user) {
         return {
@@ -318,9 +319,10 @@ export const usersRouter = tsServer.router(userContract, {
       };
     }
   },
-  checkUserSession: async ({ req }) => {
+  checkUserSession: async ({ req, res }) => {
     try {
-      const userId = await getDataFromToken(req);
+      const userId = await getDataFromToken(req, res);
+
       if (!userId) {
         return {
           status: 200,

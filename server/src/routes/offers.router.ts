@@ -1,6 +1,7 @@
 import { offersContract } from "../contracts/offers.contract";
 import OfferModel, { OfferType } from "../models/Offer.model";
-import { tsServer } from "../utils/utils";
+import { User } from "../models/User.model";
+import { c, tsServer } from "../utils/utils";
 
 export const offersRouter = tsServer.router(offersContract, {
   createOffer: async ({ body }) => {
@@ -15,6 +16,7 @@ export const offersRouter = tsServer.router(offersContract, {
       maxSalary,
       technologies,
       currency,
+      userId,
     } = body;
     try {
       const offer = await OfferModel.create({
@@ -29,11 +31,17 @@ export const offersRouter = tsServer.router(offersContract, {
         technologies,
         currency,
       });
+
+      await User.findByIdAndUpdate(
+        { _id: userId },
+        { $push: { createdOffers: offer._id } }
+      );
+
       return {
         status: 201,
         body: {
           msg: "Your new offer is successfuly posted.",
-          offer,
+          offer: { ...offer, userId },
         },
       };
     } catch (err) {
@@ -84,6 +92,7 @@ export const offersRouter = tsServer.router(offersContract, {
       if (query.filters?.minSalary) {
         filters.minSalary = { $gte: query.filters.minSalary };
       }
+      filters.isDeleted = false;
       let sortValue = {};
       switch (query.sortOption) {
         case "salary_highest":
@@ -141,6 +150,27 @@ export const offersRouter = tsServer.router(offersContract, {
       };
     }
   },
+  getUserOffers: async ({ query }) => {
+    const { ids } = query;
+    const offers = await OfferModel.find({ _id: { $in: ids } });
+
+    if (!offers.length) {
+      return {
+        status: 200,
+        body: {
+          offers: [],
+          msg: "No offers found",
+        },
+      };
+    }
+    return {
+      status: 200,
+      body: {
+        offers: offers,
+        msg: "Offers fetched successfully",
+      },
+    };
+  },
   getOffer: async ({ params }) => {
     try {
       const offer = await OfferModel.findById(params.id);
@@ -169,5 +199,39 @@ export const offersRouter = tsServer.router(offersContract, {
         },
       };
     }
+  },
+  updateOffer: async ({ body }) => {
+    return {
+      status: 200,
+      body: {
+        msg: "Offer updated successfully",
+      },
+    };
+  },
+  deleteOffer: async ({ body }) => {
+    const { offerId } = body;
+
+    const offer = await OfferModel.findByIdAndUpdate(
+      { _id: offerId },
+      { isDeleted: true, deletedAt: new Date() }
+    );
+    if (!offer) {
+      return {
+        status: 404,
+        body: {
+          msg: "Offer not found",
+        },
+      };
+    }
+    await User.updateMany(
+      { createdOffers: offerId },
+      { $pull: { createdOffers: offerId } }
+    );
+    return {
+      status: 200,
+      body: {
+        msg: "Offer deleted successfully",
+      },
+    };
   },
 });

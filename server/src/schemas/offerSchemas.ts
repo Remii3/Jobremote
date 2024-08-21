@@ -39,7 +39,9 @@ export const localizations = [
   "Worldwide",
 ] as const;
 
-export const EmploymentTypeSchema = z.enum(["B2B", "UoP"], {
+export const emplomentTypes = ["B2B", "UoP"] as const;
+
+export const EmploymentTypeSchema = z.enum(emplomentTypes, {
   message: "Employment type is required.",
 });
 
@@ -74,6 +76,8 @@ export const OfferSchema = z.object({
   maxSalary: z.coerce.number().gt(0),
   technologies: z.array(TechnologySchema).optional(),
   createdAt: z.string(),
+  isDeleted: z.boolean().optional(),
+  deletedAt: z.date().optional(),
 });
 
 export const serverOfferFiltersSchema = z.object({

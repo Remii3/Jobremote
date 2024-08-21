@@ -102,7 +102,7 @@ export default function OfferDetailsContent({
             <FileText className="h-full w-10 text-teal-400/90 mr-2" />
             <p className="flex flex-col">
               <span className="font-medium text-teal-400/90 text-sm">
-                Type of work
+                Work type
               </span>
               {offer.typeOfWork}
             </p>
@@ -129,7 +129,7 @@ export default function OfferDetailsContent({
             <Gauge className="h-full w-10 mr-2 text-amber-400/90" />
             <p className="flex flex-col">
               <span className="font-medium text-amber-400/90 text-sm">
-                Employmen type
+                Employment
               </span>
               {offer.employmentType}
             </p>

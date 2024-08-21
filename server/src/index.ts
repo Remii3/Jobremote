@@ -9,6 +9,8 @@ import { createExpressEndpoints, initServer } from "@ts-rest/express";
 import { mainRouter } from "./routes/_app";
 import { mainContract } from "./contracts/_app";
 import cookieParser from "cookie-parser";
+import OfferModel from "./models/Offer.model";
+import { schedule } from "node-cron";
 const app: Express = express();
 
 app.use(
@@ -29,6 +31,22 @@ connect(process.env.MONGO_URI as string, {})
   .catch((err) => {
     console.log("Failed to connect to MongoDB", err);
   });
+
+schedule("0 0 * * *", async () => {
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  try {
+    const result = await OfferModel.deleteMany({
+      isDeleted: true,
+      deletedAt: { $lte: thirtyDaysAgo },
+    });
+
+    console.log(`${result.deletedCount} offers deleted permanently.`);
+  } catch (err) {
+    console.error("Error deleting expired offers:", err);
+  }
+});
 
 app.listen(port, () => {
   console.log(`Server is listening at http://localhost:${port}`);

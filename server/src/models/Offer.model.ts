@@ -53,6 +53,8 @@ const offerSchema = new Schema<OfferType>({
     enum: allowedCurrencies,
   },
   createdAt: { type: String, default: () => new Date().toISOString() },
+  isDeleted: { type: Boolean, default: false },
+  deletedAt: { type: Date, default: null },
 });
 
 export default model<OfferType>("Offer", offerSchema);

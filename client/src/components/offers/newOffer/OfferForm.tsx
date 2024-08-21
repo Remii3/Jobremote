@@ -11,7 +11,7 @@ import {
 import {
   allowedCurrencies,
   allowedTechnologies,
-  EmploymentTypeSchema,
+  emplomentTypes,
   experience,
   localizations,
   typeOfWork,
@@ -36,7 +36,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import { useEffect } from "react";
 
 const OfferForm = ({ handleAddAnother }: { handleAddAnother: () => void }) => {
   const { form, handleSubmit, handleTechnologies, technologies } =
@@ -149,7 +148,7 @@ const OfferForm = ({ handleAddAnother }: { handleAddAnother: () => void }) => {
                 </FormControl>
                 <FormMessage />
                 <SelectContent>
-                  {EmploymentTypeSchema.options.map((employmentType) => (
+                  {emplomentTypes.map((employmentType) => (
                     <SelectItem key={employmentType} value={employmentType}>
                       {employmentType}
                     </SelectItem>

@@ -13,6 +13,11 @@ export type OfferType = ClientInferResponseBody<
   200
 >["offer"];
 
+export type NewOfferType = ClientInferResponseBody<
+  typeof mainContract.offers.createOffer,
+  201
+>["offer"];
+
 export type OfferFiltersType = z.infer<typeof clientOfferFiltersSchema>;
 export type OfferCategoriesType = OfferFiltersType["categories"];
 
