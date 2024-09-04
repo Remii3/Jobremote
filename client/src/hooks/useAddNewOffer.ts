@@ -1,6 +1,5 @@
 import { client } from "@/lib/utils";
 import {
-  allowedTechnologies,
   emplomentTypes,
   experience,
   localizations,
@@ -22,7 +21,8 @@ const formSchemaTypes = OfferSchema.extend({
   localization: z.enum([...localizations, ""]),
   typeOfWork: z.enum([...typeOfWork, ""]),
   employmentType: z.enum([...emplomentTypes, ""]),
-  technologies: z.array(z.enum([...allowedTechnologies]).optional()),
+  technologies: z.array(z.string().optional()),
+  logo: z.array(z.instanceof(File)).nullable().optional(),
 });
 
 interface useAddNewOfferTypes {
@@ -47,6 +47,7 @@ export default function useAddNewOffer({
       callback();
     },
   });
+
   const queryClient = useQueryClient();
   const formSchema = OfferSchema.omit({ _id: true, createdAt: true });
 
@@ -64,6 +65,7 @@ export default function useAddNewOffer({
       currency: defaultData?.currency || "USD",
     },
   });
+
   function handleTechnologies(technology: TechnologiesTypes[number]) {
     if (technologies.includes(technology)) {
       setTechnologies(technologies.filter((tech) => tech !== technology));
@@ -96,12 +98,15 @@ export default function useAddNewOffer({
       });
       hasError = true;
     }
+
     if (hasError || !user) {
       return;
     }
+
     mutate({
       body: {
         ...values,
+        logo: values.logo,
         technologies,
         userId: user._id,
       } as NewOfferType,

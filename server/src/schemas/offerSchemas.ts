@@ -1,93 +1,36 @@
+import mongoose from "mongoose";
 import { z } from "zod";
 export const allowedCurrencies = ["USD", "EUR"] as const;
-export const allowedTechnologies = [
-  "JavaScript",
-  "TypeScript",
-  "React",
-  "Angular",
-  "Vue",
-  "Node.js",
-  "Python",
-  "Django",
-  "Flask",
-  "Ruby on Rails",
-  "Java",
-  "Spring",
-  // Add more technologies as needed
-] as const;
-
-export const experience = [
-  "Senior",
-  "Mid",
-  "Junior",
-  // add more experience as needed
-] as const;
-
-export const typeOfWork = [
-  "Full-time",
-  "Part-time",
-  "Internship",
-  "Freelance",
-  // add more as needed
-] as const;
-
-export const localizations = [
-  "Europe",
-  "Africa",
-  "North America",
-  "South America",
-  "Worldwide",
-] as const;
-
-export const emplomentTypes = ["B2B", "UoP"] as const;
-
-export const EmploymentTypeSchema = z.enum(emplomentTypes, {
-  message: "Employment type is required.",
-});
-
-export const ExperienceSchema = z.enum(experience, {
-  message: "Experience is required.",
-});
-export const TechnologySchema = z.enum(allowedTechnologies, {
-  message: "Technology is required.",
-});
-export const TypeOfWorkSchema = z.enum(typeOfWork, {
-  message: "Type of work is required.",
-});
-export const LocalizationSchema = z.enum(localizations, {
-  message: "Localization is required.",
-});
 
 export const CurrencySchema = z.enum(allowedCurrencies, {
   message: "Currency is required.",
 });
 
 export const OfferSchema = z.object({
-  _id: z.string(),
+  _id: z.instanceof(mongoose.Types.ObjectId),
   title: z.string().min(2),
   content: z.string().min(2),
-  categories: z.array(TechnologySchema).optional(),
-  experience: ExperienceSchema,
-  typeOfWork: TypeOfWorkSchema,
-  localization: LocalizationSchema,
-  employmentType: EmploymentTypeSchema,
+  experience: z.string(),
+  localization: z.string(),
+  employmentType: z.array(z.string()),
   currency: CurrencySchema,
   minSalary: z.coerce.number().gt(0),
   maxSalary: z.coerce.number().gt(0),
-  technologies: z.array(TechnologySchema).optional(),
+  technologies: z.array(z.string()).optional(),
   createdAt: z.string(),
   isDeleted: z.boolean().optional(),
   deletedAt: z.date().optional(),
+  logo: z.any(),
 });
 
 export const serverOfferFiltersSchema = z.object({
-  categories: z.array(TechnologySchema).optional(),
+  categories: z.array(z.string()).optional(),
   keyword: z.string().optional(),
-  experience: z.array(ExperienceSchema).optional(),
-  typeOfWork: z.array(TypeOfWorkSchema).optional(),
-  localization: z.array(LocalizationSchema).optional(),
+  experience: z.array(z.string()).optional(),
+  typeOfWork: z.array(z.string()).optional(),
+  localization: z.array(z.string()).optional(),
   minSalary: z.string().optional(),
-  technologies: z.array(TechnologySchema).optional(),
+  technologies: z.array(z.string()).optional(),
 });
 
 export const clientOfferFiltersSchema = serverOfferFiltersSchema.extend({
@@ -104,3 +47,31 @@ export const OfferSortOptionsSchema = z.enum([
   "salary_lowest",
   "latest",
 ]);
+
+export const TechnologyOfferSchema = z.object({
+  _id: z.string(),
+  name: z.string(),
+  code: z.string(),
+  createdAt: z.coerce.date(),
+});
+
+export const LocalizationOfferSchema = z.object({
+  _id: z.string(),
+  name: z.string(),
+  code: z.string(),
+  createdAt: z.coerce.date(),
+});
+
+export const EmploymentTypeOfferSchema = z.object({
+  _id: z.string(),
+  name: z.string(),
+  code: z.string(),
+  createdAt: z.coerce.date(),
+});
+
+export const ExperienceOfferSchema = z.object({
+  _id: z.string(),
+  name: z.string(),
+  code: z.string(),
+  createdAt: z.coerce.date(),
+});

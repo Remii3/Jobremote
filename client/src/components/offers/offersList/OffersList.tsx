@@ -1,10 +1,9 @@
 import { cleanEmptyData, client } from "@/lib/utils";
 import { debounce } from "lodash";
-import { useEffect, useMemo } from "react";
+import { useEffect, useRef } from "react";
 import OfferItem from "./OfferItem";
 import { OfferFiltersType, OfferSortOptionsTypes } from "@/types/types";
 import { Loader2 } from "lucide-react";
-import { Span } from "next/dist/trace";
 import { useUser } from "@/context/UserContext";
 
 interface OffersListProps {
@@ -19,6 +18,7 @@ export default function OffersList({
   sortOption,
 }: OffersListProps) {
   const { user } = useUser();
+
   const { data, error, isLoading, isError, refetch } =
     client.offers.getOffers.useQuery(
       ["offersList", user?.createdOffers],
@@ -33,12 +33,19 @@ export default function OffersList({
         refetchOnReconnect: false,
         refetchOnWindowFocus: false,
         refetchInterval: false,
-        refetchOnMount: false,
       }
     );
+
+  const debouncedSearch = useRef(
+    debounce(async () => {
+      refetch();
+    }, 400)
+  ).current;
+
   useEffect(() => {
-    debounce(refetch, 400);
-  }, [filters, refetch, sortOption]);
+    debouncedSearch();
+  }, [filters, sortOption, debouncedSearch]);
+
   return (
     <>
       {isLoading && (
@@ -47,7 +54,7 @@ export default function OffersList({
         </div>
       )}
       {isError && <p>Error: {error.status}</p>}
-      {data && data.body.offers.length > 0 ? (
+      {data && data.body.offers.length > 0 && (
         <ul className="space-y-2">
           {data.body.offers.map((offer) => (
             <OfferItem
@@ -65,7 +72,8 @@ export default function OffersList({
             />
           ))}
         </ul>
-      ) : (
+      )}
+      {data && data.body.offers.length === 0 && (
         <div className="text-center">
           <span>No new offers yet!</span>
         </div>

@@ -132,7 +132,6 @@ export const usersRouter = tsServer.router(userContract, {
       await user.save();
 
       const tokenData = {
-        email: user.email,
         _id: user._id,
       };
       const token = sign(tokenData, process.env.JWT_SECRET!, {

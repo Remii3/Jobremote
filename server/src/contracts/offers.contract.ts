@@ -3,8 +3,11 @@ import {
   serverOfferFiltersSchema,
   OfferSchema,
   OfferSortOptionsSchema,
+  TechnologyOfferSchema,
+  EmploymentTypeOfferSchema,
 } from "../schemas/offerSchemas";
 import { c } from "../utils/utils";
+import mongoose from "mongoose";
 
 const createOfferSchema = OfferSchema.omit({ _id: true, createdAt: true })
   .strict()
@@ -14,16 +17,21 @@ export const offersContract = c.router({
   createOffer: {
     method: "POST",
     path: "/offer",
+    // contentType: "multipart/form-data",
     responses: {
       201: z.object({ msg: z.string(), offer: createOfferSchema }),
     },
-    body: createOfferSchema,
+    // body: createOfferSchema,
+    body: z.any(),
+
     summary: "Create a new offer",
   },
   updateOffer: {
     method: "PATCH",
     path: "/offer",
-    body: OfferSchema.optional(),
+    body: OfferSchema.omit({ _id: true, createdAt: true })
+      .partial()
+      .extend({ offerId: z.string() }),
     responses: {
       200: z.object({ msg: z.string() }),
       404: z.object({ msg: z.string() }),
@@ -98,6 +106,89 @@ export const offersContract = c.router({
         msg: z.string(),
       }),
       404: z.object({
+        msg: z.string(),
+      }),
+      500: z.object({
+        msg: z.string(),
+      }),
+    },
+  },
+  offerApply: {
+    method: "POST",
+    path: `/offer/apply`,
+    contentType: "multipart/form-data",
+    body: z.object({
+      name: z.string(),
+      email: z.string(),
+      description: z.string().optional(),
+      offerId: z.any(),
+      cv: z.any(),
+    }),
+    responses: {
+      200: z.object({
+        msg: z.string(),
+      }),
+      404: z.object({
+        msg: z.string(),
+      }),
+      500: z.object({
+        msg: z.string(),
+      }),
+    },
+  },
+  getTechnologies: {
+    method: "GET",
+    path: `/technologies`,
+    responses: {
+      200: z.object({
+        technologies: z.array(
+          TechnologyOfferSchema.omit({ code: true, createdAt: true })
+        ),
+        msg: z.string(),
+      }),
+      500: z.object({
+        msg: z.string(),
+      }),
+    },
+  },
+  getLocalizations: {
+    method: "GET",
+    path: `/localizations`,
+    responses: {
+      200: z.object({
+        localizations: z.array(
+          TechnologyOfferSchema.omit({ code: true, createdAt: true })
+        ),
+        msg: z.string(),
+      }),
+      500: z.object({
+        msg: z.string(),
+      }),
+    },
+  },
+  getEmploymentTypes: {
+    method: "GET",
+    path: `/employment-types`,
+    responses: {
+      200: z.object({
+        employmentTypes: z.array(
+          EmploymentTypeOfferSchema.omit({ code: true, createdAt: true })
+        ),
+        msg: z.string(),
+      }),
+      500: z.object({
+        msg: z.string(),
+      }),
+    },
+  },
+  getExperiences: {
+    method: "GET",
+    path: `/experiences`,
+    responses: {
+      200: z.object({
+        experiences: z.array(
+          TechnologyOfferSchema.omit({ code: true, createdAt: true })
+        ),
         msg: z.string(),
       }),
       500: z.object({

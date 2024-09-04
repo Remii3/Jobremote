@@ -12,6 +12,7 @@ import {
   MapPin,
   Wallet,
   X,
+  FilePlus as FileIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,38 +28,80 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { client } from "@/lib/utils";
+import { DropzoneOptions } from "react-dropzone";
+import {
+  FileInput,
+  FileUploader,
+  FileUploaderContent,
+  FileUploaderItem,
+} from "@/components/ui/extension/file-upload";
 
 interface OfferDetailsContentProps {
   offer: OfferType;
   isMobile: boolean;
 }
 
+const dropzone = {
+  accept: {
+    "application/pdf": [".pdf", ".doc", ".docx"],
+  },
+  multiple: true,
+  maxFiles: 1,
+  maxSize: 4 * 1024 * 1024,
+} satisfies DropzoneOptions;
+
+const applicationSchema = z.object({
+  name: z.string().min(2, { message: "Name is required." }),
+  email: z.string().min(1, { message: "Email is required." }).email(),
+  description: z.string().optional(),
+  cv: z
+    .array(
+      z.instanceof(File).refine((file) => file.size < 4 * 1024 * 1024, {
+        message: "File size must be less than 4MB",
+      })
+    )
+    .max(1, { message: "Only one file is allowed." })
+    .nullable(),
+});
+
 export default function OfferDetailsContent({
   offer,
   isMobile,
 }: OfferDetailsContentProps) {
   const { formatCurrency, currency } = useCurrency();
-
-  const applicationSchema = z.object({
-    name: z.string().min(2, { message: "Name is required." }),
-    email: z.string().min(1, { message: "Email is required." }).email(),
-    description: z.string().optional(),
-    cv: z.string().url({ message: "CV is required." }),
+  const { mutate: applyForOffer } = client.offers.offerApply.useMutation({
+    onSuccess: () => {},
   });
 
-  const form = useForm({
+  const form = useForm<z.infer<typeof applicationSchema>>({
     resolver: zodResolver(applicationSchema),
     defaultValues: {
       name: "",
       email: "",
       description: "",
-      cv: "",
+      cv: null,
     },
   });
 
-  function submitApplicationHandler() {
-    // #TODO: Implement application submission
-    console.log("Submit application");
+  function submitApplicationHandler(values: z.infer<typeof applicationSchema>) {
+    console.log("offer._id", typeof offer._id);
+    const testFormData = new FormData();
+    testFormData.append("name", values.name);
+    testFormData.append("email", values.email);
+    testFormData.append("description", values.description || "");
+    testFormData.append("offerId", offer._id);
+    testFormData.append("cv", values.cv);
+    applyForOffer({
+      // body: {
+      //   email: values.email,
+      //   name: values.name,
+      //   description: values.description,
+      //   offerId: offer._id,
+      //   cv: values.cv,
+      // },
+      body: testFormData,
+    });
   }
 
   return (
@@ -66,6 +109,7 @@ export default function OfferDetailsContent({
       <form
         className="space-y-4"
         onSubmit={form.handleSubmit(submitApplicationHandler)}
+        encType="multipart/form-data"
       >
         <div className="lg:p-6 p-4 bg-gradient-to-br from-indigo-500  to-violet-400 lg:rounded-md w-full space-y-4">
           {isMobile && (
@@ -218,13 +262,36 @@ export default function OfferDetailsContent({
               control={form.control}
               render={({ field }) => (
                 <FormItem className="w-full">
-                  <FormLabel htmlFor="">
-                    CV <span className="text-red-400">*</span>
-                  </FormLabel>
-                  <FormControl {...field}>
-                    <Input type="file" className="cursor-pointer" />
-                  </FormControl>
-                  <FormMessage />
+                  <FileUploader
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    dropzoneOptions={dropzone}
+                    reSelect
+                  >
+                    <FileInput>
+                      <div className="p-5 border-2 border-dashed hover:border-zinc-600 transition rounded-md flex items-center gap-3">
+                        <FileIcon className="h-8 w-8" />
+                        <span>Add CV</span>
+                      </div>
+                    </FileInput>
+                    {field.value && field.value.length > 0 && (
+                      <FileUploaderContent>
+                        {field.value.map((file, i) => (
+                          <FileUploaderItem
+                            key={i}
+                            index={i}
+                            aria-roledescription={`file ${i + 1} containing ${
+                              file.name
+                            }`}
+                          >
+                            <div className="aspect-square size-full">
+                              {file.name}
+                            </div>
+                          </FileUploaderItem>
+                        ))}
+                      </FileUploaderContent>
+                    )}
+                  </FileUploader>
                 </FormItem>
               )}
             />

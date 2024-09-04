@@ -1,17 +1,11 @@
 import { Schema, model } from "mongoose";
 import { z } from "zod";
-import {
-  allowedCurrencies,
-  allowedTechnologies,
-  experience,
-  localizations,
-  OfferSchema,
-  typeOfWork,
-} from "../schemas/offerSchemas";
+import { allowedCurrencies, OfferSchema } from "../schemas/offerSchemas";
 
 export type OfferType = z.infer<typeof OfferSchema>;
 
 const offerSchema = new Schema<OfferType>({
+  _id: { type: Schema.ObjectId, required: true },
   title: {
     type: String,
     required: true,
@@ -22,18 +16,14 @@ const offerSchema = new Schema<OfferType>({
   },
   experience: {
     type: String,
-    enum: experience,
+    required: true,
   },
   localization: {
     type: String,
-    enum: localizations,
-  },
-  typeOfWork: {
-    type: String,
-    enum: typeOfWork,
+    required: true,
   },
   employmentType: {
-    type: String,
+    type: [String],
     required: true,
   },
   maxSalary: {
@@ -46,7 +36,6 @@ const offerSchema = new Schema<OfferType>({
   },
   technologies: {
     type: [String],
-    enum: allowedTechnologies,
   },
   currency: {
     type: String,

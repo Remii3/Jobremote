@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { Button, buttonVariants } from "../ui/button";
+import { Button } from "../ui/button";
 import { ArrowLeft } from "lucide-react";
 import { OfferType } from "@/types/types";
 import { Separator } from "../ui/separator";
@@ -11,7 +10,6 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form";
-import useAddNewOffer from "@/hooks/useAddNewOffer";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import {
@@ -35,20 +33,60 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { Label } from "../ui/label";
 import { Badge } from "../ui/badge";
+import useEditOffer from "@/hooks/useEditOffer";
 
 interface EditOfferPropsTypes {
   setEditOfferData: (state: null) => void;
   offerData: OfferType;
+  handleUpdateOffer: (values: any) => void;
 }
 
 export default function EditOffer({
   setEditOfferData,
   offerData,
+  handleUpdateOffer,
 }: EditOfferPropsTypes) {
-  const { form, handleSubmit, handleTechnologies, technologies } =
-    useAddNewOffer({ callback: () => {}, defaultData: offerData });
+  const { form, handleTechnologies, technologies } = useEditOffer({
+    defaultData: offerData,
+  });
+
+  function resetOfferData() {
+    setEditOfferData(null);
+  }
+
+  function handleSubmit(values: any) {
+    let hasError = false;
+    if (values.experience === "") {
+      form.setError("experience", {
+        type: "value",
+        message: "Experience is required",
+      });
+      hasError = true;
+    }
+
+    if (values.localization === "") {
+      form.setError("localization", {
+        type: "value",
+        message: "Localization is required",
+      });
+      hasError = true;
+    }
+
+    if (values.typeOfWork === "") {
+      form.setError("typeOfWork", {
+        type: "value",
+        message: "Type of work is required",
+      });
+      hasError = true;
+    }
+
+    if (hasError) {
+      return;
+    }
+    handleUpdateOffer(values);
+  }
+
   return (
     <section className="space-y-6">
       <div>
@@ -283,6 +321,7 @@ export default function EditOffer({
                         </Button>
                       </DropdownMenuTrigger>
                     </FormControl>
+                    <FormMessage />
                     <DropdownMenuContent>
                       {allowedTechnologies.map((technology) => (
                         <DropdownMenuCheckboxItem
@@ -317,7 +356,13 @@ export default function EditOffer({
               <Button type="submit" variant={"default"} className="">
                 Update offer
               </Button>
-              <Button variant={"outline"}>Go back</Button>
+              <Button
+                type="button"
+                variant={"outline"}
+                onClick={resetOfferData}
+              >
+                Go back
+              </Button>
             </div>
           </form>
         </Form>

@@ -11,29 +11,22 @@ import { Input } from "../ui/input";
 import MoreFilters from "./parts/MoreFilters";
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import {
-  allowedTechnologies,
-  experience,
-  localizations,
-  OfferSortOptionsSchema,
-  typeOfWork,
-} from "../../../../server/src/schemas/offerSchemas";
+import { OfferSortOptionsSchema } from "../../../../server/src/schemas/offerSchemas";
 import { Search, Settings2 } from "lucide-react";
 import { Badge, badgeVariants } from "../ui/badge";
 import { FormEvent, useState } from "react";
 import { Slider } from "../ui/slider";
 import { useCurrency } from "@/context/CurrencyContext";
 import { checkIsFilterChanged, client } from "@/lib/utils";
-import { useQueryClient } from "@ts-rest/react-query/tanstack";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { Span } from "next/dist/trace";
+import Technologies from "./parts/Technologies";
+import EmploymentType from "./parts/EmploymentType";
+import Localizations from "./parts/Localizations";
+import Experience from "./parts/Experience";
 
 interface FiltersPropsType {
   filters: Required<OfferFiltersType>;
@@ -57,7 +50,6 @@ const Filters = ({
   sortOption,
 }: FiltersPropsType) => {
   const { formatCurrency, currency } = useCurrency();
-  const queryClient = useQueryClient();
   const [showMoreFilters, setShowMoreFilters] = useState(false);
   function changeTextsHandler(key: keyof OfferFiltersType, text: string) {
     changeFilters(key, text);
@@ -69,7 +61,6 @@ const Filters = ({
 
   function searchOffers(e: FormEvent) {
     e.preventDefault();
-    // queryClient.invalidateQueries(["offersList"]);
   }
 
   return (
@@ -106,19 +97,10 @@ const Filters = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              {localizations.map((localization) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={localization}
-                    checked={filters.localization?.includes(localization)}
-                    onCheckedChange={() =>
-                      changeTextsHandler("localization", localization)
-                    }
-                  >
-                    {localization}
-                  </DropdownMenuCheckboxItem>
-                );
-              })}
+              <Localizations
+                localizations={filters.localization}
+                changeTextsHandler={changeTextsHandler}
+              />
             </DropdownMenuContent>
           </DropdownMenu>
           <DropdownMenu>
@@ -133,19 +115,10 @@ const Filters = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              {experience.map((experience) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={experience}
-                    checked={filters.experience?.includes(experience)}
-                    onCheckedChange={() =>
-                      changeTextsHandler("experience", experience)
-                    }
-                  >
-                    {experience}
-                  </DropdownMenuCheckboxItem>
-                );
-              })}
+              <Experience
+                experiences={filters.experience}
+                changeTextsHandler={changeTextsHandler}
+              />
             </DropdownMenuContent>
           </DropdownMenu>
           <DropdownMenu>
@@ -160,19 +133,10 @@ const Filters = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              {typeOfWork.map((typeOfWork) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={typeOfWork}
-                    checked={filters.typeOfWork?.includes(typeOfWork)}
-                    onCheckedChange={() =>
-                      changeTextsHandler("typeOfWork", typeOfWork)
-                    }
-                  >
-                    {typeOfWork}
-                  </DropdownMenuCheckboxItem>
-                );
-              })}
+              <EmploymentType
+                changeTextsHandler={changeTextsHandler}
+                employments={filters.typeOfWork}
+              />
             </DropdownMenuContent>
           </DropdownMenu>
           <DropdownMenu>
@@ -187,19 +151,10 @@ const Filters = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              {allowedTechnologies.map((technology) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={technology}
-                    checked={filters.technologies?.includes(technology)}
-                    onCheckedChange={() =>
-                      changeTextsHandler("technologies", technology)
-                    }
-                  >
-                    {technology}
-                  </DropdownMenuCheckboxItem>
-                );
-              })}
+              <Technologies
+                technologies={filters.technologies}
+                changeTextsHandler={changeTextsHandler}
+              />
             </DropdownMenuContent>
           </DropdownMenu>
           <DropdownMenu>

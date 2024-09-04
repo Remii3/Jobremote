@@ -4,23 +4,64 @@ import OfferDetails from "./offerDetails/OfferDetails";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import Filters from "../filters/Filters";
-import { checkIsFilterChanged, findFocusableElements } from "@/lib/utils";
-import useSearchFilters from "@/hooks/useSearchFilters";
+import { findFocusableElements } from "@/lib/utils";
 import OffersList from "./offersList/OffersList";
-import { OfferSortOptionsTypes } from "@/types/types";
+import { OfferFiltersType, OfferSortOptionsTypes } from "@/types/types";
+
+const initialFilters: Required<OfferFiltersType> = {
+  categories: [],
+  minSalary: 0,
+  typeOfWork: [],
+  experience: [],
+  keyword: "",
+  localization: [],
+  technologies: [],
+};
 
 const Offers = () => {
   const [selectedOffer, setSelectedOffer] = useState<null | string>(null);
-  const { filters, updateFilters, resetFilters } = useSearchFilters();
   const offerDetailsRef = useRef<HTMLElement | null>(null);
   const offersListRef = useRef<HTMLElement | null>(null);
   const lastOfferRef = useRef<HTMLElement | null>(null);
   const [sortOption, setSortOption] = useState<OfferSortOptionsTypes>("latest");
   const isMobile = useIsMobile();
+  const [filters, setFilters] =
+    useState<Required<OfferFiltersType>>(initialFilters);
+
+  const updateFilters = useCallback(
+    (key: keyof OfferFiltersType, value: any) => {
+      setFilters((prevState) => {
+        if (Array.isArray(prevState[key])) {
+          if (prevState[key]?.includes(value)) {
+            return {
+              ...prevState,
+              [key]: prevState[key].filter((item) => item !== value),
+            };
+          } else {
+            return {
+              ...prevState,
+              [key]: [...prevState[key], value],
+            };
+          }
+        } else {
+          return {
+            ...prevState,
+            [key]: value,
+          };
+        }
+      });
+    },
+    []
+  );
+
+  const resetFilters = useCallback(() => {
+    setFilters(initialFilters);
+  }, []);
 
   const changeCurrentOffer = (newId: string | null) => {
     setSelectedOffer(newId);
   };
+
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
     const activeElement = document.activeElement;
     const focusableElements = findFocusableElements(offerDetailsRef.current);
@@ -52,7 +93,7 @@ const Offers = () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [handleKeyDown]);
-  const isFilterChanged = checkIsFilterChanged(filters);
+
   return (
     <div className="flex flex-col h-full">
       <section className="px-2 py-3 space-y-3">
@@ -96,8 +137,3 @@ const Offers = () => {
 };
 
 export default Offers;
-//   ${
-//   isFilterChanged
-//     ? "h-[calc(100vh-115px-66px)]"
-//     : "h-[calc(100vh-80px-66px)]"
-// }

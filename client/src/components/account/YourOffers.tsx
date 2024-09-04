@@ -1,8 +1,7 @@
 import { useUser } from "@/context/UserContext";
-import useAddNewOffer from "@/hooks/useAddNewOffer";
-import { client } from "@/lib/utils";
+import { cleanEmptyData, client } from "@/lib/utils";
 import { OfferType } from "@/types/types";
-import { ArrowLeft, ArrowLeftCircle, SquarePen, Trash2 } from "lucide-react";
+import { SquarePen, Trash2 } from "lucide-react";
 import React, { useState } from "react";
 import { Button } from "../ui/button";
 import EditOffer from "./EditOffer";
@@ -15,13 +14,18 @@ import {
   TableRow,
 } from "../ui/table";
 import { Separator } from "../ui/separator";
+import { formSchemaTypes } from "@/hooks/useEditOffer";
+import { z } from "zod";
+import { useQueryClient } from "@ts-rest/react-query/tanstack";
 
 export default function YourOffers() {
   const { user, fetchUserData } = useUser();
   const [editOfferData, setEditOfferData] = useState<OfferType | null>(null);
+  const queryClient = useQueryClient();
 
   if (!user) return null;
-  const { data, isLoading } = client.offers.getUserOffers.useQuery(
+
+  const { data, isLoading, refetch } = client.offers.getUserOffers.useQuery(
     ["clientOffers", user.createdOffers],
     {
       query: { ids: user.createdOffers },
@@ -30,17 +34,37 @@ export default function YourOffers() {
       refetchOnReconnect: false,
       refetchOnWindowFocus: false,
       refetchInterval: false,
-      refetchOnMount: false,
     }
   );
-  const { mutate } = client.offers.deleteOffer.useMutation({
+
+  const { mutate: updateOffer } = client.offers.updateOffer.useMutation({
+    onSuccess: () => {
+      queryClient.invalidateQueries(["clientOffers"]);
+      setEditOfferData(null);
+      queryClient.invalidateQueries(["offersList"]);
+    },
+  });
+
+  const { mutate: deleteOffer } = client.offers.deleteOffer.useMutation({
     onSuccess: async () => {
       fetchUserData();
     },
   });
 
   function handleDeleteOffer(offerId: string) {
-    mutate({ body: { offerId } });
+    deleteOffer({ body: { offerId } });
+  }
+
+  function handleUpdateOffer(values: z.infer<typeof formSchemaTypes>) {
+    if (!editOfferData) return;
+    const cleanValues = cleanEmptyData(values);
+
+    updateOffer({
+      body: {
+        ...cleanValues,
+        offerId: editOfferData._id,
+      },
+    });
   }
 
   return (
@@ -49,6 +73,7 @@ export default function YourOffers() {
         <EditOffer
           setEditOfferData={setEditOfferData}
           offerData={editOfferData}
+          handleUpdateOffer={handleUpdateOffer}
         />
       )}
       {!editOfferData && (

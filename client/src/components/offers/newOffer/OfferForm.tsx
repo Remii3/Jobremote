@@ -36,6 +36,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import {
+  FileInput,
+  FileUploader,
+  FileUploaderContent,
+  FileUploaderItem,
+} from "@/components/ui/extension/file-upload";
+import { DropzoneOptions } from "react-dropzone";
+const dropzone = {
+  multiple: false,
+  maxFiles: 1,
+  maxSize: 4 * 1024 * 1024,
+} satisfies DropzoneOptions;
 
 const OfferForm = ({ handleAddAnother }: { handleAddAnother: () => void }) => {
   const { form, handleSubmit, handleTechnologies, technologies } =
@@ -48,6 +60,39 @@ const OfferForm = ({ handleAddAnother }: { handleAddAnother: () => void }) => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="p-4">
+        <FormField
+          name="logo"
+          control={form.control}
+          render={({ field }) => (
+            <FormItem className="w-full">
+              <FileUploader
+                value={field.value}
+                onValueChange={field.onChange}
+                dropzoneOptions={dropzone}
+                reSelect
+              >
+                <FileInput>Upload your logo</FileInput>
+                {field.value && field.value.length > 0 && (
+                  <FileUploaderContent>
+                    {field.value.map((file, i) => (
+                      <FileUploaderItem
+                        key={i}
+                        index={i}
+                        aria-roledescription={`file ${i + 1} containing ${
+                          file.name
+                        }`}
+                      >
+                        <div className="aspect-square size-full">
+                          {file.name}
+                        </div>
+                      </FileUploaderItem>
+                    ))}
+                  </FileUploaderContent>
+                )}
+              </FileUploader>
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name="title"

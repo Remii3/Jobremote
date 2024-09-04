@@ -11,6 +11,8 @@ import { mainContract } from "./contracts/_app";
 import cookieParser from "cookie-parser";
 import OfferModel from "./models/Offer.model";
 import { schedule } from "node-cron";
+import { createRouteHandler } from "uploadthing/express";
+import { uploadRouter } from "./utils/uploadthing";
 const app: Express = express();
 
 app.use(
@@ -31,6 +33,14 @@ connect(process.env.MONGO_URI as string, {})
   .catch((err) => {
     console.log("Failed to connect to MongoDB", err);
   });
+
+app.use(
+  "/api/uploadthing",
+  createRouteHandler({
+    router: uploadRouter,
+    config: { uploadthingSecret: process.env.UPLOADTHING_SECRET },
+  })
+);
 
 schedule("0 0 * * *", async () => {
   const thirtyDaysAgo = new Date();
