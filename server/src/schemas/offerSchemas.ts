@@ -12,29 +12,26 @@ export const OfferSchema = z.object({
   content: z.string().min(2),
   experience: z.string(),
   localization: z.string(),
-  employmentType: z.array(z.string()),
+  contractType: z.string(),
+  employmentType: z.string(),
   currency: CurrencySchema,
   minSalary: z.coerce.number().gt(0),
   maxSalary: z.coerce.number().gt(0),
-  technologies: z.array(z.string()).optional(),
+  technologies: z.array(z.string()),
   createdAt: z.string(),
-  isDeleted: z.boolean().optional(),
-  deletedAt: z.date().optional(),
+  isDeleted: z.boolean(),
+  deletedAt: z.date().nullish(),
   logo: z.any(),
 });
 
 export const serverOfferFiltersSchema = z.object({
-  categories: z.array(z.string()).optional(),
   keyword: z.string().optional(),
   experience: z.array(z.string()).optional(),
-  typeOfWork: z.array(z.string()).optional(),
+  contractType: z.array(z.string()).optional(),
+  employmentType: z.array(z.string()).optional(),
   localization: z.array(z.string()).optional(),
   minSalary: z.string().optional(),
   technologies: z.array(z.string()).optional(),
-});
-
-export const clientOfferFiltersSchema = serverOfferFiltersSchema.extend({
-  minSalary: z.number().optional(),
 });
 
 export const JobPositionSchema = z.object({
@@ -70,6 +67,13 @@ export const EmploymentTypeOfferSchema = z.object({
 });
 
 export const ExperienceOfferSchema = z.object({
+  _id: z.string(),
+  name: z.string(),
+  code: z.string(),
+  createdAt: z.coerce.date(),
+});
+
+export const ContractTypeOfferSchema = z.object({
   _id: z.string(),
   name: z.string(),
   code: z.string(),

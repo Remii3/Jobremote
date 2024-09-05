@@ -5,6 +5,7 @@ import {
   OfferSortOptionsSchema,
   TechnologyOfferSchema,
   EmploymentTypeOfferSchema,
+  ContractTypeOfferSchema,
 } from "../schemas/offerSchemas";
 import { c } from "../utils/utils";
 import mongoose from "mongoose";
@@ -17,13 +18,11 @@ export const offersContract = c.router({
   createOffer: {
     method: "POST",
     path: "/offer",
-    // contentType: "multipart/form-data",
+    contentType: "multipart/form-data",
     responses: {
       201: z.object({ msg: z.string(), offer: createOfferSchema }),
     },
-    // body: createOfferSchema,
-    body: z.any(),
-
+    body: createOfferSchema,
     summary: "Create a new offer",
   },
   updateOffer: {
@@ -96,8 +95,8 @@ export const offersContract = c.router({
   },
   getOffer: {
     method: "GET",
-    path: `/offer/:id`,
-    pathParams: z.object({
+    path: `/offer`,
+    query: z.object({
       id: z.string(),
     }),
     responses: {
@@ -188,6 +187,21 @@ export const offersContract = c.router({
       200: z.object({
         experiences: z.array(
           TechnologyOfferSchema.omit({ code: true, createdAt: true })
+        ),
+        msg: z.string(),
+      }),
+      500: z.object({
+        msg: z.string(),
+      }),
+    },
+  },
+  getContractTypes: {
+    method: "GET",
+    path: `/contract-types`,
+    responses: {
+      200: z.object({
+        contractTypes: z.array(
+          ContractTypeOfferSchema.omit({ code: true, createdAt: true })
         ),
         msg: z.string(),
       }),

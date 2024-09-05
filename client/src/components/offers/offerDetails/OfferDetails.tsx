@@ -24,7 +24,7 @@ const OfferDetails = ({
 }: OfferDetailsProps) => {
   const { data, isLoading, isError, error, refetch } =
     client.offers.getOffer.useQuery(["currentOffer", selectedOffer], {
-      params: { id: selectedOffer },
+      query: { id: selectedOffer },
     });
 
   return (
@@ -62,7 +62,10 @@ const OfferDetails = ({
                     {data.body.offer.content}
                   </DialogDescription>
                   <OfferDetailsContent
-                    offer={data.body.offer}
+                    offer={{
+                      ...data.body.offer,
+                      _id: data.body.offer._id.toString(),
+                    }}
                     isMobile={isMobile}
                   />
                 </DialogHeader>
@@ -85,7 +88,13 @@ const OfferDetails = ({
             </div>
           )}
           {data && (
-            <OfferDetailsContent offer={data.body.offer} isMobile={isMobile} />
+            <OfferDetailsContent
+              offer={{
+                ...data.body.offer,
+                _id: data.body.offer._id.toString(),
+              }}
+              isMobile={isMobile}
+            />
           )}
         </>
       )}

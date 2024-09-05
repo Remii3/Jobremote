@@ -58,10 +58,9 @@ export default function OffersList({
         <ul className="space-y-2">
           {data.body.offers.map((offer) => (
             <OfferItem
-              key={offer._id}
-              _id={offer._id}
+              key={offer._id.toString()}
+              _id={offer._id.toString()}
               title={offer.title}
-              typeOfWork={offer.typeOfWork}
               experience={offer.experience}
               localization={offer.localization}
               changeCurrentOffer={changeCurrentOffer}

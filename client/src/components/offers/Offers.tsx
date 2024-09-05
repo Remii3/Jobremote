@@ -9,7 +9,6 @@ import OffersList from "./offersList/OffersList";
 import { OfferFiltersType, OfferSortOptionsTypes } from "@/types/types";
 
 const initialFilters: Required<OfferFiltersType> = {
-  categories: [],
   minSalary: 0,
   typeOfWork: [],
   experience: [],

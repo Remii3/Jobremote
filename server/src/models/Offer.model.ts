@@ -23,7 +23,11 @@ const offerSchema = new Schema<OfferType>({
     required: true,
   },
   employmentType: {
-    type: [String],
+    type: String,
+    required: true,
+  },
+  contractType: {
+    type: String,
     required: true,
   },
   maxSalary: {

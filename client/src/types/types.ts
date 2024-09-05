@@ -5,23 +5,21 @@ import {
   OfferSortOptionsSchema,
 } from "../../../server/src/schemas/offerSchemas";
 import { z } from "zod";
+type allowedCurrenciesType = "USD" | "EUR";
 
 export type OfferType = {
   _id: string;
   title: string;
   content: string;
+  contractType: string; //ContractTypeSchema
   experience: string; //ExperienceSchema
-  typeOfWork: string; //TypeOfWorkSchema
   localization: string; //LocalizationSchema
   employmentType: string; // EmploymentTypeSchema
-  currency: string; //CurrencySchema
+  currency: allowedCurrenciesType; //CurrencySchema
   minSalary: number;
   maxSalary: number;
   technologies: string[]; //TechnologySchema
-  createdAt: string;
-  isDeleted?: boolean;
-  deletedAt?: Date;
-  logo: any;
+  logo?: any;
 };
 
 export type OfferFiltersType = {

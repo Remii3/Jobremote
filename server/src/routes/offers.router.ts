@@ -9,24 +9,23 @@ import mongoose from "mongoose";
 import TechnologyModel from "../models/Technology.model";
 import EmploymentTypeModel from "../models/EmploymentType.model";
 import LocalizationModel from "../models/Localization.model";
-import { create } from "domain";
 import ExperienceModel from "../models/Experience.model";
-// const memoryStorage = multer.memoryStorage();
+import ContractTypeModel from "../models/ContractType.model";
+
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 export const offersRouter = tsServer.router(offersContract, {
   createOffer: {
-    middleware: [upload.single("logo")],
+    middleware: [upload.array("logo")],
     handler: async ({ body, req }) => {
-      // const logo = req.file;
       const {
         title,
         content,
         experience,
         localization,
         employmentType,
-        typeOfWork,
+        contractType,
         minSalary,
         maxSalary,
         technologies,
@@ -60,9 +59,9 @@ export const offersRouter = tsServer.router(offersContract, {
           content,
           experience,
           localization,
-          typeOfWork,
-          maxSalary,
+          contractType,
           employmentType,
+          maxSalary,
           minSalary,
           technologies,
           currency,
@@ -80,14 +79,7 @@ export const offersRouter = tsServer.router(offersContract, {
             offer: { ...offer, userId },
           },
         };
-        return {
-          status: 500,
-          body: {
-            msg: "We failed to add your new offer.",
-          },
-        };
       } catch (err) {
-        console.log("err", err);
         return {
           status: 500,
           body: {
@@ -104,8 +96,11 @@ export const offersRouter = tsServer.router(offersContract, {
     try {
       const filters: any = {};
 
-      if (query.filters?.typeOfWork && query.filters.typeOfWork.length > 0) {
-        filters.typeOfWork = { $in: query.filters.typeOfWork };
+      if (
+        query.filters?.employmentType &&
+        query.filters.employmentType.length > 0
+      ) {
+        filters.employmentType = { $in: query.filters.employmentType };
       }
 
       if (
@@ -173,7 +168,6 @@ export const offersRouter = tsServer.router(offersContract, {
           },
         };
       }
-
       return {
         status: 200,
         body: {
@@ -198,7 +192,7 @@ export const offersRouter = tsServer.router(offersContract, {
   getUserOffers: async ({ query }) => {
     const { ids } = query;
     const offers = await OfferModel.find({ _id: { $in: ids } });
-
+    console.log(offers[0]);
     if (!offers.length) {
       return {
         status: 200,
@@ -216,9 +210,9 @@ export const offersRouter = tsServer.router(offersContract, {
       },
     };
   },
-  getOffer: async ({ params }) => {
+  getOffer: async ({ query }) => {
     try {
-      const offer = await OfferModel.findById(params.id);
+      const offer = await OfferModel.findById(query.id);
 
       if (!offer) {
         return {
@@ -293,7 +287,7 @@ export const offersRouter = tsServer.router(offersContract, {
     middleware: [upload.array("cv")],
     handler: async ({ body, req }) => {
       const { description, email, name, offerId } = body;
-      console.log(name, email, offerId);
+
       const objectOfferId = new mongoose.Types.ObjectId(`${offerId}`);
       const offerData = await OfferModel.findById(objectOfferId, { title: 1 });
 
@@ -332,25 +326,25 @@ export const offersRouter = tsServer.router(offersContract, {
           pass: process.env.EMAIL_PASS,
         },
       });
-      console.log(req.file);
-      console.log(req.files);
-      // const mailOptions = {
-      //   from: email,
-      //   to: process.env.EMAIL_USER,
-      //   subject: `New offer application ${offerData?.title || "asd"}`,
-      //   text: `New application for your offer from ${name} with description: ${description}`,
-      //   attachments: [
-      //     {
-      //       filename:
-      //         (Array.isArray(req.files) && req.files[0].originalname) ||
-      //         "empty field",
-      //       path:
-      //         (Array.isArray(req.files) && req.files[0].path) || "empty path",
-      //       contentType: "application/pdf",
-      //     },
-      //   ],
-      // };
-      // await transporter.sendMail(mailOptions);
+
+      const mailOptions = {
+        from: email,
+        to: process.env.EMAIL_USER,
+        subject: `New offer application ${offerData?.title || "asd"}`,
+        text: `New application for your offer from ${name} with description: ${description}`,
+        attachments: [
+          {
+            filename:
+              (Array.isArray(req.files) && req.files[0].originalname) ||
+              "empty field",
+            path:
+              (Array.isArray(req.files) && req.files[0].path) || "empty path",
+            contentType: "application/pdf",
+          },
+        ],
+      };
+
+      await transporter.sendMail(mailOptions);
 
       return {
         status: 200,
@@ -484,6 +478,38 @@ export const offersRouter = tsServer.router(offersContract, {
         status: 500,
         body: {
           msg: "We failed to get you available experiences.",
+        },
+      };
+    }
+  },
+  getContractTypes: async () => {
+    try {
+      const contractTypes = await ContractTypeModel.find().select({
+        code: 0,
+        createdAt: 0,
+      });
+
+      if (!contractTypes.length) {
+        return {
+          status: 200,
+          body: {
+            contractTypes: [],
+            msg: "No contract types found",
+          },
+        };
+      }
+      return {
+        status: 200,
+        body: {
+          contractTypes,
+          msg: "Contract types fetched successfully",
+        },
+      };
+    } catch (err) {
+      return {
+        status: 500,
+        body: {
+          msg: "We failed to get you available contract types.",
         },
       };
     }

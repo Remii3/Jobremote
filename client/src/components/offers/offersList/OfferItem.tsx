@@ -10,7 +10,6 @@ type OfferItemTypes = Pick<
   | "title"
   | "localization"
   | "experience"
-  | "typeOfWork"
   | "_id"
   | "minSalary"
   | "maxSalary"
@@ -27,7 +26,6 @@ export default function OfferItem({
   experience,
   localization,
   title,
-  typeOfWork,
   changeCurrentOffer,
   maxSalary,
   minSalary,
@@ -68,7 +66,6 @@ export default function OfferItem({
           <div className="col-start-1 col-span-2 row-start-2 flex flex-col gap-2 sm:flex-row sm:justify-between">
             <div className="flex gap-2 flex-wrap items-start">
               <Badge variant={"outline"}>{localization}</Badge>
-              <Badge variant={"outline"}>{typeOfWork}</Badge>
               <Badge variant={"outline"}>{experience}</Badge>
             </div>
             <div className="flex sm:justify-end items-start flex-wrap gap-2">

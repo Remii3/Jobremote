@@ -85,21 +85,15 @@ export default function OfferDetailsContent({
   });
 
   function submitApplicationHandler(values: z.infer<typeof applicationSchema>) {
-    console.log("offer._id", typeof offer._id);
     const testFormData = new FormData();
     testFormData.append("name", values.name);
     testFormData.append("email", values.email);
     testFormData.append("description", values.description || "");
     testFormData.append("offerId", offer._id);
-    testFormData.append("cv", values.cv);
+    if (values.cv) {
+      testFormData.append("cv", values.cv[0]);
+    }
     applyForOffer({
-      // body: {
-      //   email: values.email,
-      //   name: values.name,
-      //   description: values.description,
-      //   offerId: offer._id,
-      //   cv: values.cv,
-      // },
       body: testFormData,
     });
   }
@@ -146,9 +140,9 @@ export default function OfferDetailsContent({
             <FileText className="h-full w-10 text-teal-400/90 mr-2" />
             <p className="flex flex-col">
               <span className="font-medium text-teal-400/90 text-sm">
-                Work type
+                Contract type
               </span>
-              {offer.typeOfWork}
+              {offer.contractType}
             </p>
           </div>
           <div className="flex bg-sky-50 p-3 rounded-sm">
@@ -304,7 +298,7 @@ export default function OfferDetailsContent({
               <span className="px-1">-</span>
               <span>{formatCurrency(offer.maxSalary, currency)}</span>
             </div>
-            <span className="text-slate-500">{offer.typeOfWork}</span>
+            <span className="text-slate-500">{offer.contractType}</span>
           </div>
           <Button variant={"default"}>Apply</Button>
         </div>
