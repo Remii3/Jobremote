@@ -1,5 +1,5 @@
 import { DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
-import { client } from "@/lib/utils";
+import useGetAvailableLocalizations from "@/hooks/useGetAvailableLocalizations";
 import { OfferFiltersType } from "@/types/types";
 import { Loader2 } from "lucide-react";
 
@@ -12,25 +12,14 @@ export default function Localizations({
   localizations,
   changeTextsHandler,
 }: LocalizationsProps) {
-  const {
-    data: availableLocalizations,
-    isLoading,
-    isError,
-    error,
-  } = client.offers.getLocalizations.useQuery(
-    ["localizations"],
-    {},
-    {
-      refetchOnMount: false,
-      refetchOnReconnect: false,
-      refetchOnWindowFocus: false,
-    }
-  );
+  const { avLocalizations, avLocalizationsError, avLocalizationsIsLoading } =
+    useGetAvailableLocalizations();
+
   return (
     <>
-      {availableLocalizations &&
-        availableLocalizations.body.localizations.length > 0 &&
-        availableLocalizations.body.localizations.map((localization) => {
+      {avLocalizations &&
+        avLocalizations.body.localizations.length > 0 &&
+        avLocalizations.body.localizations.map((localization) => {
           return (
             <DropdownMenuCheckboxItem
               key={localization._id}
@@ -38,26 +27,27 @@ export default function Localizations({
               onCheckedChange={() =>
                 changeTextsHandler("localization", localization.name)
               }
+              preventCloseOnSelect
             >
               {localization.name}
             </DropdownMenuCheckboxItem>
           );
         })}
-      {availableLocalizations &&
-        availableLocalizations.body.localizations.length <= 0 && (
-          <div className="flex p-2 items-center justify-center">
-            <span className="text-xs text-slate-500">No localizations</span>
-          </div>
-        )}
-      {isLoading && (
+      {avLocalizations && avLocalizations.body.localizations.length <= 0 && (
+        <div className="flex p-2 items-center justify-center">
+          <span className="text-xs text-slate-500">No localizations</span>
+        </div>
+      )}
+      {avLocalizationsIsLoading && (
         <div className="flex p-2 items-center justify-center">
           <Loader2 className="w-4 h-4 animate-spin" />
         </div>
       )}
-      {isError && (
+      {avLocalizationsError && (
         <div className="flex p-2 items-center justify-center">
           <span className="text-xs text-slate-500">
-            {error.status === 500 && error.body.msg}
+            {avLocalizationsError.status === 500 &&
+              avLocalizationsError.body.msg}
           </span>
         </div>
       )}

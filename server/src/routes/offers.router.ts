@@ -147,10 +147,14 @@ export const offersRouter = tsServer.router(offersContract, {
           sortValue = { createdAt: -1 };
           break;
       }
-      console.log(filters);
+
       const [fetchedOffers, total]: [fetchedOffers: OfferType[], number] =
         await Promise.all([
-          OfferModel.find(filters).sort(sortValue).skip(skip).limit(limit),
+          OfferModel.find(filters)
+            .sort(sortValue)
+            .skip(skip)
+            .limit(limit)
+            .lean(),
           OfferModel.countDocuments(filters),
         ]);
 
@@ -158,7 +162,7 @@ export const offersRouter = tsServer.router(offersContract, {
         return {
           status: 200,
           body: {
-            offers: fetchedOffers,
+            offers: [],
             msg: "No offers found",
             pagination: {
               total,
@@ -168,10 +172,14 @@ export const offersRouter = tsServer.router(offersContract, {
           },
         };
       }
+      const preparedOffers = fetchedOffers.map((offer) => ({
+        ...offer,
+        _id: offer._id.toString(),
+      }));
       return {
         status: 200,
         body: {
-          offers: fetchedOffers,
+          offers: preparedOffers,
           msg: "Offers fetched successfully",
           pagination: {
             total,
@@ -191,8 +199,7 @@ export const offersRouter = tsServer.router(offersContract, {
   },
   getUserOffers: async ({ query }) => {
     const { ids } = query;
-    const offers = await OfferModel.find({ _id: { $in: ids } });
-    console.log(offers[0]);
+    const offers = await OfferModel.find({ _id: { $in: ids } }).lean();
     if (!offers.length) {
       return {
         status: 200,
@@ -202,17 +209,22 @@ export const offersRouter = tsServer.router(offersContract, {
         },
       };
     }
+    const preparedOffers = offers.map((offer) => ({
+      ...offer,
+      _id: offer._id.toString(),
+    }));
+
     return {
       status: 200,
       body: {
-        offers: offers,
+        offers: preparedOffers,
         msg: "Offers fetched successfully",
       },
     };
   },
   getOffer: async ({ query }) => {
     try {
-      const offer = await OfferModel.findById(query.id);
+      const offer = await OfferModel.findById(query.id).lean();
 
       if (!offer) {
         return {
@@ -222,11 +234,11 @@ export const offersRouter = tsServer.router(offersContract, {
           },
         };
       }
-
+      const preparedOffer = { ...offer, _id: offer._id.toString() };
       return {
         status: 200,
         body: {
-          offer,
+          offer: preparedOffer,
           msg: "Offer fetched successfully",
         },
       };

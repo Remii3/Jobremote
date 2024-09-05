@@ -24,6 +24,14 @@ export const OfferSchema = z.object({
   logo: z.any(),
 });
 
+export const ClientOfferSchema = OfferSchema.omit({
+  _id: true,
+  isDeleted: true,
+  deletedAt: true,
+}).extend({
+  _id: z.string(),
+});
+
 export const serverOfferFiltersSchema = z.object({
   keyword: z.string().optional(),
   experience: z.array(z.string()).optional(),

@@ -1,5 +1,5 @@
 import { DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
-import { client } from "@/lib/utils";
+import useGetAvailableTechnologies from "@/hooks/useGetAvailableTechnologies";
 import { OfferFiltersType } from "@/types/types";
 import { Loader2 } from "lucide-react";
 import React from "react";
@@ -13,20 +13,8 @@ export default function Technologies({
   technologies,
   changeTextsHandler,
 }: TechnologiesProps) {
-  const {
-    data: avTechnologies,
-    isLoading,
-    error,
-    isError,
-  } = client.offers.getTechnologies.useQuery(
-    ["technologies"],
-    {},
-    {
-      refetchOnMount: false,
-      refetchOnReconnect: false,
-      refetchOnWindowFocus: false,
-    }
-  );
+  const { avTechnologies, avTechnologiesError, avTechnologiesIsLoading } =
+    useGetAvailableTechnologies();
   return (
     <>
       {avTechnologies &&
@@ -50,15 +38,15 @@ export default function Technologies({
           <span className="text-xs text-slate-500">No technologies</span>
         </div>
       )}
-      {isLoading && (
+      {avTechnologiesIsLoading && (
         <div className="flex p-2 items-center justify-center">
           <Loader2 className="w-4 h-4 animate-spin" />
         </div>
       )}
-      {isError && (
+      {avTechnologiesError && (
         <div className="flex p-2 items-center justify-center">
           <span className="text-xs text-slate-500">
-            {error.status === 500 && error.body.msg}
+            {avTechnologiesError.status === 500 && avTechnologiesError.body.msg}
           </span>
         </div>
       )}

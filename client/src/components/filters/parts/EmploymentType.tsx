@@ -1,5 +1,5 @@
 import { DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
-import { client } from "@/lib/utils";
+import useGetAvailableEmploymentTypes from "@/hooks/useGetAvailableEmploymentTypes";
 import { OfferFiltersType } from "@/types/types";
 import { Loader2 } from "lucide-react";
 
@@ -13,51 +13,44 @@ export default function EmploymentType({
   employments,
 }: EmploymentTypePropsType) {
   const {
-    data: availableEmploymentTypes,
-    isLoading,
-    isError,
-    error,
-  } = client.offers.getEmploymentTypes.useQuery(
-    ["employment-types"],
-    {},
-    {
-      refetchOnMount: false,
-      refetchOnReconnect: false,
-      refetchOnWindowFocus: false,
-    }
-  );
+    avEmploymentTypes,
+    avEmploymentTypesError,
+    avEmploymentTypesIsLoading,
+  } = useGetAvailableEmploymentTypes();
   return (
     <>
-      {availableEmploymentTypes &&
-        availableEmploymentTypes.body.employmentTypes.length > 0 &&
-        availableEmploymentTypes.body.employmentTypes.map((employmentType) => {
+      {avEmploymentTypes &&
+        avEmploymentTypes.body.employmentTypes.length > 0 &&
+        avEmploymentTypes.body.employmentTypes.map((employmentType) => {
           return (
             <DropdownMenuCheckboxItem
               key={employmentType._id}
               checked={employments.includes(employmentType.name)}
               onCheckedChange={() =>
-                changeTextsHandler("typeOfWork", employmentType.name)
+                changeTextsHandler("employmentType", employmentType.name)
               }
+              preventCloseOnSelect
             >
               {employmentType.name}
             </DropdownMenuCheckboxItem>
           );
         })}
-      {availableEmploymentTypes &&
-        availableEmploymentTypes.body.employmentTypes.length <= 0 && (
+      {avEmploymentTypes &&
+        avEmploymentTypes.body.employmentTypes.length <= 0 && (
           <div className="flex p-2 items-center justify-center">
             <span className="text-xs text-slate-500">No employments</span>
           </div>
         )}
-      {isLoading && (
+      {avEmploymentTypesIsLoading && (
         <div className="flex p-2 items-center justify-center">
           <Loader2 className="w-4 h-4 animate-spin" />
         </div>
       )}
-      {isError && (
+      {avEmploymentTypesError && (
         <div className="flex p-2 items-center justify-center">
           <span className="text-xs text-slate-500">
-            {error.status === 500 && error.body.msg}
+            {avEmploymentTypesError.status === 500 &&
+              avEmploymentTypesError.body.msg}
           </span>
         </div>
       )}

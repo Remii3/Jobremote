@@ -6,9 +6,9 @@ import {
   TechnologyOfferSchema,
   EmploymentTypeOfferSchema,
   ContractTypeOfferSchema,
+  ClientOfferSchema,
 } from "../schemas/offerSchemas";
 import { c } from "../utils/utils";
-import mongoose from "mongoose";
 
 const createOfferSchema = OfferSchema.omit({ _id: true, createdAt: true })
   .strict()
@@ -62,7 +62,7 @@ export const offersContract = c.router({
     }),
     responses: {
       200: z.object({
-        offers: z.array(OfferSchema),
+        offers: z.array(ClientOfferSchema),
         msg: z.string(),
         fromCache: z.boolean().optional(),
         pagination: z.object({
@@ -85,7 +85,7 @@ export const offersContract = c.router({
     }),
     responses: {
       200: z.object({
-        offers: z.array(OfferSchema),
+        offers: z.array(ClientOfferSchema),
         msg: z.string(),
       }),
       500: z.object({
@@ -101,7 +101,7 @@ export const offersContract = c.router({
     }),
     responses: {
       200: z.object({
-        offer: OfferSchema,
+        offer: ClientOfferSchema,
         msg: z.string(),
       }),
       404: z.object({

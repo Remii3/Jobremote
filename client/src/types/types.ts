@@ -1,11 +1,10 @@
 import { ClientInferResponseBody } from "@ts-rest/core";
 import { mainContract } from "../../../server/src/contracts/_app";
-import {
-  CurrencySchema,
-  OfferSortOptionsSchema,
-} from "../../../server/src/schemas/offerSchemas";
+import { OfferSortOptionsSchema } from "../../../server/src/schemas/offerSchemas";
 import { z } from "zod";
-type allowedCurrenciesType = "USD" | "EUR";
+import { ObjectId } from "mongoose";
+
+export type AllowedCurrenciesType = "USD" | "EUR";
 
 export type OfferType = {
   _id: string;
@@ -15,7 +14,7 @@ export type OfferType = {
   experience: string; //ExperienceSchema
   localization: string; //LocalizationSchema
   employmentType: string; // EmploymentTypeSchema
-  currency: allowedCurrenciesType; //CurrencySchema
+  currency: AllowedCurrenciesType; //CurrencySchema
   minSalary: number;
   maxSalary: number;
   technologies: string[]; //TechnologySchema
@@ -24,11 +23,12 @@ export type OfferType = {
 
 export type OfferFiltersType = {
   keyword: string;
-  experience: string[];
-  typeOfWork: string[];
   localization: string[];
-  minSalary: number;
+  experience: string[];
+  contractType: string[];
+  employmentType: string[];
   technologies: string[];
+  minSalary: number;
 };
 
 export type GetOfferType = ClientInferResponseBody<
@@ -43,5 +43,4 @@ export type NewOfferType = ClientInferResponseBody<
 
 // Filters
 
-export type CurrencyTypes = z.infer<typeof CurrencySchema>;
 export type OfferSortOptionsTypes = z.infer<typeof OfferSortOptionsSchema>;

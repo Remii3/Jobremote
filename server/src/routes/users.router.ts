@@ -179,7 +179,7 @@ export const usersRouter = tsServer.router(userContract, {
         updatedAt: 1,
         createdAt: 1,
         createdOffers: 1,
-      });
+      }).lean();
       if (!user) {
         return {
           status: 404,

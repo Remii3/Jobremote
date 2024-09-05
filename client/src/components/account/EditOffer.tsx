@@ -20,14 +20,6 @@ import {
   SelectValue,
 } from "../ui/select";
 import {
-  allowedCurrencies,
-  allowedTechnologies,
-  emplomentTypes,
-  experience,
-  localizations,
-  typeOfWork,
-} from "../../../../server/src/schemas/offerSchemas";
-import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
@@ -35,6 +27,12 @@ import {
 } from "../ui/dropdown-menu";
 import { Badge } from "../ui/badge";
 import useEditOffer from "@/hooks/useEditOffer";
+import useGetAvailableLocalizations from "@/hooks/useGetAvailableLocalizations";
+import useGetAvailableTechnologies from "@/hooks/useGetAvailableTechnologies";
+import useGetAvailableEmploymentTypes from "@/hooks/useGetAvailableEmploymentTypes";
+import useGetAvailableExperiences from "@/hooks/useGetAvailableExperiences";
+import useGetAvailableContractTypes from "@/hooks/useGetAvailableContractTypes";
+import { useCurrency } from "@/context/CurrencyContext";
 
 interface EditOfferPropsTypes {
   setEditOfferData: (state: null) => void;
@@ -86,7 +84,12 @@ export default function EditOffer({
     }
     handleUpdateOffer(values);
   }
-
+  const { avLocalizations } = useGetAvailableLocalizations();
+  const { avTechnologies } = useGetAvailableTechnologies();
+  const { avEmploymentTypes } = useGetAvailableEmploymentTypes();
+  const { avExperiences } = useGetAvailableExperiences();
+  const { avContractTypes } = useGetAvailableContractTypes();
+  const { allowedCurrencies } = useCurrency();
   return (
     <section className="space-y-6">
       <div>
@@ -154,11 +157,12 @@ export default function EditOffer({
                     </FormControl>
                     <FormMessage />
                     <SelectContent>
-                      {experience.map((exp) => (
-                        <SelectItem key={exp} value={exp}>
-                          {exp}
-                        </SelectItem>
-                      ))}
+                      {avExperiences &&
+                        avExperiences.body.experiences.map((exp) => (
+                          <SelectItem key={exp._id} value={exp.name}>
+                            {exp.name}
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                 </FormItem>
@@ -182,11 +186,12 @@ export default function EditOffer({
                     </FormControl>
                     <FormMessage />
                     <SelectContent>
-                      {typeOfWork.map((workType) => (
-                        <SelectItem key={workType} value={workType}>
-                          {workType}
-                        </SelectItem>
-                      ))}
+                      {avContractTypes &&
+                        avContractTypes.body.contractTypes.map((workType) => (
+                          <SelectItem key={workType._id} value={workType.name}>
+                            {workType.name}
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                 </FormItem>
@@ -210,11 +215,17 @@ export default function EditOffer({
                     </FormControl>
                     <FormMessage />
                     <SelectContent>
-                      {emplomentTypes.map((employmentType) => (
-                        <SelectItem key={employmentType} value={employmentType}>
-                          {employmentType}
-                        </SelectItem>
-                      ))}
+                      {avEmploymentTypes &&
+                        avEmploymentTypes.body.employmentTypes.map(
+                          (employmentType) => (
+                            <SelectItem
+                              key={employmentType._id}
+                              value={employmentType.name}
+                            >
+                              {employmentType.name}
+                            </SelectItem>
+                          )
+                        )}
                     </SelectContent>
                   </Select>
                 </FormItem>
@@ -238,11 +249,17 @@ export default function EditOffer({
                     </FormControl>
                     <FormMessage />
                     <SelectContent>
-                      {localizations.map((localization) => (
-                        <SelectItem key={localization} value={localization}>
-                          {localization}
-                        </SelectItem>
-                      ))}
+                      {avLocalizations &&
+                        avLocalizations.body.localizations.map(
+                          (localization) => (
+                            <SelectItem
+                              key={localization._id}
+                              value={localization.name}
+                            >
+                              {localization.name}
+                            </SelectItem>
+                          )
+                        )}
                     </SelectContent>
                   </Select>
                 </FormItem>
@@ -323,16 +340,19 @@ export default function EditOffer({
                     </FormControl>
                     <FormMessage />
                     <DropdownMenuContent>
-                      {allowedTechnologies.map((technology) => (
-                        <DropdownMenuCheckboxItem
-                          key={technology}
-                          checked={technologies.includes(technology)}
-                          onCheckedChange={() => handleTechnologies(technology)}
-                          preventCloseOnSelect
-                        >
-                          {technology}
-                        </DropdownMenuCheckboxItem>
-                      ))}
+                      {avTechnologies &&
+                        avTechnologies.body.technologies.map((technology) => (
+                          <DropdownMenuCheckboxItem
+                            key={technology._id}
+                            checked={technologies.includes(technology.name)}
+                            onCheckedChange={() =>
+                              handleTechnologies(technology.name)
+                            }
+                            preventCloseOnSelect
+                          >
+                            {technology.name}
+                          </DropdownMenuCheckboxItem>
+                        ))}
                     </DropdownMenuContent>
                   </DropdownMenu>
                   {technologies.length > 0 && (

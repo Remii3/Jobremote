@@ -124,10 +124,29 @@ const Filters = ({
           <DropdownMenu>
             <DropdownMenuTrigger asChild className="hidden lg:block">
               <Button variant={"outline"} className="space-x-1">
-                <span>Type of work</span>
-                {filters.typeOfWork && filters.typeOfWork.length > 0 && (
+                <span>Employmnet type</span>
+                {filters.employmentType &&
+                  filters.employmentType.length > 0 && (
+                    <Badge variant={"secondary"}>
+                      {filters.employmentType.length}
+                    </Badge>
+                  )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <EmploymentType
+                changeTextsHandler={changeTextsHandler}
+                employments={filters.employmentType}
+              />
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild className="hidden lg:block">
+              <Button variant={"outline"} className="space-x-1">
+                <span>Contract type</span>
+                {filters.contractType && filters.contractType.length > 0 && (
                   <Badge variant={"secondary"}>
-                    {filters.typeOfWork.length}
+                    {filters.contractType.length}
                   </Badge>
                 )}
               </Button>
@@ -135,7 +154,7 @@ const Filters = ({
             <DropdownMenuContent>
               <EmploymentType
                 changeTextsHandler={changeTextsHandler}
-                employments={filters.typeOfWork}
+                employments={filters.contractType}
               />
             </DropdownMenuContent>
           </DropdownMenu>
@@ -292,11 +311,22 @@ const Filters = ({
               </button>
             </li>
           ))}
-          {filters.typeOfWork?.map((item) => (
+          {filters.employmentType?.map((item) => (
             <li key={item} className={badgeVariants({ variant: "outline" })}>
               <button
                 type="button"
-                onClick={() => changeTextsHandler("typeOfWork", item)}
+                onClick={() => changeTextsHandler("employmentType", item)}
+                className="text-nowrap"
+              >
+                {item}
+              </button>
+            </li>
+          ))}
+          {filters.contractType?.map((item) => (
+            <li key={item} className={badgeVariants({ variant: "outline" })}>
+              <button
+                type="button"
+                onClick={() => changeTextsHandler("contractType", item)}
                 className="text-nowrap"
               >
                 {item}

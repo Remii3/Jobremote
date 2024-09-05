@@ -1,10 +1,11 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { CurrencyTypes } from "@/types/types";
+import { AllowedCurrenciesType } from "@/types/types";
 
 interface CurrencyContextTypes {
-  currency: CurrencyTypes;
-  changeCurrency: (newCurrency: CurrencyTypes) => void;
-  formatCurrency: (amount: number, currency: CurrencyTypes) => string;
+  currency: AllowedCurrenciesType;
+  changeCurrency: (newCurrency: AllowedCurrenciesType) => void;
+  formatCurrency: (amount: number, currency: AllowedCurrenciesType) => string;
+  allowedCurrencies: AllowedCurrenciesType[];
 }
 
 const CurrencyContext = createContext<CurrencyContextTypes | undefined>(
@@ -12,16 +13,19 @@ const CurrencyContext = createContext<CurrencyContextTypes | undefined>(
 );
 
 const CurrencyProvider = ({ children }: { children: React.ReactNode }) => {
-  const [currency, setCurrency] = useState<CurrencyTypes>("USD");
+  const [currency, setCurrency] = useState<AllowedCurrenciesType>("USD");
   const [currencyRates, setCurrencyRates] = useState<{ [key: string]: number }>(
     {}
   );
-
-  const changeCurrency = (newCurrency: CurrencyTypes) => {
+  const allowedCurrencies: AllowedCurrenciesType[] = ["USD", "EUR"];
+  const changeCurrency = (newCurrency: AllowedCurrenciesType) => {
     setCurrency(newCurrency);
   };
 
-  const formatCurrency = (amount: number, productCurrency: CurrencyTypes) => {
+  const formatCurrency = (
+    amount: number,
+    productCurrency: AllowedCurrenciesType
+  ) => {
     if (amount < 0 || typeof amount !== "number") return "N/A";
     if (!productCurrency) return amount.toString();
     const preparedAmount =
@@ -53,7 +57,7 @@ const CurrencyProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <CurrencyContext.Provider
-      value={{ currency, changeCurrency, formatCurrency }}
+      value={{ currency, changeCurrency, formatCurrency, allowedCurrencies }}
     >
       {children}
     </CurrencyContext.Provider>
