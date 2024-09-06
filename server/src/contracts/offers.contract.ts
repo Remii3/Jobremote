@@ -10,7 +10,12 @@ import {
 } from "../schemas/offerSchemas";
 import { c } from "../utils/utils";
 
-const createOfferSchema = OfferSchema.omit({ _id: true, createdAt: true })
+const createOfferSchema = OfferSchema.omit({
+  _id: true,
+  createdAt: true,
+  deletedAt: true,
+  isDeleted: true,
+})
   .strict()
   .extend({ userId: z.string() });
 

@@ -40,7 +40,7 @@ export default function OfferItem({
   ) {
     changeCurrentOffer(_id, e);
   }
-  console.log(localization);
+
   return (
     <li>
       <button

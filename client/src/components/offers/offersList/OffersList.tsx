@@ -41,7 +41,7 @@ export default function OffersList({
       refetch();
     }, 400)
   ).current;
-  console.log(data);
+
   useEffect(() => {
     debouncedSearch();
   }, [filters, sortOption, debouncedSearch]);

@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/select";
 import { Button, buttonVariants } from "@/components/ui/button";
 import Link from "next/link";
-import useAddNewOffer from "@/hooks/useAddNewOffer";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -41,6 +40,15 @@ import useGetAvailableEmploymentTypes from "@/hooks/useGetAvailableEmploymentTyp
 import useGetAvailableExperiences from "@/hooks/useGetAvailableExperiences";
 import useGetAvailableContractTypes from "@/hooks/useGetAvailableContractTypes";
 import { useCurrency } from "@/context/CurrencyContext";
+import { client } from "@/lib/utils";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import { useUser } from "@/context/UserContext";
+import { useQueryClient } from "@ts-rest/react-query/tanstack";
+import { AllowedCurrenciesType } from "@/types/types";
+import { offerSchema } from "@/schemas/offerSchemas";
 
 const dropzone = {
   multiple: false,
@@ -48,19 +56,63 @@ const dropzone = {
   maxSize: 4 * 1024 * 1024,
 } satisfies DropzoneOptions;
 
-const OfferForm = ({ handleAddAnother }: { handleAddAnother: () => void }) => {
-  const { form, handleSubmit, handleTechnologies, technologies } =
-    useAddNewOffer({
-      callback: () => {
-        handleAddAnother();
-      },
-    });
+const OfferForm = () => {
+  const [technologies, setTechnologies] = useState<string[]>([]);
+  const queryClient = useQueryClient();
+  const { user, fetchUserData } = useUser();
+
   const { avLocalizations } = useGetAvailableLocalizations();
   const { avTechnologies } = useGetAvailableTechnologies();
   const { avEmploymentTypes } = useGetAvailableEmploymentTypes();
   const { avExperiences } = useGetAvailableExperiences();
   const { avContractTypes } = useGetAvailableContractTypes();
   const { allowedCurrencies } = useCurrency();
+
+  const form = useForm<z.infer<typeof offerSchema>>({
+    resolver: zodResolver(offerSchema),
+    defaultValues: {
+      title: "",
+      content: "",
+      experience: "",
+      employmentType: "",
+      localization: "",
+      maxSalary: 0,
+      currency: "USD",
+      logo: null,
+      minSalary: 0,
+    },
+  });
+  const { mutate: createOffer } = client.offers.createOffer.useMutation({
+    onSuccess: () => {
+      fetchUserData();
+      form.reset();
+      queryClient.invalidateQueries(["offersList"]);
+    },
+  });
+
+  function handleTechnologies(technology: string) {
+    if (technologies.includes(technology)) {
+      setTechnologies(technologies.filter((tech) => tech !== technology));
+    } else {
+      setTechnologies([...technologies, technology]);
+    }
+  }
+
+  async function handleSubmit(values: z.infer<typeof offerSchema>) {
+    if (!user) {
+      return;
+    }
+
+    createOffer({
+      body: {
+        ...values,
+        logo: values.logo,
+        technologies,
+        userId: user._id,
+      },
+    });
+  }
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="p-4">
@@ -154,10 +206,10 @@ const OfferForm = ({ handleAddAnother }: { handleAddAnother: () => void }) => {
         />
         <FormField
           control={form.control}
-          name="typeOfWork"
+          name="contractType"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Type of work</FormLabel>
+              <FormLabel>Type of contract</FormLabel>
               <Select
                 onValueChange={field.onChange}
                 value={field.value}
@@ -350,6 +402,7 @@ const OfferForm = ({ handleAddAnother }: { handleAddAnother: () => void }) => {
                   ))}
                 </ul>
               )}
+              <FormMessage />
             </FormItem>
           )}
         />

@@ -26,13 +26,17 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Badge } from "../ui/badge";
-import useEditOffer from "@/hooks/useEditOffer";
 import useGetAvailableLocalizations from "@/hooks/useGetAvailableLocalizations";
 import useGetAvailableTechnologies from "@/hooks/useGetAvailableTechnologies";
 import useGetAvailableEmploymentTypes from "@/hooks/useGetAvailableEmploymentTypes";
 import useGetAvailableExperiences from "@/hooks/useGetAvailableExperiences";
 import useGetAvailableContractTypes from "@/hooks/useGetAvailableContractTypes";
 import { useCurrency } from "@/context/CurrencyContext";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { offerSchema } from "@/schemas/offerSchemas";
+import { useState } from "react";
 
 interface EditOfferPropsTypes {
   setEditOfferData: (state: null) => void;
@@ -45,8 +49,22 @@ export default function EditOffer({
   offerData,
   handleUpdateOffer,
 }: EditOfferPropsTypes) {
-  const { form, handleTechnologies, technologies } = useEditOffer({
-    defaultData: offerData,
+  const [technologies, setTechnologies] = useState<string[]>(
+    offerData.technologies || []
+  );
+
+  const form = useForm<z.infer<typeof offerSchema>>({
+    resolver: zodResolver(offerSchema),
+    defaultValues: {
+      title: offerData.title || "",
+      content: offerData.content || "",
+      experience: offerData.experience || "",
+      employmentType: offerData.employmentType || "",
+      localization: offerData.localization || "",
+      minSalary: offerData.minSalary || 0,
+      maxSalary: offerData.maxSalary || 0,
+      currency: offerData.currency || "USD",
+    },
   });
 
   function resetOfferData() {
@@ -54,36 +72,17 @@ export default function EditOffer({
   }
 
   function handleSubmit(values: any) {
-    let hasError = false;
-    if (values.experience === "") {
-      form.setError("experience", {
-        type: "value",
-        message: "Experience is required",
-      });
-      hasError = true;
-    }
-
-    if (values.localization === "") {
-      form.setError("localization", {
-        type: "value",
-        message: "Localization is required",
-      });
-      hasError = true;
-    }
-
-    if (values.typeOfWork === "") {
-      form.setError("typeOfWork", {
-        type: "value",
-        message: "Type of work is required",
-      });
-      hasError = true;
-    }
-
-    if (hasError) {
-      return;
-    }
     handleUpdateOffer(values);
   }
+
+  function handleTechnologies(technology: string) {
+    if (technologies.includes(technology)) {
+      setTechnologies(technologies.filter((tech) => tech !== technology));
+    } else {
+      setTechnologies([...technologies, technology]);
+    }
+  }
+
   const { avLocalizations } = useGetAvailableLocalizations();
   const { avTechnologies } = useGetAvailableTechnologies();
   const { avEmploymentTypes } = useGetAvailableEmploymentTypes();
@@ -170,7 +169,7 @@ export default function EditOffer({
             />
             <FormField
               control={form.control}
-              name="typeOfWork"
+              name="contractType"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Type of work</FormLabel>
