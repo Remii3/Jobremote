@@ -52,13 +52,15 @@ export default function OfferItem({
         className="shadow p-3 hover:shadow-md transition-shadow rounded-md flex justify-between items-center gap-2 w-full"
       >
         {logo && (
-          <Image
-            src={logo}
-            alt="Company logo"
-            height={64}
-            width={64}
-            className="w-16 h-16 rounded-sm object-cover aspect-square"
-          />
+          <div className="overflow-hidden rounded-full bg-background border border-input">
+            <Image
+              src={logo}
+              alt="Company logo"
+              height={64}
+              width={64}
+              className="object-scale-down object-center h-16 w-16"
+            />
+          </div>
         )}
         <div className="flex-grow grid grid-cols-2 gap-y-[14px] gap-x-4">
           <h3 className="text-lg text-start col-start-1 col-end-2 row-start-1 row-end-2">

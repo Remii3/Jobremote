@@ -109,13 +109,15 @@ export default function OfferDetailsContent({
           <div className="flex gap-2 justify-between flex-wrap ">
             <div className="flex gap-4">
               {offer.logo ? (
-                <Image
-                  src={offer.logo}
-                  alt="Company logo"
-                  height={60}
-                  width={60}
-                  className="rounded-md lg:rounded-sm h-16 w-16 object-cover aspect-square"
-                />
+                <div className="rounded-full overflow-hidden bg-background border border-input">
+                  <Image
+                    src={offer.logo}
+                    alt="Company logo"
+                    height={60}
+                    width={60}
+                    className="object-scale-down h-16 w-16 object-center"
+                  />
+                </div>
               ) : (
                 <div className="rounded-xl h-16 w-16 object-cover aspect-square bg-slate-400"></div>
               )}

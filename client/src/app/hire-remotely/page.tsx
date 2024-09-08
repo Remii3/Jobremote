@@ -12,7 +12,7 @@ export default function HireRemotely() {
   return (
     <>
       {showThanks && <OfferThankYou handleAddAnother={handleAddAnother} />}
-      {!showThanks && <OfferForm />}
+      {!showThanks && <OfferForm handleAddAnother={handleAddAnother} />}
     </>
   );
 }

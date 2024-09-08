@@ -51,14 +51,14 @@ import Image from "next/image";
 
 const dropzone = {
   accept: {
-    "application/pdf": [".png", ".img", ".jpeg", ".jpg"],
+    "application/pdf": [".png", ".img", ".jpeg", ".jpg", ".webp"],
   },
   multiple: true,
   maxFiles: 1,
   maxSize: 4 * 1024 * 10024,
 } satisfies DropzoneOptions;
 
-const OfferForm = () => {
+const OfferForm = ({ handleAddAnother }: { handleAddAnother: () => void }) => {
   const queryClient = useQueryClient();
   const { user, fetchUserData } = useUser();
 
@@ -86,13 +86,15 @@ const OfferForm = () => {
       companyName: "",
     },
   });
-  const { mutate: createOffer } = client.offers.createOffer.useMutation({
-    onSuccess: () => {
-      fetchUserData();
-      form.reset();
-      queryClient.invalidateQueries(["offersList"]);
-    },
-  });
+  const { mutate: createOffer, isLoading } =
+    client.offers.createOffer.useMutation({
+      onSuccess: () => {
+        fetchUserData();
+        queryClient.invalidateQueries(["offersList"]);
+        handleAddAnother();
+        form.reset();
+      },
+    });
 
   async function handleSubmit(values: z.infer<typeof offerSchema>) {
     if (!user) {
@@ -445,7 +447,7 @@ const OfferForm = () => {
           )}
         />
         <div className="flex mt-4 gap-4">
-          <Button type="submit" variant={"default"} className="">
+          <Button type="submit" variant={"default"} disabled={isLoading}>
             Post new offer
           </Button>
           <Link href={"/"} className={buttonVariants({ variant: "outline" })}>
