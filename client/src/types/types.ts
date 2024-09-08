@@ -2,7 +2,6 @@ import { ClientInferResponseBody } from "@ts-rest/core";
 import { mainContract } from "../../../server/src/contracts/_app";
 import { OfferSortOptionsSchema } from "../../../server/src/schemas/offerSchemas";
 import { z } from "zod";
-import { ObjectId } from "mongoose";
 
 export type AllowedCurrenciesType = "USD" | "EUR";
 
@@ -10,15 +9,16 @@ export type OfferType = {
   _id: string;
   title: string;
   content: string;
-  contractType: string; //ContractTypeSchema
-  experience: string; //ExperienceSchema
-  localization: string; //LocalizationSchema
-  employmentType: string; // EmploymentTypeSchema
-  currency: AllowedCurrenciesType; //CurrencySchema
+  contractType: string;
+  experience: string;
+  localization: string;
+  employmentType: string;
+  currency: AllowedCurrenciesType;
   minSalary: number;
   maxSalary: number;
-  technologies: string[]; //TechnologySchema
-  logo?: any;
+  technologies: string[];
+  logo?: string;
+  companyName: string;
 };
 
 export type OfferFiltersType = {

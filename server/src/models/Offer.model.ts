@@ -45,6 +45,13 @@ const offerSchema = new Schema<OfferType>({
     type: String,
     enum: allowedCurrencies,
   },
+  logo: {
+    type: String,
+  },
+  companyName: {
+    type: String,
+    required: true,
+  },
   createdAt: { type: String, default: () => new Date().toISOString() },
   isDeleted: { type: Boolean, default: false },
   deletedAt: { type: Date, default: null },

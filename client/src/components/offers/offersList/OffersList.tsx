@@ -5,6 +5,7 @@ import OfferItem from "./OfferItem";
 import { OfferFiltersType, OfferSortOptionsTypes } from "@/types/types";
 import { Loader2 } from "lucide-react";
 import { useUser } from "@/context/UserContext";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface OffersListProps {
   filters: OfferFiltersType;
@@ -49,8 +50,10 @@ export default function OffersList({
   return (
     <>
       {isLoading && (
-        <div>
-          <Loader2 className="h-6 w-6 animate-spin" />
+        <div className="space-y-2">
+          <Skeleton className="w-full h-[88px] bg-slate-100" />
+          <Skeleton className="w-full h-[88px] bg-slate-100" />
+          <Skeleton className="w-full h-[88px] bg-slate-100" />
         </div>
       )}
       {isError && <p>Error: {error.status}</p>}
@@ -68,6 +71,7 @@ export default function OffersList({
               minSalary={offer.minSalary}
               currency={offer.currency}
               technologies={offer.technologies}
+              logo={offer.logo}
             />
           ))}
         </ul>

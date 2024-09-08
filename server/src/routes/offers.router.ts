@@ -19,6 +19,8 @@ export const offersRouter = tsServer.router(offersContract, {
   createOffer: {
     middleware: [upload.array("logo")],
     handler: async ({ body, req }) => {
+      const data = body;
+      data.technologies = JSON.parse(data.technologies);
       const {
         title,
         content,
@@ -31,27 +33,27 @@ export const offersRouter = tsServer.router(offersContract, {
         technologies,
         currency,
         userId,
-      } = body;
+        companyName,
+      } = data;
+
       try {
-        // const utapi = new UTApi();
-        // let uploadedImg;
-        // // Upload image to UT
-        // if (logo) {
-        //   const metadata = {};
-        //   const uploadResponse = await utapi.uploadFiles(
-        //     new File([logo.buffer], logo.filename),
-        //     { metadata }
-        //   );
+        const utapi = new UTApi();
+        let uploadedImg;
+        if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+          const logo = req.files[0];
+          const metadata = {};
+          const uploadResponse = await utapi.uploadFiles(
+            new File([logo.buffer], logo.originalname),
+            { metadata }
+          );
 
-        //   // handle upload error
-        //   if (uploadResponse.error) {
-        //     // handle errorc
-        //     console.log("error", uploadResponse.error);
-        //   }
+          if (uploadResponse.error) {
+            console.log("error", uploadResponse.error);
+          }
 
-        //   // handle upload success
-        //   uploadedImg = uploadResponse.data;
-        // }
+          uploadedImg = uploadResponse.data;
+        }
+
         const offerId = new mongoose.Types.ObjectId();
         const offer = await OfferModel.create({
           _id: offerId,
@@ -65,6 +67,8 @@ export const offersRouter = tsServer.router(offersContract, {
           minSalary,
           technologies,
           currency,
+          logo: uploadedImg?.url,
+          companyName,
         });
 
         await User.findByIdAndUpdate(
@@ -76,7 +80,7 @@ export const offersRouter = tsServer.router(offersContract, {
           status: 201,
           body: {
             msg: "Your new offer is successfuly posted.",
-            offer: { ...offer, userId },
+            offer: { ...offer, technologies: technologies, userId },
           },
         };
       } catch (err) {

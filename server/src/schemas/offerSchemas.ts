@@ -22,6 +22,7 @@ export const OfferSchema = z.object({
   isDeleted: z.boolean(),
   deletedAt: z.date().nullish(),
   logo: z.any(),
+  companyName: z.string(),
 });
 
 export const ClientOfferSchema = OfferSchema.omit({

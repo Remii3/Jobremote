@@ -8,9 +8,10 @@ import { findFocusableElements } from "@/lib/utils";
 import OffersList from "./offersList/OffersList";
 import { OfferFiltersType, OfferSortOptionsTypes } from "@/types/types";
 
-const initialFilters: Required<OfferFiltersType> = {
+const initialFilters: OfferFiltersType = {
   minSalary: 0,
-  typeOfWork: [],
+  contractType: [],
+  employmentType: [],
   experience: [],
   keyword: "",
   localization: [],
@@ -107,7 +108,7 @@ const Offers = () => {
       <div className="flex flex-grow overflow-hidden">
         <section
           className={`lg:w-1/2 w-full 
-          overflow-y-auto px-2 pb-2 pt-1`}
+          overflow-y-auto px-2 pb-2`}
           ref={offersListRef as React.RefObject<HTMLUListElement>}
         >
           <OffersList
@@ -120,14 +121,18 @@ const Offers = () => {
         <section
           ref={offerDetailsRef}
           className={`w-1/2 
-          overflow-y-auto px-2 lg:block hidden pt-1`}
+          overflow-y-auto px-2 lg:block hidden`}
         >
-          {selectedOffer && (
+          {selectedOffer ? (
             <OfferDetails
               isMobile={isMobile}
               selectedOffer={selectedOffer}
               changeCurrentOffer={changeCurrentOffer}
             />
+          ) : (
+            <div className="h-full w-full flex items-center justify-center">
+              <span className="text-slate-400">Choose an offer!</span>
+            </div>
           )}
         </section>
       </div>

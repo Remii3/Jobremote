@@ -44,20 +44,21 @@ import { client } from "@/lib/utils";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
 import { useUser } from "@/context/UserContext";
 import { useQueryClient } from "@ts-rest/react-query/tanstack";
-import { AllowedCurrenciesType } from "@/types/types";
 import { offerSchema } from "@/schemas/offerSchemas";
+import Image from "next/image";
 
 const dropzone = {
-  multiple: false,
+  accept: {
+    "application/pdf": [".png", ".img", ".jpeg", ".jpg"],
+  },
+  multiple: true,
   maxFiles: 1,
-  maxSize: 4 * 1024 * 1024,
+  maxSize: 4 * 1024 * 10024,
 } satisfies DropzoneOptions;
 
 const OfferForm = () => {
-  const [technologies, setTechnologies] = useState<string[]>([]);
   const queryClient = useQueryClient();
   const { user, fetchUserData } = useUser();
 
@@ -80,6 +81,9 @@ const OfferForm = () => {
       currency: "USD",
       logo: null,
       minSalary: 0,
+      contractType: "",
+      technologies: [],
+      companyName: "",
     },
   });
   const { mutate: createOffer } = client.offers.createOffer.useMutation({
@@ -90,28 +94,42 @@ const OfferForm = () => {
     },
   });
 
-  function handleTechnologies(technology: string) {
-    if (technologies.includes(technology)) {
-      setTechnologies(technologies.filter((tech) => tech !== technology));
-    } else {
-      setTechnologies([...technologies, technology]);
-    }
-  }
-
   async function handleSubmit(values: z.infer<typeof offerSchema>) {
     if (!user) {
       return;
     }
 
+    const formData = new FormData();
+
+    if (values.logo) {
+      formData.append("logo", values.logo[0]);
+    }
+    formData.append("title", values.title);
+    formData.append("content", values.content);
+    formData.append("experience", values.experience);
+    formData.append("employmentType", values.employmentType);
+    formData.append("contractType", values.contractType);
+    formData.append("localization", values.localization);
+    formData.append("minSalary", values.minSalary.toString());
+    formData.append("maxSalary", values.maxSalary.toString());
+    formData.append("currency", values.currency);
+    formData.append("userId", user._id);
+    formData.append("technologies", JSON.stringify(values.technologies));
+    formData.append("companyName", values.companyName);
+
     createOffer({
-      body: {
-        ...values,
-        logo: values.logo,
-        technologies,
-        userId: user._id,
-      },
+      body: formData,
     });
   }
+
+  const handleTechnologies = (technology: string) => {
+    const currentTechnologies = form.getValues("technologies") || [];
+    const updatedTechnologies = currentTechnologies.includes(technology)
+      ? currentTechnologies.filter((tech) => tech !== technology)
+      : [...currentTechnologies, technology];
+
+    form.setValue("technologies", updatedTechnologies);
+  };
 
   return (
     <Form {...form}>
@@ -137,15 +155,35 @@ const OfferForm = () => {
                         aria-roledescription={`file ${i + 1} containing ${
                           file.name
                         }`}
+                        className="p-0 size-20"
                       >
                         <div className="aspect-square size-full">
-                          {file.name}
+                          <Image
+                            src={URL.createObjectURL(file)}
+                            alt={file.name}
+                            className="object-cover rounded-md"
+                            fill
+                          />
                         </div>
                       </FileUploaderItem>
                     ))}
                   </FileUploaderContent>
                 )}
               </FileUploader>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="companyName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Company name</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -334,7 +372,7 @@ const OfferForm = () => {
             <FormItem>
               <FormLabel>Min salary</FormLabel>
               <FormControl>
-                <Input {...field} type="number" />
+                <Input {...field} type="number" min={1} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -347,7 +385,7 @@ const OfferForm = () => {
             <FormItem>
               <FormLabel>Max salary</FormLabel>
               <FormControl>
-                <Input {...field} type="number" />
+                <Input {...field} type="number" min={1} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -356,7 +394,7 @@ const OfferForm = () => {
         <FormField
           control={form.control}
           name="technologies"
-          render={() => (
+          render={({ field }) => (
             <FormItem className="flex flex-col items-start mt-2">
               <DropdownMenu>
                 <Label>Technologies</Label>
@@ -364,9 +402,9 @@ const OfferForm = () => {
                   <DropdownMenuTrigger asChild>
                     <Button variant={"outline"} className="gap-2">
                       <span>Add tech stack</span>
-                      {technologies.length > 0 && (
+                      {field.value.length > 0 && (
                         <Badge variant={"secondary"}>
-                          {technologies.length}
+                          {field.value.length}
                         </Badge>
                       )}
                     </Button>
@@ -377,7 +415,7 @@ const OfferForm = () => {
                     avTechnologies.body.technologies.map((technology) => (
                       <DropdownMenuCheckboxItem
                         key={technology._id}
-                        checked={technologies.includes(technology.name)}
+                        checked={field.value.includes(technology.name)}
                         onCheckedChange={() =>
                           handleTechnologies(technology.name)
                         }
@@ -388,9 +426,9 @@ const OfferForm = () => {
                     ))}
                 </DropdownMenuContent>
               </DropdownMenu>
-              {technologies.length > 0 && (
+              {field.value && field.value.length > 0 && (
                 <ul className="flex gap-2">
-                  {technologies.map((tech) => (
+                  {field.value.map((tech) => (
                     <li key={tech}>
                       <button
                         type="button"

@@ -9,18 +9,12 @@ export const offerSchema = z.object({
   localization: z.string().min(1),
   employmentType: z.string().min(1),
   contractType: z.string().min(1),
-  minSalary: z.number(),
-  maxSalary: z.number(),
+  minSalary: z.coerce.number(),
+  maxSalary: z.coerce.number(),
   currency: z.enum(
     allowedCurrencies as [AllowedCurrenciesType, ...AllowedCurrenciesType[]]
   ),
   technologies: z.array(z.string()),
-  logo: z
-    .array(
-      z.instanceof(File).refine((file) => file.size < 4 * 1024 * 1024, {
-        message: "File size must be less than 4MB",
-      })
-    )
-    .max(1, { message: "Only one file is allowed." })
-    .nullable(),
+  logo: z.array(z.instanceof(File)).nullable(),
+  companyName: z.string().min(1),
 });

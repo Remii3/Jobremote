@@ -3,6 +3,7 @@
 import { Badge } from "@/components/ui/badge";
 import { useCurrency } from "@/context/CurrencyContext";
 import { OfferType } from "@/types/types";
+import Image from "next/image";
 import { MouseEvent } from "react";
 
 type OfferItemTypes = Pick<
@@ -15,6 +16,7 @@ type OfferItemTypes = Pick<
   | "maxSalary"
   | "currency"
   | "technologies"
+  | "logo"
 > & {
   changeCurrentOffer: (
     newId: string,
@@ -32,6 +34,7 @@ export default function OfferItem({
   currency,
   technologies,
   _id,
+  logo,
 }: OfferItemTypes) {
   const { formatCurrency } = useCurrency();
 
@@ -46,10 +49,18 @@ export default function OfferItem({
       <button
         type="button"
         onClick={(e) => showOfferHandler(e)}
-        className="shadow p-3 hover:shadow-md transition-shadow rounded flex justify-between items-center gap-2 w-full"
+        className="shadow p-3 hover:shadow-md transition-shadow rounded-md flex justify-between items-center gap-2 w-full"
       >
-        <div className="w-[80px]">Logo</div>
-        <div className="flex-grow grid grid-cols-2 grid-rows-2 gap-x-4 gap-y-1">
+        {logo && (
+          <Image
+            src={logo}
+            alt="Company logo"
+            height={64}
+            width={64}
+            className="w-16 h-16 rounded-sm object-cover aspect-square"
+          />
+        )}
+        <div className="flex-grow grid grid-cols-2 gap-y-[14px] gap-x-4">
           <h3 className="text-lg text-start col-start-1 col-end-2 row-start-1 row-end-2">
             {title}
           </h3>

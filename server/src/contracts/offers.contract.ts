@@ -15,9 +15,10 @@ const createOfferSchema = OfferSchema.omit({
   createdAt: true,
   deletedAt: true,
   isDeleted: true,
+  technologies: true,
 })
   .strict()
-  .extend({ userId: z.string() });
+  .extend({ userId: z.string(), technologies: z.string() });
 
 export const offersContract = c.router({
   createOffer: {
