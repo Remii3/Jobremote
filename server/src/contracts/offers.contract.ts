@@ -9,16 +9,7 @@ import {
   ClientOfferSchema,
 } from "../schemas/offerSchemas";
 import { c } from "../utils/utils";
-
-const createOfferSchema = OfferSchema.omit({
-  _id: true,
-  createdAt: true,
-  deletedAt: true,
-  isDeleted: true,
-  technologies: true,
-})
-  .strict()
-  .extend({ userId: z.string(), technologies: z.string() });
+import { createOfferSchema } from "../schemas/offerSchemas";
 
 export const offersContract = c.router({
   createOffer: {
@@ -26,7 +17,7 @@ export const offersContract = c.router({
     path: "/offer",
     contentType: "multipart/form-data",
     responses: {
-      201: z.object({ msg: z.string(), offer: createOfferSchema }),
+      201: z.object({ msg: z.string() }),
     },
     body: createOfferSchema,
     summary: "Create a new offer",

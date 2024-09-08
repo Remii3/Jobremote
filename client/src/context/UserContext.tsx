@@ -1,9 +1,8 @@
 import { client } from "@/lib/utils";
-import { PublicUserSchema } from "../../../server/src/schemas/userSchemas";
 import { createContext, useContext, useEffect, useState } from "react";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { PublicUserSchema } from "@/schemas/userSchemas";
 type UserTypes = z.infer<typeof PublicUserSchema>;
 interface UserContextTypes {
   user: UserTypes | null;

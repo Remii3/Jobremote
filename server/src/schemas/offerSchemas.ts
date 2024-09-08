@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import { z } from "zod";
 export const allowedCurrencies = ["USD", "EUR"] as const;
 
@@ -7,7 +6,7 @@ export const CurrencySchema = z.enum(allowedCurrencies, {
 });
 
 export const OfferSchema = z.object({
-  _id: z.instanceof(mongoose.Types.ObjectId),
+  _id: z.any(),
   title: z.string().min(2),
   content: z.string().min(2),
   experience: z.string(),
@@ -88,3 +87,12 @@ export const ContractTypeOfferSchema = z.object({
   code: z.string(),
   createdAt: z.coerce.date(),
 });
+export const createOfferSchema = OfferSchema.omit({
+  _id: true,
+  createdAt: true,
+  deletedAt: true,
+  isDeleted: true,
+  technologies: true,
+})
+  .strict()
+  .extend({ userId: z.string(), technologies: z.string() });

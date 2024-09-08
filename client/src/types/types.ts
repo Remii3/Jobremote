@@ -1,6 +1,4 @@
-import { ClientInferResponseBody } from "@ts-rest/core";
-import { mainContract } from "../../../server/src/contracts/_app";
-import { OfferSortOptionsSchema } from "../../../server/src/schemas/offerSchemas";
+import { OfferSortOptionsSchema } from "@/schemas/offerSchemas";
 import { z } from "zod";
 
 export type AllowedCurrenciesType = "USD" | "EUR";
@@ -30,16 +28,6 @@ export type OfferFiltersType = {
   technologies: string[];
   minSalary: number;
 };
-
-export type GetOfferType = ClientInferResponseBody<
-  typeof mainContract.offers.getOffer,
-  200
->["offer"];
-
-export type NewOfferType = ClientInferResponseBody<
-  typeof mainContract.offers.createOffer,
-  201
->["offer"];
 
 // Filters
 

@@ -11,7 +11,6 @@ import { Separator } from "@/components/ui/separator";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { RegisterUserSchemaRefined } from "../../../../server/src/schemas/userSchemas";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import Link from "next/link";
@@ -20,6 +19,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { client } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { RegisterUserSchemaRefined } from "@/schemas/userSchemas";
 
 export default function RegisterPage() {
   const router = useRouter();

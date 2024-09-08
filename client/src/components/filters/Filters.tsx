@@ -16,17 +16,17 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { OfferSortOptionsSchema } from "../../../../server/src/schemas/offerSchemas";
 import { Search, Settings2 } from "lucide-react";
 import { Badge, badgeVariants } from "../ui/badge";
 import { FormEvent, useState } from "react";
 import { Slider } from "../ui/slider";
 import { useCurrency } from "@/context/CurrencyContext";
-import { checkIsFilterChanged, client } from "@/lib/utils";
+import { checkIsFilterChanged } from "@/lib/utils";
 import Technologies from "./parts/Technologies";
 import EmploymentType from "./parts/EmploymentType";
 import Localizations from "./parts/Localizations";
 import Experience from "./parts/Experience";
+import { OfferSortOptionsSchema } from "@/schemas/offerSchemas";
 
 interface FiltersPropsType {
   filters: Required<OfferFiltersType>;

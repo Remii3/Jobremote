@@ -12,7 +12,6 @@ import {
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { LoginUserSchema } from "../../../../server/src/schemas/userSchemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { client } from "@/lib/utils";
@@ -22,6 +21,7 @@ import { useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/context/UserContext";
+import { LoginUserSchema } from "@/schemas/userSchemas";
 
 export default function LoginPage() {
   const router = useRouter();

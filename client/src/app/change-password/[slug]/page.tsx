@@ -4,7 +4,6 @@ import { client } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { ChangeUserPasswordSchemaRefined } from "../../../../../server/src/schemas/userSchemas";
 import { Separator } from "@/components/ui/separator";
 import {
   Form,
@@ -20,6 +19,7 @@ import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useState } from "react";
+import { ChangeUserPasswordSchemaRefined } from "@/schemas/userSchemas";
 
 interface ChangePasswordPageProps {
   params: { slug: string };

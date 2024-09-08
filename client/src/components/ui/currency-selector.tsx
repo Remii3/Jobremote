@@ -1,6 +1,5 @@
 "use client";
-import { CurrencyTypes } from "@/types/types";
-import { allowedCurrencies } from "../../../../server/src/schemas/offerSchemas";
+import { AllowedCurrenciesType } from "@/types/types";
 import { Badge } from "./badge";
 import {
   DropdownMenu,
@@ -10,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "./dropdown-menu";
 import { useCurrency } from "@/context/CurrencyContext";
+import { allowedCurrencies } from "@/data/constant";
 
 export default function CurrencySelector() {
   const { currency, changeCurrency } = useCurrency();
@@ -25,7 +25,7 @@ export default function CurrencySelector() {
         <DropdownMenuRadioGroup
           value={currency}
           onValueChange={(newCurrency) =>
-            changeCurrency(newCurrency as CurrencyTypes)
+            changeCurrency(newCurrency as AllowedCurrenciesType)
           }
         >
           {allowedCurrencies.map((currency) => (

@@ -35,7 +35,6 @@ export const offersRouter = tsServer.router(offersContract, {
         userId,
         companyName,
       } = data;
-
       try {
         const utapi = new UTApi();
         let uploadedImg;
@@ -46,14 +45,11 @@ export const offersRouter = tsServer.router(offersContract, {
             new File([logo.buffer], logo.originalname),
             { metadata }
           );
-
           if (uploadResponse.error) {
             console.log("error", uploadResponse.error);
           }
-
           uploadedImg = uploadResponse.data;
         }
-
         const offerId = new mongoose.Types.ObjectId();
         const offer = await OfferModel.create({
           _id: offerId,
@@ -70,17 +66,14 @@ export const offersRouter = tsServer.router(offersContract, {
           logo: uploadedImg?.url,
           companyName,
         });
-
         await User.findByIdAndUpdate(
           { _id: userId },
           { $push: { createdOffers: offer._id } }
         );
-
         return {
           status: 201,
           body: {
             msg: "Your new offer is successfuly posted.",
-            offer: { ...offer, technologies: technologies, userId },
           },
         };
       } catch (err) {
@@ -99,39 +92,33 @@ export const offersRouter = tsServer.router(offersContract, {
     const skip = (page - 1) * limit;
     try {
       const filters: any = {};
-
       if (
         query.filters?.employmentType &&
         query.filters.employmentType.length > 0
       ) {
         filters.employmentType = { $in: query.filters.employmentType };
       }
-
       if (
         query.filters?.localization &&
         query.filters.localization.length > 0
       ) {
         filters.localization = { $in: query.filters.localization };
       }
-
       if (query.filters?.experience && query.filters.experience.length > 0) {
         filters.experience = { $in: query.filters.experience };
       }
-
       if (
         query.filters?.technologies &&
         query.filters.technologies.length > 0
       ) {
         filters.technologies = { $in: query.filters.technologies };
       }
-
       if (query.filters?.keyword) {
         filters.$or = [
           { title: { $regex: query.filters.keyword, $options: "i" } },
           { content: { $regex: query.filters.keyword, $options: "i" } },
         ];
       }
-
       if (query.filters?.minSalary) {
         filters.minSalary = { $gte: query.filters.minSalary };
       }
@@ -151,7 +138,6 @@ export const offersRouter = tsServer.router(offersContract, {
           sortValue = { createdAt: -1 };
           break;
       }
-
       const [fetchedOffers, total]: [fetchedOffers: OfferType[], number] =
         await Promise.all([
           OfferModel.find(filters)
@@ -161,7 +147,6 @@ export const offersRouter = tsServer.router(offersContract, {
             .lean(),
           OfferModel.countDocuments(filters),
         ]);
-
       if (!fetchedOffers.length) {
         return {
           status: 200,
@@ -217,7 +202,6 @@ export const offersRouter = tsServer.router(offersContract, {
       ...offer,
       _id: offer._id.toString(),
     }));
-
     return {
       status: 200,
       body: {
@@ -229,7 +213,6 @@ export const offersRouter = tsServer.router(offersContract, {
   getOffer: async ({ query }) => {
     try {
       const offer = await OfferModel.findById(query.id).lean();
-
       if (!offer) {
         return {
           status: 404,
@@ -275,7 +258,6 @@ export const offersRouter = tsServer.router(offersContract, {
   },
   deleteOffer: async ({ body }) => {
     const { offerId } = body;
-
     const offer = await OfferModel.findByIdAndUpdate(
       { _id: offerId },
       { isDeleted: true, deletedAt: new Date() }
@@ -303,10 +285,8 @@ export const offersRouter = tsServer.router(offersContract, {
     middleware: [upload.array("cv")],
     handler: async ({ body, req }) => {
       const { description, email, name, offerId } = body;
-
       const objectOfferId = new mongoose.Types.ObjectId(`${offerId}`);
       const offerData = await OfferModel.findById(objectOfferId, { title: 1 });
-
       if (!offerData) {
         return {
           status: 404,
@@ -315,7 +295,6 @@ export const offersRouter = tsServer.router(offersContract, {
           },
         };
       }
-
       const offerCreator = await User.findOne(
         {
           createdOffers: {
@@ -324,7 +303,6 @@ export const offersRouter = tsServer.router(offersContract, {
         },
         { email: 1 }
       );
-
       if (!offerCreator) {
         return {
           status: 404,
@@ -333,7 +311,6 @@ export const offersRouter = tsServer.router(offersContract, {
           },
         };
       }
-
       const transporter = createTransport({
         service: "gmail",
         secure: false,
@@ -342,7 +319,6 @@ export const offersRouter = tsServer.router(offersContract, {
           pass: process.env.EMAIL_PASS,
         },
       });
-
       const mailOptions = {
         from: email,
         to: process.env.EMAIL_USER,
@@ -359,9 +335,7 @@ export const offersRouter = tsServer.router(offersContract, {
           },
         ],
       };
-
       await transporter.sendMail(mailOptions);
-
       return {
         status: 200,
         body: {
@@ -376,7 +350,6 @@ export const offersRouter = tsServer.router(offersContract, {
         code: 0,
         createdAt: 0,
       });
-
       if (!technologies.length) {
         return {
           status: 200,
@@ -408,7 +381,6 @@ export const offersRouter = tsServer.router(offersContract, {
         code: 0,
         createdAt: 0,
       });
-
       if (!employmentTypes.length) {
         return {
           status: 200,
@@ -440,7 +412,6 @@ export const offersRouter = tsServer.router(offersContract, {
         code: 0,
         createdAt: 0,
       });
-
       if (!localizations.length) {
         return {
           status: 200,
@@ -472,7 +443,6 @@ export const offersRouter = tsServer.router(offersContract, {
         code: 0,
         createdAt: 0,
       });
-
       if (!experiences.length) {
         return {
           status: 200,
@@ -504,7 +474,6 @@ export const offersRouter = tsServer.router(offersContract, {
         code: 0,
         createdAt: 0,
       });
-
       if (!contractTypes.length) {
         return {
           status: 200,
