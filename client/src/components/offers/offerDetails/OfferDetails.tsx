@@ -61,14 +61,14 @@ const OfferDetails = ({
                   <DialogDescription className="sr-only">
                     {data.body.offer.content}
                   </DialogDescription>
-                  <OfferDetailsContent
-                    offer={{
-                      ...data.body.offer,
-                      _id: data.body.offer._id.toString(),
-                    }}
-                    isMobile={isMobile}
-                  />
                 </DialogHeader>
+                <OfferDetailsContent
+                  offer={{
+                    ...data.body.offer,
+                    _id: data.body.offer._id.toString(),
+                  }}
+                  isMobile={isMobile}
+                />
               </DialogContent>
             )}
           </Dialog>

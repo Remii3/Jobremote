@@ -105,7 +105,7 @@ export default function OfferDetailsContent({
         onSubmit={form.handleSubmit(submitApplicationHandler)}
         encType="multipart/form-data"
       >
-        <div className="lg:p-6 p-4 bg-gradient-to-br from-indigo-500  to-violet-400 lg:rounded-md w-full space-y-4">
+        <div className="lg:p-6 p-4 bg-gradient-to-br from-indigo-500  to-violet-400  dark:from-indigo-800 dark:to-violet-700 lg:rounded-md w-full space-y-4">
           <div className="flex gap-2 justify-between flex-wrap ">
             <div className="flex gap-4">
               {offer.logo ? (
@@ -131,7 +131,7 @@ export default function OfferDetailsContent({
                 </p>
               </div>
             </div>
-            <p className="p-3 bg-violet-600/50 font-medium text-lg text-white flex items-center rounded-md lg:rounded-sm">
+            <p className="p-3 bg-violet-600/50 dark:bg-violet-800/50 font-medium text-lg text-white flex items-center rounded-md lg:rounded-sm">
               <Wallet className="h-6 w-6 mr-2" />
               <span>{formatCurrency(offer.minSalary, currency)}</span>
               <span className="px-1">-</span>
@@ -139,7 +139,7 @@ export default function OfferDetailsContent({
             </p>
             {isMobile && (
               <div className="flex items-center justify-end absolute top-2 right-2">
-                <DialogPrimitive.Close className="bg-white rounded-md opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+                <DialogPrimitive.Close className="bg-white rounded-md opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground text-[hsl(224,71.4%,4.1%)]">
                   <X className="h-6 w-6" />
                   <span className="sr-only">Close</span>
                 </DialogPrimitive.Close>
@@ -148,7 +148,7 @@ export default function OfferDetailsContent({
           </div>
         </div>
         <div className="px-4 lg:px-0 grid gap-4 grid-rows-2 grid-cols-2 sm:grid-rows-1 sm:grid-cols-4 lg:grid-rows-2 lg:grid-cols-2 xl:grid-rows-1 xl:grid-cols-4">
-          <div className="flex bg-green-50 rounded-md p-3">
+          <div className="flex bg-green-50 dark:bg-green-700/50 rounded-md p-3">
             <FileText className="h-full w-10 text-teal-400/90 mr-2" />
             <p className="flex flex-col">
               <span className="font-medium text-teal-400/90 text-sm">
@@ -157,7 +157,7 @@ export default function OfferDetailsContent({
               {offer.contractType}
             </p>
           </div>
-          <div className="flex bg-sky-50 p-3 rounded-md">
+          <div className="flex bg-sky-50 dark:bg-sky-700/50 p-3 rounded-md">
             <MapPin className="h-full w-10 mr-2 text-sky-400/90" />
             <p className="flex flex-col">
               <span className="font-medium text-sky-400/90 text-sm">
@@ -166,7 +166,7 @@ export default function OfferDetailsContent({
               {offer.localization}
             </p>
           </div>
-          <div className="flex bg-indigo-50 p-3 rounded-md">
+          <div className="flex bg-indigo-50 dark:bg-indigo-700/50 p-3 rounded-md">
             <ArrowBigUpDash className="h-12 w-10 mr-2 text-indigo-400/90" />
             <p className="flex flex-col">
               <span className="text-indigo-400/90 font-medium text-sm">
@@ -175,7 +175,7 @@ export default function OfferDetailsContent({
               {offer.experience}
             </p>
           </div>
-          <div className="flex bg-amber-50 rounded-md p-3">
+          <div className="flex bg-amber-50 dark:bg-amber-700/50 rounded-md p-3">
             <Gauge className="h-full w-10 mr-2 text-amber-400/90" />
             <p className="flex flex-col">
               <span className="font-medium text-amber-400/90 text-sm">
@@ -307,7 +307,7 @@ export default function OfferDetailsContent({
           </div>
         </div>
 
-        <div className="sticky bottom-0 right-0 bg-background flex justify-between px-4 lg:px-0 py-3">
+        <div className="sticky bottom-0 right-0 bg-background flex justify-between px-4 lg:px-0 py-3 h-[72px]">
           <div>
             <div className="flex font-medium text-green-500">
               <span>{formatCurrency(offer.minSalary, currency)}</span>

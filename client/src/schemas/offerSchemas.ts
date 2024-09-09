@@ -18,6 +18,7 @@ export const offerSchema = z.object({
   logo: z.array(z.instanceof(File)).nullable(),
   companyName: z.string().min(1),
 });
+
 export const OfferSortOptionsSchema = z.enum([
   "salary_highest",
   "salary_lowest",

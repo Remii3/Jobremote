@@ -3,7 +3,6 @@ import { debounce } from "lodash";
 import { useEffect, useRef } from "react";
 import OfferItem from "./OfferItem";
 import { OfferFiltersType, OfferSortOptionsTypes } from "@/types/types";
-import { Loader2 } from "lucide-react";
 import { useUser } from "@/context/UserContext";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -58,7 +57,7 @@ export default function OffersList({
       )}
       {isError && <p>Error: {error.status}</p>}
       {data && data.body.offers.length > 0 && (
-        <ul className="space-y-2">
+        <ul className="space-y-3">
           {data.body.offers.map((offer) => (
             <OfferItem
               key={offer._id.toString()}

@@ -105,10 +105,10 @@ const Offers = () => {
           setSortOption={setSortOption}
         />
       </section>
-      <div className="flex flex-grow overflow-hidden">
+      <div className="flex flex-grow overflow-hidden gap-2">
         <section
           className={`lg:w-1/2 w-full 
-          overflow-y-auto px-2 pb-2`}
+          overflow-y-auto pr-2 pl-3 pb-2`}
           ref={offersListRef as React.RefObject<HTMLUListElement>}
         >
           <OffersList
@@ -121,7 +121,7 @@ const Offers = () => {
         <section
           ref={offerDetailsRef}
           className={`w-1/2 
-          overflow-y-auto px-2 lg:block hidden`}
+          overflow-y-auto pl-2 pr-3 lg:block hidden`}
         >
           {selectedOffer ? (
             <OfferDetails

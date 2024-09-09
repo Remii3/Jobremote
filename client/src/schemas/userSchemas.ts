@@ -18,6 +18,7 @@ export const UserSchema = z.object({
   resetPasswordExpires: z.number().optional(),
   createdOffers: z.array(z.string()),
 });
+
 export const RegisterUserSchema = UserSchema.pick({
   email: true,
   password: true,
@@ -26,12 +27,14 @@ export const RegisterUserSchema = UserSchema.pick({
 }).extend({
   passwordRepeat: z.string().min(6),
 });
+
 export const ChangeUserPasswordSchema = RegisterUserSchema.pick({
   password: true,
   passwordRepeat: true,
 }).extend({
   resetToken: z.string().optional(),
 });
+
 export const ChangeUserPasswordSchemaRefined =
   ChangeUserPasswordSchema.superRefine((data, ctx) => {
     if (data.password !== data.passwordRepeat) {
@@ -42,6 +45,7 @@ export const ChangeUserPasswordSchemaRefined =
       });
     }
   });
+
 export const LoginUserSchema = UserSchema.pick({
   email: true,
   password: true,
@@ -65,6 +69,7 @@ export const RegisterUserSchemaRefined = RegisterUserSchema.superRefine(
     }
   }
 );
+
 export const PublicUserSchema = UserSchema.pick({
   email: true,
   createdAt: true,

@@ -49,7 +49,7 @@ export default function OfferItem({
       <button
         type="button"
         onClick={(e) => showOfferHandler(e)}
-        className="shadow p-3 hover:shadow-md transition-shadow rounded-md flex justify-between items-center gap-2 w-full"
+        className="shadow p-3 hover:shadow-md transition-shadow rounded-md flex justify-between items-center gap-2 w-full border border-input"
       >
         {logo && (
           <div className="overflow-hidden rounded-full bg-background border border-input">
