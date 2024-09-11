@@ -11,6 +11,12 @@ import EmploymentTypeModel from "../models/EmploymentType.model";
 import LocalizationModel from "../models/Localization.model";
 import ExperienceModel from "../models/Experience.model";
 import ContractTypeModel from "../models/ContractType.model";
+import Stripe from "stripe";
+import bodyParser from "body-parser";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
+  apiVersion: "2024-06-20",
+});
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
@@ -34,46 +40,83 @@ export const offersRouter = tsServer.router(offersContract, {
         currency,
         userId,
         companyName,
+        offerPrice,
       } = data;
+
       try {
-        const utapi = new UTApi();
-        let uploadedImg;
-        if (req.files && Array.isArray(req.files) && req.files.length > 0) {
-          const logo = req.files[0];
-          const metadata = {};
-          const uploadResponse = await utapi.uploadFiles(
-            new File([logo.buffer], logo.originalname),
-            { metadata }
-          );
-          if (uploadResponse.error) {
-            console.log("error", uploadResponse.error);
-          }
-          uploadedImg = uploadResponse.data;
-        }
-        const offerId = new mongoose.Types.ObjectId();
-        const offer = await OfferModel.create({
-          _id: offerId,
-          title,
-          content,
-          experience,
-          localization,
-          contractType,
-          employmentType,
-          maxSalary,
-          minSalary,
-          technologies,
-          currency,
-          logo: uploadedImg?.url,
-          companyName,
+        const session = await stripe.checkout.sessions.create({
+          payment_method_types: ["card"],
+          line_items: [
+            {
+              price_data: {
+                currency,
+                product_data: {
+                  name: title,
+                },
+                unit_amount: offerPrice,
+              },
+              quantity: 1,
+            },
+          ],
+          metadata: {
+            title,
+            content,
+            experience,
+            localization,
+            employmentType,
+            contractType,
+            minSalary,
+            maxSalary,
+            technologies,
+            currency,
+            companyName,
+            userId,
+          },
+          mode: "payment",
+          success_url: `${process.env.CLIENT_URL}/hire-remotely/success?session_id={CHECKOUT_SESSION_ID}`,
+          cancel_url: `${process.env.CLIENT_URL}/hire-remotely/cancel`,
         });
-        await User.findByIdAndUpdate(
-          { _id: userId },
-          { $push: { createdOffers: offer._id } }
-        );
+        // const utapi = new UTApi();
+        // let uploadedImg;
+
+        // if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+        //   const logo = req.files[0];
+        //   const metadata = {};
+        //   const uploadResponse = await utapi.uploadFiles(
+        //     new File([logo.buffer], logo.originalname),
+        //     { metadata }
+        //   );
+        //   if (uploadResponse.error) {
+        //     console.log("error", uploadResponse.error);
+        //   }
+        //   uploadedImg = uploadResponse.data;
+        // }
+
+        // const offerId = new mongoose.Types.ObjectId();
+        // const offer = await OfferModel.create({
+        //   _id: offerId,
+        //   title,
+        //   content,
+        //   experience,
+        //   localization,
+        //   contractType,
+        //   employmentType,
+        //   maxSalary,
+        //   minSalary,
+        //   technologies,
+        //   currency,
+        //   logo: uploadedImg?.url,
+        //   companyName,
+        // });
+        // await User.findByIdAndUpdate(
+        //   { _id: userId },
+        //   { $push: { createdOffers: offer._id } }
+        // );
         return {
           status: 201,
           body: {
             msg: "Your new offer is successfuly posted.",
+            sessionId: session.id,
           },
         };
       } catch (err) {
@@ -498,5 +541,87 @@ export const offersRouter = tsServer.router(offersContract, {
         },
       };
     }
+  },
+  checkoutSession: {
+    middleware: [upload.array("logo")],
+    handler: async ({ body }) => {
+      const { price, title, currency } = body;
+
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        line_items: [
+          {
+            price_data: {
+              currency,
+              product_data: {
+                name: title,
+              },
+              unit_amount: price,
+            },
+            quantity: 1,
+          },
+        ],
+        metadata: {},
+        mode: "payment",
+        success_url: `${process.env.CLIENT_URL}/hire-remotely/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${process.env.CLIENT_URL}/hire-remotely/cancel`,
+      });
+      return {
+        status: 200,
+        body: {
+          sessionId: session.id,
+        },
+      };
+    },
+  },
+  webhook: {
+    middleware: [bodyParser.raw({ type: "application/json" })],
+    handler: async ({ req, res, body }) => {
+      const sig = req.headers["stripe-signature"];
+
+      if (!sig || typeof sig !== "string") {
+        console.error("Stripe signature is missing or invalid.");
+        return {
+          status: 400,
+          body: {
+            msg: "Invalid or missing Stripe signature.",
+          },
+        };
+      }
+
+      let event;
+
+      try {
+        event = stripe.webhooks.constructEvent(
+          body,
+          sig,
+          process.env.STRIPE_WEBHOOK_SECRET || ""
+        );
+      } catch (err) {
+        console.error(
+          `Webhook signature verification failed.`,
+          (err as Error).message
+        );
+        return {
+          status: 400,
+          body: {
+            msg: "Webhook signature verification failed.",
+          },
+        };
+      }
+
+      if (event.type === "checkout.session.completed") {
+        const session = event.data.object;
+
+        console.log("here");
+      }
+
+      return {
+        status: 200,
+        body: {
+          msg: "Webhook received",
+        },
+      };
+    },
   },
 });

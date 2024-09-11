@@ -14,21 +14,19 @@ import {
   TableRow,
 } from "../ui/table";
 import { Separator } from "../ui/separator";
-import { formSchemaTypes } from "@/hooks/useEditOffer";
 import { z } from "zod";
 import { useQueryClient } from "@ts-rest/react-query/tanstack";
+import { offerSchema } from "@/schemas/offerSchemas";
 
 export default function YourOffers() {
   const { user, fetchUserData } = useUser();
   const [editOfferData, setEditOfferData] = useState<OfferType | null>(null);
   const queryClient = useQueryClient();
 
-  if (!user) return null;
-
-  const { data, isLoading, refetch } = client.offers.getUserOffers.useQuery(
-    ["clientOffers", user.createdOffers],
+  const { data, isLoading } = client.offers.getUserOffers.useQuery(
+    ["clientOffers", user?.createdOffers],
     {
-      query: { ids: user.createdOffers },
+      query: { ids: user?.createdOffers },
     },
     {
       refetchOnReconnect: false,
@@ -55,7 +53,7 @@ export default function YourOffers() {
     deleteOffer({ body: { offerId } });
   }
 
-  function handleUpdateOffer(values: z.infer<typeof formSchemaTypes>) {
+  function handleUpdateOffer(values: z.infer<typeof offerSchema>) {
     if (!editOfferData) return;
     const cleanValues = cleanEmptyData(values);
 

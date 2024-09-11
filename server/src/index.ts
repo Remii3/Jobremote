@@ -13,6 +13,7 @@ import OfferModel from "./models/Offer.model";
 import { schedule } from "node-cron";
 import { createRouteHandler } from "uploadthing/express";
 import { uploadRouter } from "./utils/uploadthing";
+
 const app: Express = express();
 
 app.use(
@@ -21,8 +22,14 @@ app.use(
     credentials: true,
   })
 );
+
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+app.use((req, res, next) => {
+  if (req.path === "/webhook") {
+    return next();
+  }
+  bodyParser.json()(req, res, next);
+});
 app.use(cookieParser());
 createExpressEndpoints(mainContract, mainRouter, app);
 

@@ -17,7 +17,7 @@ export const offersContract = c.router({
     path: "/offer",
     contentType: "multipart/form-data",
     responses: {
-      201: z.object({ msg: z.string() }),
+      201: z.object({ msg: z.string(), sessionId: z.string() }),
     },
     body: createOfferSchema,
     summary: "Create a new offer",
@@ -200,6 +200,40 @@ export const offersContract = c.router({
         contractTypes: z.array(
           ContractTypeOfferSchema.omit({ code: true, createdAt: true })
         ),
+        msg: z.string(),
+      }),
+      500: z.object({
+        msg: z.string(),
+      }),
+    },
+  },
+  checkoutSession: {
+    method: "POST",
+    path: `/create-checkout-session`,
+    body: z.object({
+      title: z.string(),
+      price: z.number(),
+      currency: z.string(),
+    }),
+    responses: {
+      200: z.object({
+        sessionId: z.string(),
+      }),
+      500: z.object({
+        msg: z.string(),
+      }),
+    },
+  },
+  webhook: {
+    method: "POST",
+    path: `/webhook`,
+    contentType: "application/json",
+    body: z.any(),
+    responses: {
+      200: z.object({
+        msg: z.string(),
+      }),
+      400: z.object({
         msg: z.string(),
       }),
       500: z.object({

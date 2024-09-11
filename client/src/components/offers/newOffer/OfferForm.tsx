@@ -48,6 +48,8 @@ import { useUser } from "@/context/UserContext";
 import { useQueryClient } from "@ts-rest/react-query/tanstack";
 import { offerSchema } from "@/schemas/offerSchemas";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { loadStripe } from "@stripe/stripe-js";
 
 const dropzone = {
   accept: {
@@ -57,10 +59,27 @@ const dropzone = {
   maxFiles: 1,
   maxSize: 4 * 1024 * 10024,
 } satisfies DropzoneOptions;
-
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY || ""
+);
 const OfferForm = ({ handleAddAnother }: { handleAddAnother: () => void }) => {
   const queryClient = useQueryClient();
   const { user, fetchUserData } = useUser();
+  const router = useRouter();
+  const { mutate: test } = client.offers.checkoutSession.useMutation({
+    onSuccess: async (param) => {
+      console.log({ param });
+      const stripe = await stripePromise;
+      if (!stripe) return;
+      const { error } = await stripe.redirectToCheckout({
+        sessionId: param.body.sessionId,
+      });
+
+      if (error) {
+        console.error("Stripe error:", error);
+      }
+    },
+  });
 
   const { avLocalizations } = useGetAvailableLocalizations();
   const { avTechnologies } = useGetAvailableTechnologies();
@@ -449,6 +468,15 @@ const OfferForm = ({ handleAddAnother }: { handleAddAnother: () => void }) => {
         <div className="flex mt-4 gap-4">
           <Button type="submit" variant={"default"} disabled={isLoading}>
             Post new offer
+          </Button>
+          <Button
+            className={buttonVariants({ variant: "outline" })}
+            type="button"
+            onClick={() =>
+              test({ body: { title: "test", currency: "USD", price: 125 } })
+            }
+          >
+            Pay
           </Button>
           <Link href={"/"} className={buttonVariants({ variant: "outline" })}>
             Go back

@@ -5,7 +5,6 @@ import Link from "next/link";
 
 import CurrencySelector from "../ui/currency-selector";
 import ThemeSelector from "../ui/theme-selector";
-import { useUser } from "@/context/UserContext";
 
 const Header = () => {
   return (

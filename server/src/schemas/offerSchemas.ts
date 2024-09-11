@@ -95,4 +95,8 @@ export const createOfferSchema = OfferSchema.omit({
   technologies: true,
 })
   .strict()
-  .extend({ userId: z.string(), technologies: z.string() });
+  .extend({
+    userId: z.string(),
+    technologies: z.string(),
+    offerPrice: z.number(),
+  });
