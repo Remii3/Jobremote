@@ -1,7 +1,7 @@
 import { useUser } from "@/context/UserContext";
 import { cleanEmptyData, client } from "@/lib/utils";
 import { OfferType } from "@/types/types";
-import { SquarePen, Trash2 } from "lucide-react";
+import { SquarePen, Trash2, Wallet } from "lucide-react";
 import React, { useState } from "react";
 import { Button } from "../ui/button";
 import EditOffer from "./EditOffer";
@@ -17,7 +17,12 @@ import { Separator } from "../ui/separator";
 import { z } from "zod";
 import { useQueryClient } from "@ts-rest/react-query/tanstack";
 import { offerSchema } from "@/schemas/offerSchemas";
+import { Badge } from "../ui/badge";
+import { loadStripe } from "@stripe/stripe-js";
 
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY || ""
+);
 export default function YourOffers() {
   const { user, fetchUserData } = useUser();
   const [editOfferData, setEditOfferData] = useState<OfferType | null>(null);
@@ -34,7 +39,25 @@ export default function YourOffers() {
       refetchInterval: false,
     }
   );
+  const {
+    mutate: payForOffer,
+    isLoading: payForOfferIsLoading,
+    error: payForOfferError,
+  } = client.offers.payForOffer.useMutation({
+    onSuccess: async (param) => {
+      fetchUserData();
+      const stripe = await stripePromise;
+      if (!stripe) return;
+      const { error } = await stripe.redirectToCheckout({
+        sessionId: param.body.sessionId,
+      });
 
+      if (error) {
+        console.error("Stripe error:", error);
+      }
+      queryClient.invalidateQueries(["offersList"]);
+    },
+  });
   const { mutate: updateOffer } = client.offers.updateOffer.useMutation({
     onSuccess: () => {
       queryClient.invalidateQueries(["clientOffers"]);
@@ -88,6 +111,7 @@ export default function YourOffers() {
                     <TableHead className="min-w-40">Title</TableHead>
                     <TableHead className="min-w-[115px]">Min salary</TableHead>
                     <TableHead className="min-w-[115px]">Created at</TableHead>
+                    <TableHead className="min-w-[115px]">Status</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -99,6 +123,13 @@ export default function YourOffers() {
                         <span>{offer.minSalary}</span>
                       </TableCell>
                       <TableCell>{offer.createdAt.slice(0, 10)}</TableCell>
+                      <TableCell>
+                        {offer.isPaid ? (
+                          <Badge>Paid</Badge>
+                        ) : (
+                          <Badge variant={"outline"}>Not paid</Badge>
+                        )}
+                      </TableCell>
                       <TableCell className="flex gap-2">
                         <Button
                           onClick={() => {
@@ -108,6 +139,22 @@ export default function YourOffers() {
                           size={"icon"}
                         >
                           <SquarePen className="h-5 w-5" />
+                        </Button>
+                        <Button
+                          variant={"outline"}
+                          size={"icon"}
+                          disabled={offer.isPaid || payForOfferIsLoading}
+                          onClick={() =>
+                            payForOffer({
+                              body: {
+                                offerId: offer._id,
+                                title: offer.title,
+                                currency: offer.currency,
+                              },
+                            })
+                          }
+                        >
+                          <Wallet className="h-5 w-5" />
                         </Button>
                         <Button
                           variant={"outline"}

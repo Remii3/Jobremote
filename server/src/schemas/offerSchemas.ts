@@ -22,6 +22,7 @@ export const OfferSchema = z.object({
   deletedAt: z.date().nullish(),
   logo: z.any(),
   companyName: z.string(),
+  isPaid: z.boolean(),
 });
 
 export const ClientOfferSchema = OfferSchema.omit({
@@ -93,10 +94,10 @@ export const createOfferSchema = OfferSchema.omit({
   deletedAt: true,
   isDeleted: true,
   technologies: true,
+  isPaid: true,
 })
   .strict()
   .extend({
     userId: z.string(),
     technologies: z.string(),
-    offerPrice: z.number(),
   });

@@ -40,10 +40,54 @@ export const offersRouter = tsServer.router(offersContract, {
         currency,
         userId,
         companyName,
-        offerPrice,
       } = data;
-
+      const offerPrice = 1000;
       try {
+        const utapi = new UTApi();
+        let uploadedImg;
+        console.log("first  log");
+        if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+          const logo = req.files[0];
+          const metadata = {};
+          const uploadResponse = await utapi.uploadFiles(
+            new File([logo.buffer], logo.originalname),
+            { metadata }
+          );
+          if (uploadResponse.error) {
+            console.error("error", uploadResponse.error);
+            return {
+              status: 500,
+              body: {
+                msg: "We failed to add your new offer.",
+              },
+            };
+          }
+          uploadedImg = uploadResponse.data;
+        }
+
+        const offerId = new mongoose.Types.ObjectId();
+        const offer = await OfferModel.create({
+          _id: offerId,
+          title,
+          content,
+          experience,
+          localization,
+          contractType,
+          employmentType,
+          maxSalary,
+          minSalary,
+          technologies,
+          currency,
+          logo: uploadedImg?.url,
+          companyName,
+          isPaid: false,
+        });
+
+        await User.findByIdAndUpdate(
+          { _id: userId },
+          { $push: { createdOffers: offer._id } }
+        );
+
         const session = await stripe.checkout.sessions.create({
           payment_method_types: ["card"],
           line_items: [
@@ -59,59 +103,13 @@ export const offersRouter = tsServer.router(offersContract, {
             },
           ],
           metadata: {
-            title,
-            content,
-            experience,
-            localization,
-            employmentType,
-            contractType,
-            minSalary,
-            maxSalary,
-            technologies,
-            currency,
-            companyName,
-            userId,
+            offerId: offerId.toString(),
           },
           mode: "payment",
           success_url: `${process.env.CLIENT_URL}/hire-remotely/success?session_id={CHECKOUT_SESSION_ID}`,
           cancel_url: `${process.env.CLIENT_URL}/hire-remotely/cancel`,
         });
-        // const utapi = new UTApi();
-        // let uploadedImg;
 
-        // if (req.files && Array.isArray(req.files) && req.files.length > 0) {
-        //   const logo = req.files[0];
-        //   const metadata = {};
-        //   const uploadResponse = await utapi.uploadFiles(
-        //     new File([logo.buffer], logo.originalname),
-        //     { metadata }
-        //   );
-        //   if (uploadResponse.error) {
-        //     console.log("error", uploadResponse.error);
-        //   }
-        //   uploadedImg = uploadResponse.data;
-        // }
-
-        // const offerId = new mongoose.Types.ObjectId();
-        // const offer = await OfferModel.create({
-        //   _id: offerId,
-        //   title,
-        //   content,
-        //   experience,
-        //   localization,
-        //   contractType,
-        //   employmentType,
-        //   maxSalary,
-        //   minSalary,
-        //   technologies,
-        //   currency,
-        //   logo: uploadedImg?.url,
-        //   companyName,
-        // });
-        // await User.findByIdAndUpdate(
-        //   { _id: userId },
-        //   { $push: { createdOffers: offer._id } }
-        // );
         return {
           status: 201,
           body: {
@@ -166,6 +164,7 @@ export const offersRouter = tsServer.router(offersContract, {
         filters.minSalary = { $gte: query.filters.minSalary };
       }
       filters.isDeleted = false;
+      filters.isPaid = true;
       let sortValue = {};
       switch (query.sortOption) {
         case "salary_highest":
@@ -542,11 +541,10 @@ export const offersRouter = tsServer.router(offersContract, {
       };
     }
   },
-  checkoutSession: {
-    middleware: [upload.array("logo")],
-    handler: async ({ body }) => {
-      const { price, title, currency } = body;
-
+  payForOffer: async ({ body }) => {
+    const { offerId, title, currency } = body;
+    const offerPrice = 1000;
+    try {
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
         line_items: [
@@ -556,12 +554,14 @@ export const offersRouter = tsServer.router(offersContract, {
               product_data: {
                 name: title,
               },
-              unit_amount: price,
+              unit_amount: offerPrice,
             },
             quantity: 1,
           },
         ],
-        metadata: {},
+        metadata: {
+          offerId: offerId.toString(),
+        },
         mode: "payment",
         success_url: `${process.env.CLIENT_URL}/hire-remotely/success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${process.env.CLIENT_URL}/hire-remotely/cancel`,
@@ -569,10 +569,19 @@ export const offersRouter = tsServer.router(offersContract, {
       return {
         status: 200,
         body: {
+          msg: "Payment session created",
           sessionId: session.id,
         },
       };
-    },
+    } catch (err) {
+      console.error(err);
+      return {
+        status: 500,
+        body: {
+          msg: "We failed to create payment session.",
+        },
+      };
+    }
   },
   webhook: {
     middleware: [bodyParser.raw({ type: "application/json" })],
@@ -613,7 +622,13 @@ export const offersRouter = tsServer.router(offersContract, {
       if (event.type === "checkout.session.completed") {
         const session = event.data.object;
 
-        console.log("here");
+        console.log("Session:", session);
+        if (session.metadata) {
+          console.log(session.metadata.offerId);
+          await OfferModel.findByIdAndUpdate(session.metadata.offerId, {
+            isPaid: true,
+          });
+        }
       }
 
       return {

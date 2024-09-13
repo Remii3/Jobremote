@@ -29,6 +29,11 @@ export type OfferFiltersType = {
   minSalary: number;
 };
 
+export type OfferFilterType = {
+  _id: string;
+  name: string;
+};
+
 // Filters
 
 export type OfferSortOptionsTypes = z.infer<typeof OfferSortOptionsSchema>;

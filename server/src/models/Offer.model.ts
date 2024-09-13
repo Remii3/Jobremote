@@ -52,6 +52,11 @@ const offerSchema = new Schema<OfferType>({
     type: String,
     required: true,
   },
+  isPaid: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
   createdAt: { type: String, default: () => new Date().toISOString() },
   isDeleted: { type: Boolean, default: false },
   deletedAt: { type: Date, default: null },

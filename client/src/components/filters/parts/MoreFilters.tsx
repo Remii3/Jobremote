@@ -7,6 +7,9 @@ import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import useGetAvailableExperiences from "@/hooks/useGetAvailableExperiences";
 import useGetAvailableContractTypes from "@/hooks/useGetAvailableContractTypes";
+import useGetAvailableLocalizations from "@/hooks/useGetAvailableLocalizations";
+import useGetAvailableEmploymentTypes from "@/hooks/useGetAvailableEmploymentTypes";
+import useGetAvailableTechnologies from "@/hooks/useGetAvailableTechnologies";
 
 interface MoreFiltersTypes {
   filters: OfferFiltersType;
@@ -21,6 +24,9 @@ const MoreFilters = ({
   const { formatCurrency, currency } = useCurrency();
   const { avExperiences } = useGetAvailableExperiences();
   const { avContractTypes } = useGetAvailableContractTypes();
+  const { avLocalizations } = useGetAvailableLocalizations();
+  const { avEmploymentTypes } = useGetAvailableEmploymentTypes();
+  const { avTechnologies } = useGetAvailableTechnologies();
   return (
     <>
       <div className="space-y-2">
@@ -44,22 +50,6 @@ const MoreFilters = ({
             min={0}
             value={[filters.minSalary ? filters.minSalary / 1000 : 0]}
           />
-          <div className="flex items-center justify-between">
-            <span>Minimum</span>
-            <div className="flex items-center gap-1 text-sm">
-              <span>{currency}</span>
-              <Input
-                type="number"
-                max={250}
-                min={0}
-                step={5}
-                className=""
-                onChange={(e) => changeSalaryHandler(Number(e.target.value))}
-                value={filters.minSalary ? filters.minSalary / 1000 : 0}
-              />
-              <span>k/year</span>
-            </div>
-          </div>
         </div>
       </div>
       <div className="space-y-2">
@@ -91,7 +81,7 @@ const MoreFilters = ({
         </div>
       </div>
       <div className="space-y-2">
-        <h2>Type of work</h2>
+        <h2>Contract types</h2>
         <Separator />
         <div className="space-y-2">
           {avContractTypes &&
@@ -99,9 +89,86 @@ const MoreFilters = ({
               return (
                 <div key={type._id} className="flex items-center">
                   <Checkbox
-                    onClick={() => changeTextHandler("typeOfWork", type.name)}
+                    onClick={() => changeTextHandler("contractType", type.name)}
                     id={type._id}
-                    checked={filters.typeOfWork?.includes(type.name)}
+                    checked={filters.contractType.includes(type.name)}
+                    className="h-5 w-5"
+                  />
+                  <Label
+                    htmlFor={type._id}
+                    className="text-base cursor-pointer pl-2"
+                  >
+                    {type.name}
+                  </Label>
+                </div>
+              );
+            })}
+        </div>
+      </div>
+      <div className="space-y-2">
+        <h2>Localizations</h2>
+        <Separator />
+        <div className="space-y-2">
+          {avLocalizations &&
+            avLocalizations.body.localizations.map((type) => {
+              return (
+                <div key={type._id} className="flex items-center">
+                  <Checkbox
+                    onClick={() => changeTextHandler("localization", type.name)}
+                    id={type._id}
+                    checked={filters.localization.includes(type.name)}
+                    className="h-5 w-5"
+                  />
+                  <Label
+                    htmlFor={type._id}
+                    className="text-base cursor-pointer pl-2"
+                  >
+                    {type.name}
+                  </Label>
+                </div>
+              );
+            })}
+        </div>
+      </div>
+      <div className="space-y-2">
+        <h2>Emploment types</h2>
+        <Separator />
+        <div className="space-y-2">
+          {avEmploymentTypes &&
+            avEmploymentTypes.body.employmentTypes.map((type) => {
+              return (
+                <div key={type._id} className="flex items-center">
+                  <Checkbox
+                    onClick={() =>
+                      changeTextHandler("employmentType", type.name)
+                    }
+                    id={type._id}
+                    checked={filters.employmentType.includes(type.name)}
+                    className="h-5 w-5"
+                  />
+                  <Label
+                    htmlFor={type._id}
+                    className="text-base cursor-pointer pl-2"
+                  >
+                    {type.name}
+                  </Label>
+                </div>
+              );
+            })}
+        </div>
+      </div>
+      <div className="space-y-2">
+        <h2>Technologies</h2>
+        <Separator />
+        <div className="space-y-2">
+          {avTechnologies &&
+            avTechnologies.body.technologies.map((type) => {
+              return (
+                <div key={type._id} className="flex items-center">
+                  <Checkbox
+                    onClick={() => changeTextHandler("technologies", type.name)}
+                    id={type._id}
+                    checked={filters.technologies.includes(type.name)}
                     className="h-5 w-5"
                   />
                   <Label
