@@ -77,19 +77,7 @@ const Nav = () => {
                         size: "lg",
                       })} w-full`}
                     >
-                      Sign in to Candidate profile
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      onClick={toggleSheet}
-                      href={"/login"}
-                      className={`${buttonVariants({
-                        variant: "outline",
-                        size: "lg",
-                      })} w-full`}
-                    >
-                      Sign in to Employer&apos;s panel
+                      Sign in to your profile
                     </Link>
                   </li>
                 </>

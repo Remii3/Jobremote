@@ -21,7 +21,7 @@ export default function AccountPage() {
   }
 
   return (
-    <div className="h-full content-start grid px-4 py-6 md:p-8 grid-cols-1 md:grid-cols-sideNav_1 md:gap-8">
+    <div className="h-full content-start grid px-4 py-6 md:p-8 grid-cols-1 md:grid-cols-sideNav_1 md:gap-8 md:grid-rows-1">
       <Select onValueChange={(e: TabsTypes) => changeTab(e)}>
         <SelectTrigger className="md:hidden mb-6">
           {currentTab.charAt(0).toUpperCase() + currentTab.slice(1)}
@@ -36,21 +36,26 @@ export default function AccountPage() {
           </SelectGroup>
         </SelectContent>
       </Select>
-      <ul className="hidden md:block md:col-span-1 space-y-3">
-        {tabs.map((tab) => (
-          <li key={tab}>
-            <Button
-              onClick={() => changeTab(tab)}
-              className="w-full"
-              size={"lg"}
-              variant={"outline"}
-              disabled={currentTab === tab}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </Button>
-          </li>
-        ))}
-      </ul>
+      <div className="hidden md:flex flex-col justify-between md:col-span-1 space-y-6">
+        <ul className="space-y-4">
+          {tabs.map((tab) => (
+            <li key={tab}>
+              <Button
+                onClick={() => changeTab(tab)}
+                className="w-full"
+                size={"lg"}
+                variant={"outline"}
+                disabled={currentTab === tab}
+              >
+                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              </Button>
+            </li>
+          ))}
+        </ul>
+        <Button variant={"destructive"} className="w-full" size={"lg"}>
+          Logout
+        </Button>
+      </div>
       <section className="md:col-span-4">
         {currentTab === "account" && <Account />}
         {currentTab === "settings" && <Settings />}

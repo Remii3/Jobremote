@@ -1,12 +1,11 @@
 import * as React from "react";
 import * as SwitchPrimitives from "@radix-ui/react-switch";
-import { Moon, Sun } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const Switch = React.forwardRef<
   React.ElementRef<typeof SwitchPrimitives.Root>,
   React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root>
->(({ className, ...props }, ref) => {
+>(({ className, children, ...props }, ref) => {
   return (
     <SwitchPrimitives.Root
       className={cn(
@@ -21,16 +20,7 @@ const Switch = React.forwardRef<
           "pointer-events-none block h-5 w-5 rounded-full bg-background rotate-0 shadow-lg ring-0 transition-all duration-200 data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0 data-[state=checked]:rotate-[35deg] relative"
         )}
       >
-        <Moon
-          className={`h-4 w-4 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2  absolute transition-[opacity] ${
-            props.checked ? "opacity-100" : "opacity-0"
-          }`}
-        />
-        <Sun
-          className={`h-4 w-4 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 absolute transition-[opacity] ${
-            props.checked ? "opacity-0" : "opacity-100"
-          }`}
-        />
+        {children}
       </SwitchPrimitives.Thumb>
     </SwitchPrimitives.Root>
   );

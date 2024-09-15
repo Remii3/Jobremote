@@ -101,7 +101,10 @@ export default function YourOffers() {
         <div>
           <div>
             <h2 className="text-3xl font-semibold">Your offers</h2>
-            <Separator className="my-2" />
+            <span className="text-muted-foreground text-sm">
+              Manage your offers
+            </span>
+            <Separator className="my-4" />
           </div>
           {!isLoading && (
             <>

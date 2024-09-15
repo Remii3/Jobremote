@@ -27,6 +27,46 @@ export const userContract = c.router({
     body: RegisterUserSchema,
     summary: "Create a user",
   },
+  updateUser: {
+    method: "PUT",
+    path: "/user-update",
+    body: UserSchema.pick({
+      name: true,
+      description: true,
+      password: true,
+    })
+      .partial()
+      .extend({ _id: z.string() }),
+    responses: {
+      200: z.object({
+        msg: z.string(),
+      }),
+      404: z.object({
+        msg: z.string(),
+      }),
+      500: z.object({
+        msg: z.string(),
+      }),
+    },
+  },
+  updateSetings: {
+    method: "PUT",
+    path: "/user/settings",
+    body: UserSchema.pick({ commercialConsent: true }).partial().extend({
+      userId: z.string(),
+    }),
+    responses: {
+      200: z.object({
+        msg: z.string(),
+      }),
+      404: z.object({
+        msg: z.string(),
+      }),
+      500: z.object({
+        msg: z.string(),
+      }),
+    },
+  },
   loginUser: {
     method: "POST",
     path: "/user/login",

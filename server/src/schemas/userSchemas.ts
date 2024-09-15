@@ -3,6 +3,8 @@ import { z } from "zod";
 export const UserSchema = z.object({
   _id: z.string(),
   email: z.string().email(),
+  name: z.string().optional(),
+  description: z.string().optional(),
   password: z.string().min(6),
   privacyPolicyConsent: z.boolean(),
   commercialConsent: z.boolean(),

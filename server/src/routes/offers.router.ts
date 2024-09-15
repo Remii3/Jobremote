@@ -361,11 +361,22 @@ export const offersRouter = tsServer.router(offersContract, {
           pass: process.env.EMAIL_PASS,
         },
       });
+
+      if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
+        return {
+          status: 404,
+          body: {
+            msg: "No file uploaded",
+          },
+        };
+      }
+
       const mailOptions = {
         from: email,
-        to: process.env.EMAIL_USER,
-        subject: `New offer application ${offerData?.title || "asd"}`,
-        text: `New application for your offer from ${name} with description: ${description}`,
+        to: offerCreator.email,
+        subject: `New offer application ${offerData.title}`,
+        text: `${name} just applied for the position you posted!
+        Few words about them: ${description}`,
         attachments: [
           {
             filename:

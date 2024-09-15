@@ -1,25 +1,38 @@
 "use client";
-import { useLayoutEffect, useState } from "react";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 import { Switch } from "./switch";
+import { Moon, Sun } from "lucide-react";
 
 export default function ThemeSelector() {
-  const [theme, setTheme] = useState<string | null>(null);
-  useLayoutEffect(() => {
-    const storedTheme = window.localStorage.getItem("theme");
-    setTheme(storedTheme);
-  }, []);
+  const { setTheme, theme, systemTheme } = useTheme();
+  const [hasMounted, setHasMounted] = useState(false);
 
-  const setDarkMode = () => {
-    const body = document.body;
-    body.classList.toggle("dark");
+  useEffect(() => setHasMounted(true), []);
 
-    if (theme && theme === "dark") {
-      window.localStorage.setItem("theme", "");
-      setTheme("");
-    } else {
-      window.localStorage.setItem("theme", "dark");
-      setTheme("dark");
-    }
+  const currentTheme = theme === "system" ? systemTheme : theme;
+
+  if (!hasMounted) return null;
+
+  const handleThemeChange = (checked: boolean) => {
+    setTheme(checked ? "dark" : "light");
   };
-  return <Switch onClick={setDarkMode} checked={theme == "dark"} />;
+
+  return (
+    <Switch
+      onCheckedChange={handleThemeChange}
+      checked={currentTheme === "dark"}
+    >
+      <Moon
+        className={`h-4 w-4 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2  absolute transition-[opacity] ${
+          theme === "dark" ? "opacity-100" : "opacity-0"
+        }`}
+      />
+      <Sun
+        className={`h-4 w-4 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 absolute transition-[opacity] ${
+          theme === "dark" ? "opacity-0" : "opacity-100"
+        }`}
+      />
+    </Switch>
+  );
 }

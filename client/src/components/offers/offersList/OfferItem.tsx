@@ -49,7 +49,7 @@ export default function OfferItem({
       <button
         type="button"
         onClick={(e) => showOfferHandler(e)}
-        className="shadow p-3 hover:shadow-md transition-shadow rounded-md flex justify-between items-center gap-2 w-full border border-input"
+        className="bg-background shadow p-3 hover:shadow-md transition-shadow rounded-md flex justify-between items-center gap-2 w-full border border-input"
       >
         {logo && (
           <div className="overflow-hidden rounded-full bg-background border border-input">
@@ -62,35 +62,44 @@ export default function OfferItem({
             />
           </div>
         )}
-        <div className="flex-grow grid grid-cols-2 gap-y-[14px] gap-x-4">
-          <h3 className="text-lg text-start col-start-1 col-end-2 row-start-1 row-end-2">
-            {title}
-          </h3>
-          <div className="col-start-2 col-end-3 text-end row-start-1 row-end-2 font-medium text-green-500">
-            {minSalary === maxSalary ? (
-              <span>{formatCurrency(minSalary, currency)}</span>
-            ) : (
-              <div>
-                <span>{formatCurrency(minSalary, currency)}</span> -{" "}
-                <span>{formatCurrency(maxSalary, currency)}</span>
-              </div>
-            )}
+        <div className="flex flex-grow flex-col justify-between sm:gap-y-3 gap-y-1">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg text-start">{title}</h3>
+            <div className="text-end font-medium text-green-500 sm:inline hidden">
+              {minSalary === maxSalary ? (
+                <span>{formatCurrency(minSalary, currency)}</span>
+              ) : (
+                <div>
+                  <span>{formatCurrency(minSalary, currency)}</span> -{" "}
+                  <span>{formatCurrency(maxSalary, currency)}</span>
+                </div>
+              )}
+            </div>
           </div>
-          <div className="col-start-1 col-span-2 row-start-2 flex flex-col gap-2 sm:flex-row sm:justify-between">
-            <div className="flex gap-2 flex-wrap items-start">
-              <Badge variant={"outline"}>{localization}</Badge>
+          <div className="flex gap-2 sm:justify-between">
+            <div className="flex gap-2 flex-wrap items-center justify-start">
+              <span className="flex sm:hidden text-xs sm:text-sm text-green-500 font-medium">
+                {minSalary === maxSalary ? (
+                  <span>{formatCurrency(minSalary, currency)}</span>
+                ) : (
+                  <div>
+                    <span>{formatCurrency(minSalary, currency)}</span> -{" "}
+                    <span>{formatCurrency(maxSalary, currency)}</span>
+                  </div>
+                )}
+              </span>
+              <Badge variant={"outline"} className="">
+                {localization}
+              </Badge>
               <Badge variant={"outline"}>{experience}</Badge>
             </div>
-            <div className="flex sm:justify-end items-start flex-wrap gap-2">
+            <div className="sm:flex sm:justify-end sm:items-start sm:flex-wrap sm:gap-2 hidden">
               {technologies &&
                 technologies.slice(0, 2).map((technology) => (
                   <Badge key={technology} variant={"outline"}>
                     {technology}
                   </Badge>
                 ))}
-              {technologies && technologies.length > 2 && (
-                <Badge variant={"outline"}>...</Badge>
-              )}
             </div>
           </div>
         </div>

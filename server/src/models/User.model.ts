@@ -7,6 +7,8 @@ export type UserType = z.infer<typeof UserSchema>;
 const userSchema = new Schema<UserType>({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
+  name: { type: String, required: true, default: "" },
+  description: { type: String, required: true, default: "" },
   privacyPolicyConsent: { type: Boolean, required: true },
   createdAt: { type: String, default: () => new Date().toISOString() },
   updatedAt: { type: String, default: () => new Date().toISOString() },

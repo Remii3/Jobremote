@@ -1,3 +1,4 @@
+"use client";
 import { client } from "@/lib/utils";
 import { createContext, useContext, useEffect, useState } from "react";
 import { z } from "zod";
