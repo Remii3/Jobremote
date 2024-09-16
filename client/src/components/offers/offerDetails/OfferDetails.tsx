@@ -11,6 +11,7 @@ import {
 import { Loader2 } from "lucide-react";
 import OfferDetailsContent from "./OfferDetailsContent";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 interface OfferDetailsProps {
   selectedOffer: string | null;
@@ -117,7 +118,17 @@ const OfferDetails = ({
   }
   return (
     <div className="h-full w-full flex items-center justify-center">
-      <span className="text-muted-foreground">Choose an offer!</span>
+      <div className="text-center">
+        <Image
+          src="/marketing_man.webp"
+          alt="No offer selected"
+          width={500}
+          height={500}
+          quality={100}
+          className="aspect-auto opacity-80"
+        />
+        <span className="text-muted-foreground">Choose an offer</span>
+      </div>
     </div>
   );
 };
