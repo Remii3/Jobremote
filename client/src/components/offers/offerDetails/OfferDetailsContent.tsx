@@ -169,7 +169,9 @@ export default function OfferDetailsContent({
                   />
                 </div>
               ) : (
-                <div className="rounded-xl h-16 w-16 object-cover aspect-square bg-slate-400"></div>
+                <div className="rounded-full overflow-hidden bg-background border border-input">
+                  <div className="h-16 w-16 bg-muted"></div>
+                </div>
               )}
               <div className="space-y-2">
                 <h2 className="text-2xl font-semibold text-white">

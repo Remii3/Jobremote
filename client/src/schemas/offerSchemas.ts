@@ -20,7 +20,7 @@ export const offerSchema = z.object({
 });
 
 export const OfferSortOptionsSchema = z.enum([
+  "latest",
   "salary_highest",
   "salary_lowest",
-  "latest",
 ]);

@@ -125,7 +125,7 @@ const OfferDetails = ({
           width={500}
           height={500}
           quality={100}
-          className="aspect-auto opacity-80"
+          className="aspect-auto"
         />
         <span className="text-muted-foreground">Choose an offer</span>
       </div>

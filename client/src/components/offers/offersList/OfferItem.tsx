@@ -1,6 +1,7 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useCurrency } from "@/context/CurrencyContext";
 import { OfferType } from "@/types/types";
 import { Mail, MailOpen } from "lucide-react";
@@ -19,6 +20,8 @@ type OfferItemTypes = Pick<
   | "technologies"
   | "logo"
   | "createdAt"
+  | "contractType"
+  | "employmentType"
 > & {
   changeCurrentOffer: (
     newId: string,
@@ -40,6 +43,8 @@ export default function OfferItem({
   logo,
   createdAt,
   isApplied,
+  contractType,
+  employmentType,
 }: OfferItemTypes) {
   const { formatCurrency } = useCurrency();
   function showOfferHandler(
@@ -56,8 +61,8 @@ export default function OfferItem({
         onClick={(e) => showOfferHandler(e)}
         className="bg-background shadow p-3 hover:shadow-md transition-shadow rounded-md flex justify-between items-center gap-2 w-full border border-input"
       >
-        {logo && (
-          <div className="overflow-hidden rounded-full bg-background border border-input">
+        {logo ? (
+          <div className="overflow-hidden rounded-full min-h-16 min-w-16 max-w-16 max-h-16 bg-background border border-input">
             <Image
               src={logo}
               alt="Company logo"
@@ -66,6 +71,10 @@ export default function OfferItem({
               className="object-scale-down object-center h-16 w-16"
             />
           </div>
+        ) : (
+          <div className="overflow-hidden rounded-full bg-background border border-input min-h-16 min-w-16 max-w-16 max-h-16">
+            <div className="h-16 w-16 bg-muted"></div>
+          </div>
         )}
         <div className="flex flex-grow flex-col justify-between sm:gap-y-3 gap-y-1">
           <div className="flex justify-between items-center">
@@ -73,9 +82,9 @@ export default function OfferItem({
               {isApplied !== null && (
                 <>
                   {isApplied ? (
-                    <MailOpen className="text-muted-foreground h-5 w-5" />
+                    <MailOpen className="text-muted-foreground h-[18px] w-[18px]" />
                   ) : (
-                    <Mail className="text-muted-foreground h-5 w-5" />
+                    <Mail className="text-muted-foreground h-[18px] w-[18px]" />
                   )}
                 </>
               )}
@@ -97,7 +106,7 @@ export default function OfferItem({
               )}
             </div>
           </div>
-          <div className="flex gap-2 sm:justify-between">
+          <div className="flex gap-2 sm:justify-between flex-wrap">
             <div className="flex gap-2 flex-wrap items-center justify-start">
               <span className="flex sm:hidden text-xs sm:text-sm text-green-500 font-medium">
                 {minSalary === maxSalary ? (
@@ -113,6 +122,12 @@ export default function OfferItem({
                 {localization}
               </Badge>
               <Badge variant={"outline"}>{experience}</Badge>
+              <Badge variant={"outline"} className="sm:inline-flex hidden">
+                {contractType}
+              </Badge>
+              <Badge variant={"outline"} className="sm:inline-flex hidden">
+                {employmentType}
+              </Badge>
             </div>
             <div className="sm:flex sm:justify-end sm:items-start sm:flex-wrap sm:gap-2 hidden">
               {technologies &&

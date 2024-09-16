@@ -415,10 +415,12 @@ export const offersRouter = tsServer.router(offersContract, {
   },
   getTechnologies: async () => {
     try {
-      const technologies = await TechnologyModel.find().select({
-        code: 0,
-        createdAt: 0,
-      });
+      const technologies = await TechnologyModel.find()
+        .select({
+          code: 0,
+          createdAt: 0,
+        })
+        .sort({ name: 1 });
       if (!technologies.length) {
         return {
           status: 200,
@@ -446,10 +448,12 @@ export const offersRouter = tsServer.router(offersContract, {
   },
   getEmploymentTypes: async () => {
     try {
-      const employmentTypes = await EmploymentTypeModel.find().select({
-        code: 0,
-        createdAt: 0,
-      });
+      const employmentTypes = await EmploymentTypeModel.find()
+        .select({
+          code: 0,
+          createdAt: 0,
+        })
+        .sort({ name: 1 });
       if (!employmentTypes.length) {
         return {
           status: 200,
@@ -477,10 +481,12 @@ export const offersRouter = tsServer.router(offersContract, {
   },
   getLocalizations: async () => {
     try {
-      const localizations = await LocalizationModel.find().select({
-        code: 0,
-        createdAt: 0,
-      });
+      const localizations = await LocalizationModel.find()
+        .select({
+          code: 0,
+          createdAt: 0,
+        })
+        .sort({ name: 1 });
       if (!localizations.length) {
         return {
           status: 200,
@@ -508,10 +514,12 @@ export const offersRouter = tsServer.router(offersContract, {
   },
   getExperiences: async () => {
     try {
-      const experiences = await ExperienceModel.find().select({
-        code: 0,
-        createdAt: 0,
-      });
+      const experiences = await ExperienceModel.find()
+        .select({
+          code: 0,
+          createdAt: 0,
+        })
+        .sort({ name: 1 });
       if (!experiences.length) {
         return {
           status: 200,
@@ -539,10 +547,12 @@ export const offersRouter = tsServer.router(offersContract, {
   },
   getContractTypes: async () => {
     try {
-      const contractTypes = await ContractTypeModel.find().select({
-        code: 0,
-        createdAt: 0,
-      });
+      const contractTypes = await ContractTypeModel.find()
+        .select({
+          code: 0,
+          createdAt: 0,
+        })
+        .sort({ name: 1 });
       if (!contractTypes.length) {
         return {
           status: 200,

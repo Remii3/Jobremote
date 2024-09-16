@@ -113,6 +113,7 @@ export default function YourOffers() {
                   <TableRow>
                     <TableHead className="min-w-40">Title</TableHead>
                     <TableHead className="min-w-[115px]">Min salary</TableHead>
+                    <TableHead className="min-w-[115px]">Max salary</TableHead>
                     <TableHead className="min-w-[115px]">Created at</TableHead>
                     <TableHead className="min-w-[115px]">Status</TableHead>
                     <TableHead>Actions</TableHead>
@@ -124,6 +125,9 @@ export default function YourOffers() {
                       <TableCell>{offer.title}</TableCell>
                       <TableCell>
                         <span>{offer.minSalary}</span>
+                      </TableCell>
+                      <TableCell>
+                        <span>{offer.maxSalary}</span>
                       </TableCell>
                       <TableCell>{offer.createdAt.slice(0, 10)}</TableCell>
                       <TableCell>
@@ -164,7 +168,7 @@ export default function YourOffers() {
                           size={"icon"}
                           onClick={() => handleDeleteOffer(offer._id)}
                         >
-                          <Trash2 className="text-red-400 h-5 w-5" />
+                          <Trash2 className="text-destructive h-5 w-5" />
                         </Button>
                       </TableCell>
                     </TableRow>

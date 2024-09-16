@@ -8,11 +8,11 @@ export default function OfferThankYou() {
     <div className="flex h-full flex-col items-center relative">
       <div className="flex flex-col relative top-40 items-center">
         <Image
-          src={"/success_award.svg"}
+          src={"/success_award.webp"}
           alt="Successfuly posted new offer icon"
           width={400}
           height={400}
-          className="rounded-3xl aspect-auto mb-6 opacity-90"
+          className="rounded-3xl aspect-auto mb-6"
         />
         <h2 className="text-2xl font-semibold mb-4">
           Your offer has been posted successfully!
