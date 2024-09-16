@@ -17,6 +17,7 @@ export type OfferType = {
   technologies: string[];
   logo?: string;
   companyName: string;
+  createdAt: string;
 };
 
 export type OfferFiltersType = {

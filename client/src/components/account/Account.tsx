@@ -154,7 +154,6 @@ export default function Account() {
                   <Input
                     {...field}
                     onChange={(data) => {
-                      console.log(data.target.value);
                       field.onChange(data);
                     }}
                   />

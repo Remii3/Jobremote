@@ -3,6 +3,7 @@
 import { Badge } from "@/components/ui/badge";
 import { useCurrency } from "@/context/CurrencyContext";
 import { OfferType } from "@/types/types";
+import { Mail, MailOpen } from "lucide-react";
 import Image from "next/image";
 import { MouseEvent } from "react";
 
@@ -17,11 +18,13 @@ type OfferItemTypes = Pick<
   | "currency"
   | "technologies"
   | "logo"
+  | "createdAt"
 > & {
   changeCurrentOffer: (
     newId: string,
     e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>
   ) => void;
+  isApplied: boolean | null;
 };
 
 export default function OfferItem({
@@ -35,15 +38,17 @@ export default function OfferItem({
   technologies,
   _id,
   logo,
+  createdAt,
+  isApplied,
 }: OfferItemTypes) {
   const { formatCurrency } = useCurrency();
-
   function showOfferHandler(
     e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>
   ) {
     changeCurrentOffer(_id, e);
   }
-
+  const isYoungerThan2Days =
+    new Date(createdAt) > new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
   return (
     <li>
       <button
@@ -64,15 +69,31 @@ export default function OfferItem({
         )}
         <div className="flex flex-grow flex-col justify-between sm:gap-y-3 gap-y-1">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg text-start">{title}</h3>
-            <div className="text-end font-medium text-green-500 sm:inline hidden">
-              {minSalary === maxSalary ? (
-                <span>{formatCurrency(minSalary, currency)}</span>
-              ) : (
-                <div>
-                  <span>{formatCurrency(minSalary, currency)}</span> -{" "}
-                  <span>{formatCurrency(maxSalary, currency)}</span>
-                </div>
+            <div className="flex items-center gap-1">
+              {isApplied !== null && (
+                <>
+                  {isApplied ? (
+                    <MailOpen className="text-muted-foreground h-5 w-5" />
+                  ) : (
+                    <Mail className="text-muted-foreground h-5 w-5" />
+                  )}
+                </>
+              )}
+              <h3 className="text-lg text-start">{title}</h3>
+            </div>
+            <div className="flex gap-2">
+              <span className="text-end font-medium text-green-500 hidden sm:inline">
+                {minSalary === maxSalary ? (
+                  <span>{formatCurrency(minSalary, currency)}</span>
+                ) : (
+                  <span>
+                    <span>{formatCurrency(minSalary, currency)}</span> -{" "}
+                    <span>{formatCurrency(maxSalary, currency)}</span>
+                  </span>
+                )}
+              </span>
+              {isYoungerThan2Days && (
+                <Badge variant={"outlinePrimary"}>New</Badge>
               )}
             </div>
           </div>

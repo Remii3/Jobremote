@@ -19,6 +19,7 @@ export const UserSchema = z.object({
   resetPasswordToken: z.string().optional(),
   resetPasswordExpires: z.number().optional(),
   createdOffers: z.array(z.string()),
+  appliedToOffers: z.array(z.string()),
 });
 
 export const PublicUserSchema = UserSchema.pick({
@@ -28,6 +29,7 @@ export const PublicUserSchema = UserSchema.pick({
   _id: true,
   commercialConsent: true,
   createdOffers: true,
+  appliedToOffers: true,
 });
 
 export const LoginUserSchema = UserSchema.pick({

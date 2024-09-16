@@ -248,6 +248,7 @@ export const usersRouter = tsServer.router(userContract, {
         createdOffers: 1,
         name: 1,
         description: 1,
+        appliedToOffers: 1,
       }).lean();
       if (!user) {
         return {

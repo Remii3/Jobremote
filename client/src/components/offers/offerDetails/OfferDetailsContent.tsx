@@ -14,6 +14,7 @@ import {
   Wallet,
   X,
   FilePlus as FileIcon,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,6 +24,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormRootError,
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -43,6 +45,7 @@ import { useUser } from "@/context/UserContext";
 interface OfferDetailsContentProps {
   offer: OfferType;
   isMobile: boolean;
+  toggleSuccessApplied: () => void;
 }
 
 const dropzone = {
@@ -84,12 +87,10 @@ const applicationSchema = z
 export default function OfferDetailsContent({
   offer,
   isMobile,
+  toggleSuccessApplied,
 }: OfferDetailsContentProps) {
-  const { user } = useUser();
+  const { user, fetchUserData } = useUser();
   const { formatCurrency, currency } = useCurrency();
-  const { mutate: applyForOffer } = client.offers.offerApply.useMutation({
-    onSuccess: () => {},
-  });
 
   const form = useForm<z.infer<typeof applicationSchema>>({
     resolver: zodResolver(applicationSchema),
@@ -101,6 +102,26 @@ export default function OfferDetailsContent({
     },
   });
 
+  const {
+    mutate: applyForOffer,
+    error,
+    isLoading,
+  } = client.offers.offerApply.useMutation({
+    onSuccess: () => {
+      fetchUserData();
+      form.reset();
+      toggleSuccessApplied();
+    },
+    onError: (error) => {
+      if (error.status === 404 || error.status === 500) {
+        form.setError("root", {
+          type: "manual",
+          message: error.body.msg,
+        });
+      }
+    },
+  });
+
   function submitApplicationHandler(values: z.infer<typeof applicationSchema>) {
     if (values.cv === null) return;
     const applyFormData = new FormData();
@@ -109,7 +130,9 @@ export default function OfferDetailsContent({
     applyFormData.append("description", values.description || "");
     applyFormData.append("offerId", offer._id);
     applyFormData.append("cv", values.cv[0]);
-
+    if (user) {
+      applyFormData.append("userId", user._id);
+    }
     applyForOffer({
       body: applyFormData,
     });
@@ -330,6 +353,7 @@ export default function OfferDetailsContent({
                   </FormItem>
                 )}
               />
+              <FormRootError />
             </div>
           </div>
         </div>
@@ -343,8 +367,26 @@ export default function OfferDetailsContent({
             </div>
             <span className="text-slate-500">{offer.companyName}</span>
           </div>
-          <Button variant={"default"} className="rounded-md">
-            Apply
+          <Button
+            variant={"default"}
+            className="relative"
+            aria-live="polite"
+            disabled={isLoading}
+          >
+            <Loader2
+              className={`absolute w-6 h-6 animate-spin transition-opacity ${
+                isLoading ? "opacity-100" : "opacity-0"
+              }`}
+              aria-hidden={isLoading ? "false" : "true"}
+            />
+            <span
+              className={`transition-opacity ${
+                isLoading ? "opacity-0" : "opacity-100"
+              }`}
+              aria-hidden={isLoading ? "true" : "false"}
+            >
+              Apply
+            </span>
           </Button>
         </div>
       </form>

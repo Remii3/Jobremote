@@ -8,6 +8,18 @@ import { findFocusableElements } from "@/lib/utils";
 import OffersList from "./offersList/OffersList";
 import { OfferFiltersType, OfferSortOptionsTypes } from "@/types/types";
 
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
+
+import { Button } from "../ui/button";
+
 const initialFilters: OfferFiltersType = {
   minSalary: 0,
   contractType: [],
@@ -25,8 +37,14 @@ const Offers = () => {
   const lastOfferRef = useRef<HTMLElement | null>(null);
   const [sortOption, setSortOption] = useState<OfferSortOptionsTypes>("latest");
   const isMobile = useIsMobile();
+  const [isSuccessApplied, setIsSuccessApplied] = useState<boolean>(false);
+
   const [filters, setFilters] =
     useState<Required<OfferFiltersType>>(initialFilters);
+
+  function toggleSuccessApplied() {
+    setIsSuccessApplied((prev) => !prev);
+  }
 
   const updateFilters = useCallback(
     (key: keyof OfferFiltersType, value: any) => {
@@ -123,19 +141,33 @@ const Offers = () => {
           className={`w-1/2 
           overflow-y-auto px-3 lg:block hidden`}
         >
-          {selectedOffer ? (
-            <OfferDetails
-              isMobile={isMobile}
-              selectedOffer={selectedOffer}
-              changeCurrentOffer={changeCurrentOffer}
-            />
-          ) : (
-            <div className="h-full w-full flex items-center justify-center">
-              <span className="text-slate-400">Choose an offer!</span>
-            </div>
-          )}
+          <OfferDetails
+            isMobile={isMobile}
+            selectedOffer={selectedOffer}
+            toggleSuccessApplied={toggleSuccessApplied}
+            changeSelectedOffer={changeCurrentOffer}
+          />
         </section>
       </div>
+      <Dialog open={isSuccessApplied} onOpenChange={toggleSuccessApplied}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              You have successfully applied for this offer!
+            </DialogTitle>
+            <DialogDescription>
+              All that&apos;s left is to wait for the employer to contact you.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant={"default"} className="mt-2 sm:mt-0 w-full">
+                Great!
+              </Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

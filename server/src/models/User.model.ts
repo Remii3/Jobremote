@@ -7,8 +7,8 @@ export type UserType = z.infer<typeof UserSchema>;
 const userSchema = new Schema<UserType>({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  name: { type: String, required: true, default: "" },
-  description: { type: String, required: true, default: "" },
+  name: { type: String, default: "" },
+  description: { type: String, default: "" },
   privacyPolicyConsent: { type: Boolean, required: true },
   createdAt: { type: String, default: () => new Date().toISOString() },
   updatedAt: { type: String, default: () => new Date().toISOString() },
@@ -20,6 +20,7 @@ const userSchema = new Schema<UserType>({
   resetPasswordToken: { type: String },
   resetPasswordExpires: { type: String },
   createdOffers: [{ type: Schema.Types.ObjectId, ref: "Offer" }],
+  appliedToOffers: [{ type: Schema.Types.ObjectId, ref: "Offer" }],
 });
 
 userSchema.methods.isLocked = function () {

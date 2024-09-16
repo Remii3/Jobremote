@@ -326,75 +326,91 @@ export const offersRouter = tsServer.router(offersContract, {
   offerApply: {
     middleware: [upload.array("cv")],
     handler: async ({ body, req }) => {
-      const { description, email, name, offerId } = body;
+      const { description, email, name, offerId, userId } = body;
       const objectOfferId = new mongoose.Types.ObjectId(`${offerId}`);
-      const offerData = await OfferModel.findById(objectOfferId, { title: 1 });
-      if (!offerData) {
-        return {
-          status: 404,
-          body: {
-            msg: "Offer not found",
-          },
-        };
-      }
-      const offerCreator = await User.findOne(
-        {
-          createdOffers: {
-            $in: [objectOfferId],
-          },
-        },
-        { email: 1 }
-      );
-      if (!offerCreator) {
-        return {
-          status: 404,
-          body: {
-            msg: "Offer creator not found",
-          },
-        };
-      }
-      const transporter = createTransport({
-        service: "gmail",
-        secure: false,
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
-        },
-      });
-
-      if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
-        return {
-          status: 404,
-          body: {
-            msg: "No file uploaded",
-          },
-        };
-      }
-
-      const mailOptions = {
-        from: email,
-        to: offerCreator.email,
-        subject: `New offer application ${offerData.title}`,
-        text: `${name} just applied for the position you posted!
-        Few words about them: ${description}`,
-        attachments: [
+      try {
+        const offerData = await OfferModel.findById(objectOfferId, {
+          title: 1,
+        });
+        if (!offerData) {
+          return {
+            status: 404,
+            body: {
+              msg: "Offer not found",
+            },
+          };
+        }
+        const offerCreator = await User.findOne(
           {
-            filename:
-              (Array.isArray(req.files) && req.files[0].originalname) ||
-              "empty field",
-            path:
-              (Array.isArray(req.files) && req.files[0].path) || "empty path",
-            contentType: "application/pdf",
+            createdOffers: {
+              $in: [objectOfferId],
+            },
           },
-        ],
-      };
-      await transporter.sendMail(mailOptions);
-      return {
-        status: 200,
-        body: {
-          msg: "Offer applied successfully",
-        },
-      };
+          { email: 1, _id: 1 }
+        );
+        if (!offerCreator) {
+          return {
+            status: 404,
+            body: {
+              msg: "Offer creator not found",
+            },
+          };
+        }
+        console.log(req.files);
+        const transporter = createTransport({
+          service: "gmail",
+          secure: false,
+          auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
+          },
+        });
+
+        if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
+          return {
+            status: 404,
+            body: {
+              msg: "No file uploaded",
+            },
+          };
+        }
+
+        const mailOptions = {
+          from: email,
+          to: process.env.EMAIL_USER, // TODO change to offerCreator.email when ready for prod
+          subject: `New offer application ${offerData.title}`,
+          text: `${name} just applied for the position you posted!
+          Here is few words they wanted to say to you:
+          ${description}`,
+          attachments: [
+            {
+              filename: `${name}_CV` || "empty field",
+              content: req.files[0].buffer || "empty buffer",
+              contentType: req.files[0].mimetype || "application/pdf",
+            },
+          ],
+        };
+        await transporter.sendMail(mailOptions);
+        if (userId) {
+          await User.findByIdAndUpdate(userId, {
+            $push: { appliedToOffers: objectOfferId },
+          });
+        }
+        return {
+          status: 200,
+          body: {
+            msg: "Offer applied successfully",
+          },
+        };
+      } catch (err) {
+        console.error(err);
+        return {
+          status: 500,
+          body: {
+            msg: "We failed to apply for the offer.",
+          },
+        };
+      }
     },
   },
   getTechnologies: async () => {

@@ -19,6 +19,7 @@ export const UserSchema = z.object({
   resetPasswordToken: z.string().optional(),
   resetPasswordExpires: z.number().optional(),
   createdOffers: z.array(z.string()),
+  appliedToOffers: z.array(z.string()),
 });
 
 export const RegisterUserSchema = UserSchema.pick({
@@ -81,4 +82,5 @@ export const PublicUserSchema = UserSchema.pick({
   createdOffers: true,
   description: true,
   name: true,
+  appliedToOffers: true,
 });

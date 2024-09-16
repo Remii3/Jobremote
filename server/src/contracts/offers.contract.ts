@@ -119,6 +119,7 @@ export const offersContract = c.router({
       description: z.string().optional(),
       offerId: z.any(),
       cv: z.any(),
+      userId: z.string().optional(),
     }),
     responses: {
       200: z.object({

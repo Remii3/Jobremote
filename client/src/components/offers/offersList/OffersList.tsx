@@ -71,6 +71,8 @@ export default function OffersList({
               currency={offer.currency}
               technologies={offer.technologies}
               logo={offer.logo}
+              createdAt={offer.createdAt}
+              isApplied={user ? user.appliedToOffers.includes(offer._id) : null}
             />
           ))}
         </ul>

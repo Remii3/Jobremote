@@ -330,26 +330,24 @@ const Filters = ({
               </Button>
             </DialogTrigger>
             <DialogContent>
-              <div className="p-4">
-                <DialogTitle>More fitlers</DialogTitle>
-                <DialogDescription className="sr-only">
-                  Options for filters
-                </DialogDescription>
-                <div className="py-4 space-y-4">
-                  <MoreFilters
-                    filters={filters}
-                    changeSalaryHandler={changeSalaryHandler}
-                    changeTextHandler={changeTextsHandler}
-                  />
-                </div>
-                <div>
-                  <Button
-                    onClick={() => setShowMoreFilters(false)}
-                    className="mt-2"
-                  >
-                    Show results
-                  </Button>
-                </div>
+              <DialogTitle>More fitlers</DialogTitle>
+              <DialogDescription className="sr-only">
+                Options for filters
+              </DialogDescription>
+              <div className="py-4 space-y-4">
+                <MoreFilters
+                  filters={filters}
+                  changeSalaryHandler={changeSalaryHandler}
+                  changeTextHandler={changeTextsHandler}
+                />
+              </div>
+              <div>
+                <Button
+                  onClick={() => setShowMoreFilters(false)}
+                  className="mt-2"
+                >
+                  Show results
+                </Button>
               </div>
             </DialogContent>
           </Dialog>
