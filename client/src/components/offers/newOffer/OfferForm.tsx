@@ -40,7 +40,7 @@ import useGetAvailableEmploymentTypes from "@/hooks/useGetAvailableEmploymentTyp
 import useGetAvailableExperiences from "@/hooks/useGetAvailableExperiences";
 import useGetAvailableContractTypes from "@/hooks/useGetAvailableContractTypes";
 import { useCurrency } from "@/context/CurrencyContext";
-import { client } from "@/lib/utils";
+import { client, cn } from "@/lib/utils";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -49,6 +49,8 @@ import { useQueryClient } from "@ts-rest/react-query/tanstack";
 import { offerSchema } from "@/schemas/offerSchemas";
 import Image from "next/image";
 import { loadStripe } from "@stripe/stripe-js";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const dropzone = {
   accept: {
@@ -61,6 +63,43 @@ const dropzone = {
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY || ""
 );
+
+const pricingOptions = [
+  {
+    name: "Basic",
+    code: "basic",
+    description: (
+      <ul>
+        <li>Basic offer</li>
+        <li>Some other option</li>
+      </ul>
+    ),
+    price: 10,
+  },
+  {
+    name: "Standard",
+    code: "standard",
+    description: (
+      <ul>
+        <li>Standard offer</li>
+        <li>Some other option</li>
+      </ul>
+    ),
+    price: 20,
+  },
+  {
+    name: "Premium",
+    code: "premium",
+    description: (
+      <ul>
+        <li>Premium offer</li>
+        <li>Some other option</li>
+      </ul>
+    ),
+    price: 30,
+  },
+];
+
 const OfferForm = () => {
   const queryClient = useQueryClient();
   const { user, fetchUserData } = useUser();
@@ -86,6 +125,7 @@ const OfferForm = () => {
       contractType: "",
       technologies: [],
       companyName: "",
+      pricing: undefined,
     },
   });
   const { mutate: createOffer, isLoading } =
@@ -112,7 +152,7 @@ const OfferForm = () => {
     }
 
     const formData = new FormData();
-
+    console.log(values);
     if (values.logo) {
       formData.append("logo", values.logo[0]);
     }
@@ -128,6 +168,7 @@ const OfferForm = () => {
     formData.append("userId", user._id);
     formData.append("technologies", JSON.stringify(values.technologies));
     formData.append("companyName", values.companyName);
+    formData.append("pricing", values.pricing);
     createOffer({
       body: formData,
     });
@@ -451,6 +492,50 @@ const OfferForm = () => {
                   ))}
                 </ul>
               )}
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="pricing"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Pricing</FormLabel>
+              <FormControl>
+                <RadioGroup
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                  className="flex gap-4"
+                >
+                  {pricingOptions.map((option) => (
+                    <FormItem key={option.name} className="relative">
+                      <FormControl>
+                        <RadioGroupItem
+                          value={option.code}
+                          className="absolute top-2 left-2"
+                        />
+                      </FormControl>
+                      <FormLabel className="cursor-pointer">
+                        <Card
+                          className={`${
+                            field.value === option.name &&
+                            "ring-2 ring-ring ring-offset-2"
+                          }`}
+                        >
+                          <CardHeader>
+                            <CardTitle>{option.name}</CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            {option.description}
+                            <div className="mt-4">{option.price} USD</div>
+                          </CardContent>
+                        </Card>
+                      </FormLabel>
+                    </FormItem>
+                  ))}
+                </RadioGroup>
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}

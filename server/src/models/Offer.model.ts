@@ -57,6 +57,11 @@ const offerSchema = new Schema<OfferType>({
     required: true,
     default: false,
   },
+  pricing: {
+    type: String,
+    enum: ["basic", "standard", "premium"],
+    required: true,
+  },
   createdAt: { type: String, default: () => new Date().toISOString() },
   isDeleted: { type: Boolean, default: false },
   deletedAt: { type: Date, default: null },

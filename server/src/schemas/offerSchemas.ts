@@ -23,6 +23,7 @@ export const OfferSchema = z.object({
   logo: z.any(),
   companyName: z.string(),
   isPaid: z.boolean(),
+  pricing: z.enum(["basic", "standard", "premium"]),
 });
 
 export const ClientOfferSchema = OfferSchema.omit({

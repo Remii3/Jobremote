@@ -13,7 +13,7 @@ import ExperienceModel from "../models/Experience.model";
 import ContractTypeModel from "../models/ContractType.model";
 import Stripe from "stripe";
 import bodyParser from "body-parser";
-
+import { priceLogic } from "../middleware/priceLogic";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
   apiVersion: "2024-06-20",
 });
@@ -23,10 +23,24 @@ const upload = multer({ storage: storage });
 
 export const offersRouter = tsServer.router(offersContract, {
   createOffer: {
-    middleware: [upload.array("logo")],
-    handler: async ({ body, req }) => {
+    middleware: [
+      upload.array("logo"),
+      (req, res, next) => priceLogic(req, res, next),
+    ],
+    handler: async ({ body, req, res }) => {
       const data = body;
+      const price = res.locals.price;
+      if (!price) {
+        return {
+          status: 404,
+          body: {
+            msg: "Invalid pricing",
+          },
+        };
+      }
+
       data.technologies = JSON.parse(data.technologies);
+
       const {
         title,
         content,
@@ -40,14 +54,15 @@ export const offersRouter = tsServer.router(offersContract, {
         currency,
         userId,
         companyName,
+        pricing,
       } = data;
-      const offerPrice = 1000;
+
       try {
         const utapi = new UTApi();
         let uploadedImg;
-        console.log("first  log");
+
         if (req.files && Array.isArray(req.files) && req.files.length > 0) {
-          const logo = req.files[0];
+          const logo = req.files[0]!;
           const metadata = {};
           const uploadResponse = await utapi.uploadFiles(
             new File([logo.buffer], logo.originalname),
@@ -81,6 +96,7 @@ export const offersRouter = tsServer.router(offersContract, {
           logo: uploadedImg?.url,
           companyName,
           isPaid: false,
+          pricing,
         });
 
         await User.findByIdAndUpdate(
@@ -97,7 +113,7 @@ export const offersRouter = tsServer.router(offersContract, {
                 product_data: {
                   name: title,
                 },
-                unit_amount: offerPrice,
+                unit_amount: price * 100,
               },
               quantity: 1,
             },
