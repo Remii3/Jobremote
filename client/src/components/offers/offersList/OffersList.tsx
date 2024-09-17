@@ -71,13 +71,17 @@ export default function OffersList({
               currency={offer.currency}
               technologies={offer.technologies}
               logo={offer.logo}
+              createdAt={offer.createdAt}
+              isApplied={user ? user.appliedToOffers.includes(offer._id) : null}
+              contractType={offer.contractType}
+              employmentType={offer.employmentType}
             />
           ))}
         </ul>
       )}
       {data && data.body.offers.length === 0 && (
         <div className="text-center">
-          <span>No new offers yet!</span>
+          <span className="text-muted-foreground">No offers</span>
         </div>
       )}
     </>

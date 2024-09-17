@@ -17,6 +17,7 @@ export type OfferType = {
   technologies: string[];
   logo?: string;
   companyName: string;
+  createdAt: string;
 };
 
 export type OfferFiltersType = {
@@ -27,6 +28,11 @@ export type OfferFiltersType = {
   employmentType: string[];
   technologies: string[];
   minSalary: number;
+};
+
+export type OfferFilterType = {
+  _id: string;
+  name: string;
 };
 
 // Filters

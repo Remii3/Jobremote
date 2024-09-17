@@ -3,6 +3,8 @@ import { z } from "zod";
 export const UserSchema = z.object({
   _id: z.string(),
   email: z.string().email(),
+  name: z.string().optional(),
+  description: z.string().optional(),
   password: z.string().min(6),
   privacyPolicyConsent: z.boolean(),
   commercialConsent: z.boolean(),
@@ -17,6 +19,7 @@ export const UserSchema = z.object({
   resetPasswordToken: z.string().optional(),
   resetPasswordExpires: z.number().optional(),
   createdOffers: z.array(z.string()),
+  appliedToOffers: z.array(z.string()),
 });
 
 export const PublicUserSchema = UserSchema.pick({
@@ -26,6 +29,7 @@ export const PublicUserSchema = UserSchema.pick({
   _id: true,
   commercialConsent: true,
   createdOffers: true,
+  appliedToOffers: true,
 });
 
 export const LoginUserSchema = UserSchema.pick({

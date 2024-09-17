@@ -1,7 +1,7 @@
 import { userContract } from "../contracts/users.contract";
 import { User } from "../models/User.model";
 import { getDataFromToken, tsServer } from "../utils/utils";
-import { hashSync, compareSync, genSaltSync, compare } from "bcrypt";
+import { hashSync, compareSync, genSaltSync } from "bcrypt";
 import { sign } from "jsonwebtoken";
 import { createTransport } from "nodemailer";
 
@@ -32,6 +32,8 @@ export const usersRouter = tsServer.router(userContract, {
       await User.create({
         email,
         password: passwordHash,
+        description: "",
+        name: "",
         commercialConsent,
         privacyPolicyConsent,
       });
@@ -51,6 +53,71 @@ export const usersRouter = tsServer.router(userContract, {
         status: 500,
         body: {
           msg: "We failed to add your new account.",
+        },
+      };
+    }
+  },
+  updateUser: async ({ body }) => {
+    const { _id, ...updatedFieldsValues } = body;
+    try {
+      const updatedUser = await User.findByIdAndUpdate(
+        { _id },
+        { ...updatedFieldsValues },
+        { new: true }
+      );
+
+      if (!updatedUser) {
+        return {
+          status: 404,
+          body: {
+            msg: "User not found",
+          },
+        };
+      }
+
+      return {
+        status: 200,
+        body: {
+          msg: "User updated",
+        },
+      };
+    } catch (err) {
+      console.error(err);
+      return {
+        status: 500,
+        body: {
+          msg: "We failed to update your account.",
+        },
+      };
+    }
+  },
+  updateSetings: async ({ body, req, res }) => {
+    const { userId, ...updatedSettings } = body;
+    try {
+      const updateStatus = await User.findByIdAndUpdate(
+        userId,
+        { ...updatedSettings },
+        { new: true }
+      );
+      if (!updateStatus) {
+        return {
+          status: 404,
+          body: {
+            msg: "User not found",
+          },
+        };
+      }
+      return {
+        status: 200,
+        body: {
+          msg: "Settings updated",
+        },
+      };
+    } catch (err) {
+      return {
+        status: 500,
+        body: {
+          msg: "We failed to update your settings.",
         },
       };
     }
@@ -179,6 +246,9 @@ export const usersRouter = tsServer.router(userContract, {
         updatedAt: 1,
         createdAt: 1,
         createdOffers: 1,
+        name: 1,
+        description: 1,
+        appliedToOffers: 1,
       }).lean();
       if (!user) {
         return {

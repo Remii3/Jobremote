@@ -1,4 +1,5 @@
 "use client";
+
 import { Badge } from "@/components/ui/badge";
 import { useCurrency } from "@/context/CurrencyContext";
 import { OfferType } from "@/types/types";
@@ -13,6 +14,7 @@ import {
   Wallet,
   X,
   FilePlus as FileIcon,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +24,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormRootError,
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -36,10 +39,13 @@ import {
   FileUploaderContent,
   FileUploaderItem,
 } from "@/components/ui/extension/file-upload";
+import { useEffect } from "react";
+import { useUser } from "@/context/UserContext";
 
 interface OfferDetailsContentProps {
   offer: OfferType;
   isMobile: boolean;
+  toggleSuccessApplied: () => void;
 }
 
 const dropzone = {
@@ -51,28 +57,40 @@ const dropzone = {
   maxSize: 4 * 1024 * 1024,
 } satisfies DropzoneOptions;
 
-const applicationSchema = z.object({
-  name: z.string().min(2, { message: "Name is required." }),
-  email: z.string().min(1, { message: "Email is required." }).email(),
-  description: z.string().optional(),
-  cv: z
-    .array(
-      z.instanceof(File).refine((file) => file.size < 4 * 1024 * 1024, {
-        message: "File size must be less than 4MB",
-      })
-    )
-    .max(1, { message: "Only one file is allowed." })
-    .nullable(),
-});
+const applicationSchema = z
+  .object({
+    name: z.string().min(1, { message: "First and last name is required." }),
+    email: z.string().min(1, { message: "Email is required." }).email(),
+    description: z.string().optional(),
+    cv: z
+      .array(
+        z.instanceof(File).refine((file) => file.size < 5 * 1024 * 1024, {
+          message: "File size must be less than 5MB",
+        })
+      )
+      .max(1, { message: "Only one file is allowed." })
+      .nullable(),
+  })
+  .refine(
+    (data) => {
+      if (data.cv === null) {
+        return false;
+      }
+      return true;
+    },
+    {
+      path: ["cv"],
+      message: "CV is required.",
+    }
+  );
 
 export default function OfferDetailsContent({
   offer,
   isMobile,
+  toggleSuccessApplied,
 }: OfferDetailsContentProps) {
+  const { user, fetchUserData } = useUser();
   const { formatCurrency, currency } = useCurrency();
-  const { mutate: applyForOffer } = client.offers.offerApply.useMutation({
-    onSuccess: () => {},
-  });
 
   const form = useForm<z.infer<typeof applicationSchema>>({
     resolver: zodResolver(applicationSchema),
@@ -84,28 +102,60 @@ export default function OfferDetailsContent({
     },
   });
 
+  const {
+    mutate: applyForOffer,
+    error,
+    isLoading,
+  } = client.offers.offerApply.useMutation({
+    onSuccess: () => {
+      fetchUserData();
+      form.reset();
+      toggleSuccessApplied();
+    },
+    onError: (error) => {
+      if (error.status === 404 || error.status === 500) {
+        form.setError("root", {
+          type: "manual",
+          message: error.body.msg,
+        });
+      }
+    },
+  });
+
   function submitApplicationHandler(values: z.infer<typeof applicationSchema>) {
-    const testFormData = new FormData();
-    testFormData.append("name", values.name);
-    testFormData.append("email", values.email);
-    testFormData.append("description", values.description || "");
-    testFormData.append("offerId", offer._id);
-    if (values.cv) {
-      testFormData.append("cv", values.cv[0]);
+    if (values.cv === null) return;
+    const applyFormData = new FormData();
+    applyFormData.append("name", values.name);
+    applyFormData.append("email", values.email);
+    applyFormData.append("description", values.description || "");
+    applyFormData.append("offerId", offer._id);
+    applyFormData.append("cv", values.cv[0]);
+    if (user) {
+      applyFormData.append("userId", user._id);
     }
     applyForOffer({
-      body: testFormData,
+      body: applyFormData,
     });
   }
+
+  useEffect(() => {
+    if (user) {
+      form.reset({
+        name: user.name,
+        email: user.email,
+        description: user.description,
+      });
+    }
+  }, [user, form]);
 
   return (
     <Form {...form}>
       <form
-        className="space-y-4"
+        className="space-y-3 flex flex-col h-full"
         onSubmit={form.handleSubmit(submitApplicationHandler)}
         encType="multipart/form-data"
       >
-        <div className="lg:p-6 p-4 bg-gradient-to-br from-indigo-500  to-violet-400  dark:from-indigo-800 dark:to-violet-700 lg:rounded-md w-full space-y-4">
+        <div className="lg:p-[25px] p-4 bg-gradient-to-br shadow from-indigo-500  to-violet-400  dark:from-indigo-800 dark:to-violet-700 lg:rounded-lg w-full space-y-4">
           <div className="flex gap-2 justify-between flex-wrap ">
             <div className="flex gap-4">
               {offer.logo ? (
@@ -119,7 +169,9 @@ export default function OfferDetailsContent({
                   />
                 </div>
               ) : (
-                <div className="rounded-xl h-16 w-16 object-cover aspect-square bg-slate-400"></div>
+                <div className="rounded-full overflow-hidden bg-background border border-input">
+                  <div className="h-16 w-16 bg-muted"></div>
+                </div>
               )}
               <div className="space-y-2">
                 <h2 className="text-2xl font-semibold text-white">
@@ -131,7 +183,7 @@ export default function OfferDetailsContent({
                 </p>
               </div>
             </div>
-            <p className="p-3 bg-violet-600/50 dark:bg-violet-800/50 font-medium text-lg text-white flex items-center rounded-md lg:rounded-sm">
+            <p className="p-3 bg-violet-600/50 dark:bg-violet-800/50 font-medium text-lg text-white flex items-center rounded-md">
               <Wallet className="h-6 w-6 mr-2" />
               <span>{formatCurrency(offer.minSalary, currency)}</span>
               <span className="px-1">-</span>
@@ -148,7 +200,7 @@ export default function OfferDetailsContent({
           </div>
         </div>
         <div className="px-4 lg:px-0 grid gap-4 grid-rows-2 grid-cols-2 sm:grid-rows-1 sm:grid-cols-4 lg:grid-rows-2 lg:grid-cols-2 xl:grid-rows-1 xl:grid-cols-4">
-          <div className="flex bg-green-50 dark:bg-green-700/50 rounded-md p-3">
+          <div className="flex bg-green-50 dark:bg-green-700/50 rounded-md p-3 items-center justify-start h-20 shadow">
             <FileText className="h-full w-10 text-teal-400/90 mr-2" />
             <p className="flex flex-col">
               <span className="font-medium text-teal-400/90 text-sm">
@@ -157,7 +209,7 @@ export default function OfferDetailsContent({
               {offer.contractType}
             </p>
           </div>
-          <div className="flex bg-sky-50 dark:bg-sky-700/50 p-3 rounded-md">
+          <div className="flex bg-sky-50 dark:bg-sky-700/50 p-3 rounded-md items-center justify-start h-20 shadow">
             <MapPin className="h-full w-10 mr-2 text-sky-400/90" />
             <p className="flex flex-col">
               <span className="font-medium text-sky-400/90 text-sm">
@@ -166,7 +218,7 @@ export default function OfferDetailsContent({
               {offer.localization}
             </p>
           </div>
-          <div className="flex bg-indigo-50 dark:bg-indigo-700/50 p-3 rounded-md">
+          <div className="flex bg-indigo-50 dark:bg-indigo-700/50 p-3 rounded-md items-center justify-start h-20 shadow">
             <ArrowBigUpDash className="h-12 w-10 mr-2 text-indigo-400/90" />
             <p className="flex flex-col">
               <span className="text-indigo-400/90 font-medium text-sm">
@@ -175,7 +227,7 @@ export default function OfferDetailsContent({
               {offer.experience}
             </p>
           </div>
-          <div className="flex bg-amber-50 dark:bg-amber-700/50 rounded-md p-3">
+          <div className="flex bg-amber-50 dark:bg-amber-700/50 rounded-md p-3 items-center justify-start h-20 shadow">
             <Gauge className="h-full w-10 mr-2 text-amber-400/90" />
             <p className="flex flex-col">
               <span className="font-medium text-amber-400/90 text-sm">
@@ -185,16 +237,16 @@ export default function OfferDetailsContent({
             </p>
           </div>
         </div>
-        <div className="space-y-6">
+        <div className="space-y-6 flex-grow">
           <div className="px-4 lg:px-0">
-            <h3 className="text-xl mb-2">Tech stack</h3>
+            <h3 className="text-xl font-medium mb-2">Tech stack</h3>
             <div className="flex gap-2 flex-wrap">
               {offer.technologies &&
                 offer.technologies.map((technology) => (
                   <Badge
                     key={technology}
                     variant={"outline"}
-                    className="text-sm font-medium border-2"
+                    className="text-xs font-medium border-2"
                   >
                     {technology}
                   </Badge>
@@ -202,19 +254,19 @@ export default function OfferDetailsContent({
             </div>
           </div>
           <div className="px-4 lg:px-0">
-            <h3 className="text-xl mb-2">Job description</h3>
+            <h3 className="text-xl font-medium mb-2">Job description</h3>
             <p
               id="offerContent"
               tabIndex={0}
               aria-label="Scrollable offer content"
-              className="prose max-w-[85ch]"
+              className="prose max-w-[85ch] text-foreground text-sm"
             >
               {offer.content}
             </p>
           </div>
           <div className="px-4 lg:px-0">
-            <h3 className="text-xl mb-2">Apply for this job</h3>
-            <div className="space-y-2">
+            <h3 className="text-xl font-medium mb-2">Apply for this job</h3>
+            <div className="space-y-4">
               <div className="flex gap-8 w-full justify-between">
                 <FormField
                   name="name"
@@ -255,7 +307,6 @@ export default function OfferDetailsContent({
                   <FormItem className="w-full">
                     <FormLabel htmlFor="">
                       Introduce yourself (Github/Linkedin link){" "}
-                      <span className="text-red-400">*</span>
                     </FormLabel>
                     <FormControl {...field}>
                       <Textarea className="rounded-md" />
@@ -300,9 +351,11 @@ export default function OfferDetailsContent({
                         </FileUploaderContent>
                       )}
                     </FileUploader>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
+              <FormRootError />
             </div>
           </div>
         </div>
@@ -316,8 +369,26 @@ export default function OfferDetailsContent({
             </div>
             <span className="text-slate-500">{offer.companyName}</span>
           </div>
-          <Button variant={"default"} className="rounded-md">
-            Apply
+          <Button
+            variant={"default"}
+            className="relative"
+            aria-live="polite"
+            disabled={isLoading}
+          >
+            <Loader2
+              className={`absolute w-6 h-6 animate-spin transition-opacity ${
+                isLoading ? "opacity-100" : "opacity-0"
+              }`}
+              aria-hidden={isLoading ? "false" : "true"}
+            />
+            <span
+              className={`transition-opacity ${
+                isLoading ? "opacity-0" : "opacity-100"
+              }`}
+              aria-hidden={isLoading ? "true" : "false"}
+            >
+              Apply
+            </span>
           </Button>
         </div>
       </form>

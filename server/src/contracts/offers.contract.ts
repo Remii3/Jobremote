@@ -119,6 +119,7 @@ export const offersContract = c.router({
       description: z.string().optional(),
       offerId: z.any(),
       cv: z.any(),
+      userId: z.string().optional(),
     }),
     responses: {
       200: z.object({
@@ -207,17 +208,21 @@ export const offersContract = c.router({
       }),
     },
   },
-  checkoutSession: {
+  payForOffer: {
     method: "POST",
-    path: `/create-checkout-session`,
+    path: `/offer/pay`,
     body: z.object({
+      offerId: z.string(),
       title: z.string(),
-      price: z.number(),
       currency: z.string(),
     }),
     responses: {
       200: z.object({
+        msg: z.string(),
         sessionId: z.string(),
+      }),
+      404: z.object({
+        msg: z.string(),
       }),
       500: z.object({
         msg: z.string(),

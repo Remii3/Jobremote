@@ -13,7 +13,7 @@ import ExperienceModel from "../models/Experience.model";
 import ContractTypeModel from "../models/ContractType.model";
 import Stripe from "stripe";
 import bodyParser from "body-parser";
-
+import { priceLogic } from "../middleware/priceLogic";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
   apiVersion: "2024-06-20",
 });
@@ -23,10 +23,24 @@ const upload = multer({ storage: storage });
 
 export const offersRouter = tsServer.router(offersContract, {
   createOffer: {
-    middleware: [upload.array("logo")],
-    handler: async ({ body, req }) => {
+    middleware: [
+      upload.array("logo"),
+      (req, res, next) => priceLogic(req, res, next),
+    ],
+    handler: async ({ body, req, res }) => {
       const data = body;
+      const price = res.locals.price;
+      if (!price) {
+        return {
+          status: 404,
+          body: {
+            msg: "Invalid pricing",
+          },
+        };
+      }
+
       data.technologies = JSON.parse(data.technologies);
+
       const {
         title,
         content,
@@ -40,10 +54,56 @@ export const offersRouter = tsServer.router(offersContract, {
         currency,
         userId,
         companyName,
-        offerPrice,
+        pricing,
       } = data;
 
       try {
+        const utapi = new UTApi();
+        let uploadedImg;
+
+        if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+          const logo = req.files[0]!;
+          const metadata = {};
+          const uploadResponse = await utapi.uploadFiles(
+            new File([logo.buffer], logo.originalname),
+            { metadata }
+          );
+          if (uploadResponse.error) {
+            console.error("error", uploadResponse.error);
+            return {
+              status: 500,
+              body: {
+                msg: "We failed to add your new offer.",
+              },
+            };
+          }
+          uploadedImg = uploadResponse.data;
+        }
+
+        const offerId = new mongoose.Types.ObjectId();
+        const offer = await OfferModel.create({
+          _id: offerId,
+          title,
+          content,
+          experience,
+          localization,
+          contractType,
+          employmentType,
+          maxSalary,
+          minSalary,
+          technologies,
+          currency,
+          logo: uploadedImg?.url,
+          companyName,
+          isPaid: false,
+          pricing,
+        });
+
+        await User.findByIdAndUpdate(
+          { _id: userId },
+          { $push: { createdOffers: offer._id } }
+        );
+
         const session = await stripe.checkout.sessions.create({
           payment_method_types: ["card"],
           line_items: [
@@ -53,65 +113,19 @@ export const offersRouter = tsServer.router(offersContract, {
                 product_data: {
                   name: title,
                 },
-                unit_amount: offerPrice,
+                unit_amount: price * 100,
               },
               quantity: 1,
             },
           ],
           metadata: {
-            title,
-            content,
-            experience,
-            localization,
-            employmentType,
-            contractType,
-            minSalary,
-            maxSalary,
-            technologies,
-            currency,
-            companyName,
-            userId,
+            offerId: offerId.toString(),
           },
           mode: "payment",
           success_url: `${process.env.CLIENT_URL}/hire-remotely/success?session_id={CHECKOUT_SESSION_ID}`,
           cancel_url: `${process.env.CLIENT_URL}/hire-remotely/cancel`,
         });
-        // const utapi = new UTApi();
-        // let uploadedImg;
 
-        // if (req.files && Array.isArray(req.files) && req.files.length > 0) {
-        //   const logo = req.files[0];
-        //   const metadata = {};
-        //   const uploadResponse = await utapi.uploadFiles(
-        //     new File([logo.buffer], logo.originalname),
-        //     { metadata }
-        //   );
-        //   if (uploadResponse.error) {
-        //     console.log("error", uploadResponse.error);
-        //   }
-        //   uploadedImg = uploadResponse.data;
-        // }
-
-        // const offerId = new mongoose.Types.ObjectId();
-        // const offer = await OfferModel.create({
-        //   _id: offerId,
-        //   title,
-        //   content,
-        //   experience,
-        //   localization,
-        //   contractType,
-        //   employmentType,
-        //   maxSalary,
-        //   minSalary,
-        //   technologies,
-        //   currency,
-        //   logo: uploadedImg?.url,
-        //   companyName,
-        // });
-        // await User.findByIdAndUpdate(
-        //   { _id: userId },
-        //   { $push: { createdOffers: offer._id } }
-        // );
         return {
           status: 201,
           body: {
@@ -166,6 +180,7 @@ export const offersRouter = tsServer.router(offersContract, {
         filters.minSalary = { $gte: query.filters.minSalary };
       }
       filters.isDeleted = false;
+      filters.isPaid = true;
       let sortValue = {};
       switch (query.sortOption) {
         case "salary_highest":
@@ -327,72 +342,101 @@ export const offersRouter = tsServer.router(offersContract, {
   offerApply: {
     middleware: [upload.array("cv")],
     handler: async ({ body, req }) => {
-      const { description, email, name, offerId } = body;
+      const { description, email, name, offerId, userId } = body;
       const objectOfferId = new mongoose.Types.ObjectId(`${offerId}`);
-      const offerData = await OfferModel.findById(objectOfferId, { title: 1 });
-      if (!offerData) {
-        return {
-          status: 404,
-          body: {
-            msg: "Offer not found",
-          },
-        };
-      }
-      const offerCreator = await User.findOne(
-        {
-          createdOffers: {
-            $in: [objectOfferId],
-          },
-        },
-        { email: 1 }
-      );
-      if (!offerCreator) {
-        return {
-          status: 404,
-          body: {
-            msg: "Offer creator not found",
-          },
-        };
-      }
-      const transporter = createTransport({
-        service: "gmail",
-        secure: false,
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
-        },
-      });
-      const mailOptions = {
-        from: email,
-        to: process.env.EMAIL_USER,
-        subject: `New offer application ${offerData?.title || "asd"}`,
-        text: `New application for your offer from ${name} with description: ${description}`,
-        attachments: [
+      try {
+        const offerData = await OfferModel.findById(objectOfferId, {
+          title: 1,
+        });
+        if (!offerData) {
+          return {
+            status: 404,
+            body: {
+              msg: "Offer not found",
+            },
+          };
+        }
+        const offerCreator = await User.findOne(
           {
-            filename:
-              (Array.isArray(req.files) && req.files[0].originalname) ||
-              "empty field",
-            path:
-              (Array.isArray(req.files) && req.files[0].path) || "empty path",
-            contentType: "application/pdf",
+            createdOffers: {
+              $in: [objectOfferId],
+            },
           },
-        ],
-      };
-      await transporter.sendMail(mailOptions);
-      return {
-        status: 200,
-        body: {
-          msg: "Offer applied successfully",
-        },
-      };
+          { email: 1, _id: 1 }
+        );
+        if (!offerCreator) {
+          return {
+            status: 404,
+            body: {
+              msg: "Offer creator not found",
+            },
+          };
+        }
+        console.log(req.files);
+        const transporter = createTransport({
+          service: "gmail",
+          secure: false,
+          auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
+          },
+        });
+
+        if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
+          return {
+            status: 404,
+            body: {
+              msg: "No file uploaded",
+            },
+          };
+        }
+
+        const mailOptions = {
+          from: email,
+          to: process.env.EMAIL_USER, // TODO change to offerCreator.email when ready for prod
+          subject: `New offer application ${offerData.title}`,
+          text: `${name} just applied for the position you posted!
+          Here is few words they wanted to say to you:
+          ${description}`,
+          attachments: [
+            {
+              filename: `${name}_CV` || "empty field",
+              content: req.files[0].buffer || "empty buffer",
+              contentType: req.files[0].mimetype || "application/pdf",
+            },
+          ],
+        };
+        await transporter.sendMail(mailOptions);
+        if (userId) {
+          await User.findByIdAndUpdate(userId, {
+            $push: { appliedToOffers: objectOfferId },
+          });
+        }
+        return {
+          status: 200,
+          body: {
+            msg: "Offer applied successfully",
+          },
+        };
+      } catch (err) {
+        console.error(err);
+        return {
+          status: 500,
+          body: {
+            msg: "We failed to apply for the offer.",
+          },
+        };
+      }
     },
   },
   getTechnologies: async () => {
     try {
-      const technologies = await TechnologyModel.find().select({
-        code: 0,
-        createdAt: 0,
-      });
+      const technologies = await TechnologyModel.find()
+        .select({
+          code: 0,
+          createdAt: 0,
+        })
+        .sort({ name: 1 });
       if (!technologies.length) {
         return {
           status: 200,
@@ -420,10 +464,12 @@ export const offersRouter = tsServer.router(offersContract, {
   },
   getEmploymentTypes: async () => {
     try {
-      const employmentTypes = await EmploymentTypeModel.find().select({
-        code: 0,
-        createdAt: 0,
-      });
+      const employmentTypes = await EmploymentTypeModel.find()
+        .select({
+          code: 0,
+          createdAt: 0,
+        })
+        .sort({ name: 1 });
       if (!employmentTypes.length) {
         return {
           status: 200,
@@ -451,10 +497,12 @@ export const offersRouter = tsServer.router(offersContract, {
   },
   getLocalizations: async () => {
     try {
-      const localizations = await LocalizationModel.find().select({
-        code: 0,
-        createdAt: 0,
-      });
+      const localizations = await LocalizationModel.find()
+        .select({
+          code: 0,
+          createdAt: 0,
+        })
+        .sort({ name: 1 });
       if (!localizations.length) {
         return {
           status: 200,
@@ -482,10 +530,12 @@ export const offersRouter = tsServer.router(offersContract, {
   },
   getExperiences: async () => {
     try {
-      const experiences = await ExperienceModel.find().select({
-        code: 0,
-        createdAt: 0,
-      });
+      const experiences = await ExperienceModel.find()
+        .select({
+          code: 0,
+          createdAt: 0,
+        })
+        .sort({ name: 1 });
       if (!experiences.length) {
         return {
           status: 200,
@@ -513,10 +563,12 @@ export const offersRouter = tsServer.router(offersContract, {
   },
   getContractTypes: async () => {
     try {
-      const contractTypes = await ContractTypeModel.find().select({
-        code: 0,
-        createdAt: 0,
-      });
+      const contractTypes = await ContractTypeModel.find()
+        .select({
+          code: 0,
+          createdAt: 0,
+        })
+        .sort({ name: 1 });
       if (!contractTypes.length) {
         return {
           status: 200,
@@ -542,11 +594,10 @@ export const offersRouter = tsServer.router(offersContract, {
       };
     }
   },
-  checkoutSession: {
-    middleware: [upload.array("logo")],
-    handler: async ({ body }) => {
-      const { price, title, currency } = body;
-
+  payForOffer: async ({ body }) => {
+    const { offerId, title, currency } = body;
+    const offerPrice = 1000;
+    try {
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
         line_items: [
@@ -556,12 +607,14 @@ export const offersRouter = tsServer.router(offersContract, {
               product_data: {
                 name: title,
               },
-              unit_amount: price,
+              unit_amount: offerPrice,
             },
             quantity: 1,
           },
         ],
-        metadata: {},
+        metadata: {
+          offerId: offerId.toString(),
+        },
         mode: "payment",
         success_url: `${process.env.CLIENT_URL}/hire-remotely/success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${process.env.CLIENT_URL}/hire-remotely/cancel`,
@@ -569,10 +622,19 @@ export const offersRouter = tsServer.router(offersContract, {
       return {
         status: 200,
         body: {
+          msg: "Payment session created",
           sessionId: session.id,
         },
       };
-    },
+    } catch (err) {
+      console.error(err);
+      return {
+        status: 500,
+        body: {
+          msg: "We failed to create payment session.",
+        },
+      };
+    }
   },
   webhook: {
     middleware: [bodyParser.raw({ type: "application/json" })],
@@ -613,7 +675,13 @@ export const offersRouter = tsServer.router(offersContract, {
       if (event.type === "checkout.session.completed") {
         const session = event.data.object;
 
-        console.log("here");
+        console.log("Session:", session);
+        if (session.metadata) {
+          console.log(session.metadata.offerId);
+          await OfferModel.findByIdAndUpdate(session.metadata.offerId, {
+            isPaid: true,
+          });
+        }
       }
 
       return {

@@ -11,6 +11,7 @@ export const offerSchema = z.object({
   contractType: z.string().min(1),
   minSalary: z.coerce.number(),
   maxSalary: z.coerce.number(),
+  pricing: z.enum(["basic", "standard", "premium"]),
   currency: z.enum(
     allowedCurrencies as [AllowedCurrenciesType, ...AllowedCurrenciesType[]]
   ),
@@ -20,7 +21,7 @@ export const offerSchema = z.object({
 });
 
 export const OfferSortOptionsSchema = z.enum([
+  "latest",
   "salary_highest",
   "salary_lowest",
-  "latest",
 ]);

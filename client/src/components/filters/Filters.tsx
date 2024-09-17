@@ -16,7 +16,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { Search, Settings2 } from "lucide-react";
+import { ArrowUpDown, Loader2, Search, Settings2 } from "lucide-react";
 import { Badge, badgeVariants } from "../ui/badge";
 import { FormEvent, useState } from "react";
 import { Slider } from "../ui/slider";
@@ -27,6 +27,12 @@ import EmploymentType from "./parts/EmploymentType";
 import Localizations from "./parts/Localizations";
 import Experience from "./parts/Experience";
 import { OfferSortOptionsSchema } from "@/schemas/offerSchemas";
+import useGetAvailableContractTypes from "@/hooks/useGetAvailableContractTypes";
+import ContractType from "./parts/ContractType";
+import useGetAvailableEmploymentTypes from "@/hooks/useGetAvailableEmploymentTypes";
+import useGetAvailableLocalizations from "@/hooks/useGetAvailableLocalizations";
+import useGetAvailableExperiences from "@/hooks/useGetAvailableExperiences";
+import useGetAvailableTechnologies from "@/hooks/useGetAvailableTechnologies";
 
 interface FiltersPropsType {
   filters: Required<OfferFiltersType>;
@@ -42,6 +48,30 @@ const SORT_OPTIONS: Record<OfferSortOptionsTypes, string> = {
   salary_lowest: "Lowest salary",
 };
 
+const ServerErrorMessage = ({
+  message,
+  status,
+}: {
+  message: string;
+  status: number;
+}) => (
+  <div className="flex p-2 items-center justify-center">
+    <span className="text-xs text-slate-500">{status === 500 && message}</span>
+  </div>
+);
+
+const LoadingComponent = () => (
+  <div className="flex p-2 items-center justify-center">
+    <Loader2 className="w-4 h-4 animate-spin" />
+  </div>
+);
+
+const EmptyFilterComponent = ({ message }: { message: string }) => (
+  <div className="flex p-2 items-center justify-center">
+    <span className="text-xs text-slate-500">{message}</span>
+  </div>
+);
+
 const Filters = ({
   filters,
   changeFilters,
@@ -51,6 +81,20 @@ const Filters = ({
 }: FiltersPropsType) => {
   const { formatCurrency, currency } = useCurrency();
   const [showMoreFilters, setShowMoreFilters] = useState(false);
+  const { avContractTypes, avContractTypesError, avContractTypesIsLoading } =
+    useGetAvailableContractTypes();
+  const { avLocalizations, avLocalizationsError, avLocalizationsIsLoading } =
+    useGetAvailableLocalizations();
+  const {
+    avEmploymentTypes,
+    avEmploymentTypesError,
+    avEmploymentTypesIsLoading,
+  } = useGetAvailableEmploymentTypes();
+  const { avExperiences, avExperiencesError, avExperiencesIsLoading } =
+    useGetAvailableExperiences();
+  const { avTechnologies, avTechnologiesError, avTechnologiesIsLoading } =
+    useGetAvailableTechnologies();
+
   function changeTextsHandler(key: keyof OfferFiltersType, text: string) {
     changeFilters(key, text);
   }
@@ -66,7 +110,7 @@ const Filters = ({
   return (
     <>
       <div className="flex gap-4 justify-between">
-        <div className="flex gap-4">
+        <div className="flex gap-4 flex-grow">
           <form
             onSubmit={searchOffers}
             className="relative flex-grow md:flex-grow-0"
@@ -97,10 +141,25 @@ const Filters = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <Localizations
-                localizations={filters.localization}
-                changeTextsHandler={changeTextsHandler}
-              />
+              {avLocalizations &&
+                avLocalizations.body.localizations.length > 0 && (
+                  <Localizations
+                    localizations={filters.localization}
+                    changeTextsHandler={changeTextsHandler}
+                    avLocalizations={avLocalizations.body.localizations}
+                  />
+                )}
+              {avLocalizations &&
+                avLocalizations.body.localizations.length <= 0 && (
+                  <EmptyFilterComponent message="No localizations" />
+                )}
+              {avLocalizationsIsLoading && <LoadingComponent />}
+              {avLocalizationsError && avLocalizationsError.status === 500 && (
+                <ServerErrorMessage
+                  message={avLocalizationsError.body.msg}
+                  status={avLocalizationsError.status}
+                />
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
           <DropdownMenu>
@@ -115,10 +174,23 @@ const Filters = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <Experience
-                experiences={filters.experience}
-                changeTextsHandler={changeTextsHandler}
-              />
+              {avExperiences && avExperiences.body.experiences.length > 0 && (
+                <Experience
+                  experiences={filters.experience}
+                  changeTextsHandler={changeTextsHandler}
+                  avExperiences={avExperiences.body.experiences}
+                />
+              )}
+              {avExperiences && avExperiences.body.experiences.length <= 0 && (
+                <EmptyFilterComponent message="No experiences" />
+              )}
+              {avExperiencesIsLoading && <LoadingComponent />}
+              {avExperiencesError && avExperiencesError.status === 500 && (
+                <ServerErrorMessage
+                  message={avExperiencesError.body.msg}
+                  status={avExperiencesError.status}
+                />
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
           <DropdownMenu>
@@ -134,10 +206,26 @@ const Filters = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <EmploymentType
-                changeTextsHandler={changeTextsHandler}
-                employments={filters.employmentType}
-              />
+              {avEmploymentTypes &&
+                avEmploymentTypes.body.employmentTypes.length > 0 && (
+                  <EmploymentType
+                    changeTextsHandler={changeTextsHandler}
+                    employments={filters.employmentType}
+                    avEmploymentTypes={avEmploymentTypes.body.employmentTypes}
+                  />
+                )}
+              {avEmploymentTypes &&
+                avEmploymentTypes.body.employmentTypes.length <= 0 && (
+                  <EmptyFilterComponent message="No employments" />
+                )}
+              {avEmploymentTypesIsLoading && <LoadingComponent />}
+              {avEmploymentTypesError &&
+                avEmploymentTypesError.status === 500 && (
+                  <ServerErrorMessage
+                    message={avEmploymentTypesError.body.msg}
+                    status={avEmploymentTypesError.status}
+                  />
+                )}
             </DropdownMenuContent>
           </DropdownMenu>
           <DropdownMenu>
@@ -152,10 +240,25 @@ const Filters = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <EmploymentType
-                changeTextsHandler={changeTextsHandler}
-                employments={filters.contractType}
-              />
+              {avContractTypes &&
+                avContractTypes.body.contractTypes.length > 0 && (
+                  <ContractType
+                    changeTextsHandler={changeTextsHandler}
+                    contractTypes={filters.contractType}
+                    avContractTypes={avContractTypes?.body.contractTypes}
+                  />
+                )}
+              {avContractTypes &&
+                avContractTypes.body.contractTypes.length <= 0 && (
+                  <EmptyFilterComponent message="No contracts" />
+                )}
+              {avContractTypesIsLoading && <LoadingComponent />}
+              {avContractTypesError && avContractTypesError.status === 500 && (
+                <ServerErrorMessage
+                  message={avContractTypesError.body.msg}
+                  status={avContractTypesError.status}
+                />
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
           <DropdownMenu>
@@ -170,10 +273,25 @@ const Filters = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <Technologies
-                technologies={filters.technologies}
-                changeTextsHandler={changeTextsHandler}
-              />
+              {avTechnologies &&
+                avTechnologies.body.technologies.length > 0 && (
+                  <Technologies
+                    technologies={filters.technologies}
+                    changeTextsHandler={changeTextsHandler}
+                    avTechnologies={avTechnologies.body.technologies}
+                  />
+                )}
+              {avTechnologies &&
+                avTechnologies.body.technologies.length <= 0 && (
+                  <EmptyFilterComponent message="No technologies" />
+                )}
+              {avTechnologiesIsLoading && <LoadingComponent />}
+              {avTechnologiesError && avTechnologiesError.status === 500 && (
+                <ServerErrorMessage
+                  message={avTechnologiesError.body.msg}
+                  status={avTechnologiesError.status}
+                />
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
           <DropdownMenu>
@@ -183,8 +301,8 @@ const Filters = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <div className="px-2 pb-2 pt-1">
-                <div className="flex justify-between gap-3 mb-3">
+              <div className="px-2 pt-1.5 pb-3 space-y-3">
+                <div className="flex justify-between gap-3">
                   <span className="text-sm">Minimum</span>
                   <span className="text-sm">
                     {formatCurrency(
@@ -201,54 +319,35 @@ const Filters = ({
                   step={5}
                   min={0}
                 />
-                <div>
-                  <div className="flex items-center justify-between text-sm mt-2 gap-4">
-                    <span>Minimum</span>
-                    <div className="flex items-center gap-1 text-sm">
-                      <Input
-                        type="number"
-                        max={250}
-                        min={0}
-                        step={5}
-                        className=""
-                        onChange={(e) =>
-                          changeSalaryHandler(Number(e.target.value))
-                        }
-                        value={
-                          filters.minSalary === 0 ? 0 : filters.minSalary / 1000
-                        }
-                      />
-                    </div>
-                  </div>
-                </div>
               </div>
             </DropdownMenuContent>
           </DropdownMenu>
           <Dialog open={showMoreFilters} onOpenChange={setShowMoreFilters}>
             <DialogTrigger asChild className="block lg:hidden">
-              <Button variant={"outline"}>More filters</Button>
+              <Button variant={"outline"} className="flex ">
+                <span className="hidden sm:inline mr-1">More filters</span>
+                <Settings2 className="h-5 w-5" />
+              </Button>
             </DialogTrigger>
             <DialogContent>
-              <div className="p-4">
-                <DialogTitle>More fitlers</DialogTitle>
-                <DialogDescription className="sr-only">
-                  Options for filters
-                </DialogDescription>
-                <div className="py-4 space-y-4">
-                  <MoreFilters
-                    filters={filters}
-                    changeSalaryHandler={changeSalaryHandler}
-                    changeTextHandler={changeTextsHandler}
-                  />
-                </div>
-                <div>
-                  <Button
-                    onClick={() => setShowMoreFilters(false)}
-                    className="mt-2"
-                  >
-                    Show results
-                  </Button>
-                </div>
+              <DialogTitle>More fitlers</DialogTitle>
+              <DialogDescription className="sr-only">
+                Options for filters
+              </DialogDescription>
+              <div className="py-4 space-y-4">
+                <MoreFilters
+                  filters={filters}
+                  changeSalaryHandler={changeSalaryHandler}
+                  changeTextHandler={changeTextsHandler}
+                />
+              </div>
+              <div>
+                <Button
+                  onClick={() => setShowMoreFilters(false)}
+                  className="mt-2"
+                >
+                  Show results
+                </Button>
               </div>
             </DialogContent>
           </Dialog>
@@ -256,8 +355,8 @@ const Filters = ({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant={"outline"}>
-              <span className="mr-1">Sort</span>
-              <Settings2 className="h-5 w-5" />
+              <span className="mr-1 sm:inline hidden">Sort</span>
+              <ArrowUpDown className="h-5 w-5" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>

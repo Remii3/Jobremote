@@ -2,7 +2,7 @@ import { initContract } from "@ts-rest/core";
 import { initServer } from "@ts-rest/express";
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import { createUploadthing, type FileRouter } from "uploadthing/express";
+
 export function handleError(err: unknown, message?: string) {
   if (process.env.NODE_ENV !== "production") {
     console.error(err);
@@ -34,16 +34,3 @@ export const getDataFromToken = (req: Request, res: Response) => {
     throw new Error("Invalid token");
   }
 };
-
-// const f = createUploadthing();
-// export function uploadRouter() {
-//   imageUploader: f({
-//     image: {
-//       maxFileCount: 1,
-//       maxFileSize: "4MB",
-//     },
-//   }).onUploadComplete((data) => {
-//     console.log("Uplaod complete", data);
-//   });
-// }
-// export type OurFileRouter = typeof uploadRouter;
