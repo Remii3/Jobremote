@@ -672,24 +672,21 @@ export const offersRouter = tsServer.router(offersContract, {
           },
         };
       }
-      let test = "Nothing";
+
       if (event.type === "checkout.session.completed") {
         const session = event.data.object;
 
-        console.log("Session:", session);
         if (session.metadata) {
-          console.log(session.metadata.offerId);
           await OfferModel.findByIdAndUpdate(session.metadata.offerId, {
             isPaid: true,
           });
-          test = session.metadata.offerId;
         }
       }
 
       return {
         status: 200,
         body: {
-          msg: `Webhook received ${test}`,
+          msg: `Webhook received`,
         },
       };
     },

@@ -94,8 +94,8 @@ const OfferDetails = ({
   if (isMobile) {
     return (
       <Dialog open={dialogOpen} onOpenChange={closeCurrentOfferHandler}>
-        <DialogContent className="h-full p-0 overflow-hidden max-h-[90vh] max-w-3xl min-h-[150px] border-0">
-          <div className="max-h-[90vh] overflow-y-auto">
+        <DialogContent className="h-full p-0 overflow-hidden max-w-3xl min-h-[150px] border-0">
+          <div className="overflow-y-auto">
             <DialogHeader className="text-left">
               <DialogTitle className="sr-only">
                 {data ? data.body.offer.title : "Offer details"}

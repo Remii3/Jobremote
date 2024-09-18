@@ -28,7 +28,7 @@ const MoreFilters = ({
   const { avEmploymentTypes } = useGetAvailableEmploymentTypes();
   const { avTechnologies } = useGetAvailableTechnologies();
   return (
-    <>
+    <div className="space-y-4 overflow-y-auto px-4 py-2 border-t">
       <div className="space-y-2">
         <h2>Salary</h2>
         <Separator />
@@ -182,7 +182,7 @@ const MoreFilters = ({
             })}
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

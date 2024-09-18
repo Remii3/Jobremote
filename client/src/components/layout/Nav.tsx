@@ -1,4 +1,4 @@
-import { Menu } from "lucide-react";
+import { FilePlus2, Menu } from "lucide-react";
 import { Button, buttonVariants } from "../ui/button";
 import {
   Sheet,
@@ -47,13 +47,13 @@ const Nav = () => {
             Profile
           </Link>
         )}
-        <Link
-          href={"/hire-remotely"}
-          className={buttonVariants({ variant: "default" })}
-        >
-          Post a job
-        </Link>
       </div>
+      <Link
+        href={"/hire-remotely"}
+        className={`${buttonVariants({ variant: "default" })}`}
+      >
+        Post a job
+      </Link>
       <Sheet open={sheetOpen} onOpenChange={toggleSheet}>
         <SheetTrigger asChild>
           <Button variant={"outline"} className="px-2">

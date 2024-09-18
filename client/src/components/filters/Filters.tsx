@@ -4,6 +4,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "../ui/dialog";
@@ -329,23 +330,20 @@ const Filters = ({
                 <Settings2 className="h-5 w-5" />
               </Button>
             </DialogTrigger>
-            <DialogContent>
-              <DialogTitle>More fitlers</DialogTitle>
-              <DialogDescription className="sr-only">
-                Options for filters
-              </DialogDescription>
-              <div className="py-4 space-y-4">
-                <MoreFilters
-                  filters={filters}
-                  changeSalaryHandler={changeSalaryHandler}
-                  changeTextHandler={changeTextsHandler}
-                />
-              </div>
-              <div>
-                <Button
-                  onClick={() => setShowMoreFilters(false)}
-                  className="mt-2"
-                >
+            <DialogContent className="h-full overflow-hidden p-0">
+              <DialogHeader className="px-4 pt-4">
+                <DialogTitle>Fitlers</DialogTitle>
+                <DialogDescription className="sr-only">
+                  Options for filters
+                </DialogDescription>
+              </DialogHeader>
+              <MoreFilters
+                filters={filters}
+                changeSalaryHandler={changeSalaryHandler}
+                changeTextHandler={changeTextsHandler}
+              />
+              <div className="px-4 pb-4">
+                <Button onClick={() => setShowMoreFilters(false)}>
                   Show results
                 </Button>
               </div>
