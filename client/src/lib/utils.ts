@@ -13,12 +13,6 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function showError(err: unknown) {
-  if (process.env.NODE_ENV !== "production") {
-    console.error(err);
-  }
-}
-
 export const client = initQueryClient(mainContract, {
   baseUrl: process.env.NEXT_PUBLIC_SERVER_URI || "",
   baseHeaders: {},

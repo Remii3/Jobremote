@@ -31,14 +31,15 @@ const Nav = () => {
   return (
     <nav className="flex gap-3 items-center">
       <div className="hidden md:flex gap-3 items-center">
-        {!user && !userDataIsLoading ? (
+        {!user && !userDataIsLoading && (
           <Link
             href={"/login"}
             className={buttonVariants({ variant: "outline" })}
           >
             Login
           </Link>
-        ) : (
+        )}
+        {user && !userDataIsLoading && (
           <Link
             href={"/account"}
             className={buttonVariants({ variant: "outline" })}
