@@ -27,6 +27,7 @@ export default function YourOffers() {
   const { user, fetchUserData } = useUser();
   const [editOfferData, setEditOfferData] = useState<OfferType | null>(null);
   const queryClient = useQueryClient();
+  console.log("yro", process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
 
   const { data, isLoading } = client.offers.getUserOffers.useQuery(
     ["clientOffers", user?.createdOffers],
