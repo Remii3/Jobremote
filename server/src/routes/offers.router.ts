@@ -15,10 +15,6 @@ import Stripe from "stripe";
 import bodyParser from "body-parser";
 import { priceLogic } from "../middleware/priceLogic";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "TESTING", {
-  apiVersion: "2024-06-20",
-});
-
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
@@ -80,7 +76,6 @@ export const offersRouter = tsServer.router(offersContract, {
           }
           uploadedImg = uploadResponse.data;
         }
-        console.log("stripe", stripe, process.env.STRIPE_SECRET_KEY);
         const offerId = new mongoose.Types.ObjectId();
         const offer = await OfferModel.create({
           _id: offerId,
@@ -104,7 +99,9 @@ export const offersRouter = tsServer.router(offersContract, {
           { _id: userId },
           { $push: { createdOffers: offer._id } }
         );
-
+        const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "TESTING", {
+          apiVersion: "2024-06-20",
+        });
         const session = await stripe.checkout.sessions.create({
           payment_method_types: ["card"],
           line_items: [
@@ -599,6 +596,9 @@ export const offersRouter = tsServer.router(offersContract, {
     const { offerId, title, currency } = body;
     const offerPrice = 1000;
     try {
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "TESTING", {
+        apiVersion: "2024-06-20",
+      });
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
         line_items: [
@@ -653,7 +653,9 @@ export const offersRouter = tsServer.router(offersContract, {
       }
 
       let event;
-
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "TESTING", {
+        apiVersion: "2024-06-20",
+      });
       try {
         event = stripe.webhooks.constructEvent(
           body,
