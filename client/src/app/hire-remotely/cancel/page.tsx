@@ -5,13 +5,11 @@ import React from "react";
 
 export default function page() {
   return (
-    <AuthGuard>
-      <div>
-        <span>Canceled order</span>
-        <Link href={"/"} className={buttonVariants({ variant: "default" })}>
-          Go back
-        </Link>
-      </div>
-    </AuthGuard>
+    <div>
+      <span>Canceled order</span>
+      <Link href={"/"} className={buttonVariants({ variant: "default" })}>
+        Go back
+      </Link>
+    </div>
   );
 }
