@@ -206,8 +206,12 @@ export const usersRouter = tsServer.router(userContract, {
       });
       res.cookie("token", token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        expires: new Date(Date.now() + 86400000),
+        // secure: process.env.NODE_ENV === "production",
+        secure: true,
+        // sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        sameSite: "none",
+        path: "/",
       });
 
       return {
@@ -278,6 +282,9 @@ export const usersRouter = tsServer.router(userContract, {
   logoutUser: async ({ res }) => {
     res.cookie("token", "", {
       httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      path: "/",
       expires: new Date(0),
     });
     return {

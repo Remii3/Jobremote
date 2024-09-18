@@ -25,6 +25,9 @@ export const getDataFromToken = (req: Request, res: Response) => {
       res.cookie("token", "", {
         httpOnly: true,
         expires: new Date(0),
+        secure: true,
+        sameSite: "none",
+        path: "/",
       });
       return null;
     }
