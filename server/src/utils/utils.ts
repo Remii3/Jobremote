@@ -1,4 +1,3 @@
-import { initContract } from "@ts-rest/core";
 import { initServer } from "@ts-rest/express";
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
@@ -10,8 +9,6 @@ export function handleError(err: unknown, message?: string) {
 }
 
 export const tsServer = initServer();
-
-export const c = initContract();
 
 export const getDataFromToken = (req: Request, res: Response) => {
   try {

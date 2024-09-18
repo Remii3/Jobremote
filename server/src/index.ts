@@ -7,7 +7,7 @@ import cors from "cors";
 const port = process.env.PORT || 5000;
 import { createExpressEndpoints, initServer } from "@ts-rest/express";
 import { mainRouter } from "./routes/_app";
-import { mainContract } from "./contracts/_app";
+import { mainContract } from "jobremotecontracts";
 import cookieParser from "cookie-parser";
 import OfferModel from "./models/Offer.model";
 import { schedule } from "node-cron";

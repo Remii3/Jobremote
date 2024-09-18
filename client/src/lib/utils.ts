@@ -2,7 +2,7 @@ import { initQueryClient } from "@ts-rest/react-query";
 
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { mainContract } from "../../../server/src/contracts/_app";
+import { mainContract } from "jobremotecontracts";
 
 interface ClientErrorType {
   status: number;

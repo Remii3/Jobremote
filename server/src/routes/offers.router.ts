@@ -1,4 +1,4 @@
-import { offersContract } from "../contracts/offers.contract";
+import { offersContract } from "jobremotecontracts";
 import OfferModel, { OfferType } from "../models/Offer.model";
 import { User } from "../models/User.model";
 import { tsServer } from "../utils/utils";

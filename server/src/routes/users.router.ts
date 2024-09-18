@@ -1,4 +1,4 @@
-import { userContract } from "../contracts/users.contract";
+import { userContract } from "jobremotecontracts";
 import { User } from "../models/User.model";
 import { getDataFromToken, tsServer } from "../utils/utils";
 import { hashSync, compareSync, genSaltSync } from "bcrypt";
