@@ -20,7 +20,7 @@ export function showError(err: unknown) {
 }
 
 export const client = initQueryClient(mainContract, {
-  baseUrl: "http://localhost:5000",
+  baseUrl: process.env.NEXT_PUBLIC_SERVER_URI || "",
   baseHeaders: {},
   credentials: "include",
 });

@@ -5,7 +5,7 @@ import { connect } from "mongoose";
 import bodyParser from "body-parser";
 import cors from "cors";
 const port = process.env.PORT || 5000;
-import { createExpressEndpoints, initServer } from "@ts-rest/express";
+import { createExpressEndpoints } from "@ts-rest/express";
 import { mainRouter } from "./routes/_app";
 import { mainContract } from "jobremotecontracts";
 import cookieParser from "cookie-parser";
