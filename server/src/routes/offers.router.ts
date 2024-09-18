@@ -122,8 +122,8 @@ export const offersRouter = tsServer.router(offersContract, {
             offerId: offerId.toString(),
           },
           mode: "payment",
-          success_url: `${process.env.CLIENT_URL}/hire-remotely/success?session_id={CHECKOUT_SESSION_ID}`,
-          cancel_url: `${process.env.CLIENT_URL}/hire-remotely/cancel`,
+          success_url: `${process.env.CORS_URI}/hire-remotely/success?session_id={CHECKOUT_SESSION_ID}`,
+          cancel_url: `${process.env.CORS_URI}/hire-remotely/cancel`,
         });
 
         return {
@@ -616,8 +616,8 @@ export const offersRouter = tsServer.router(offersContract, {
           offerId: offerId.toString(),
         },
         mode: "payment",
-        success_url: `${process.env.CLIENT_URL}/hire-remotely/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${process.env.CLIENT_URL}/hire-remotely/cancel`,
+        success_url: `${process.env.CORS_URI}/hire-remotely/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${process.env.CORS_URI}/hire-remotely/cancel`,
       });
       return {
         status: 200,

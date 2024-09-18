@@ -207,10 +207,8 @@ export const usersRouter = tsServer.router(userContract, {
       res.cookie("token", token, {
         httpOnly: true,
         expires: new Date(Date.now() + 86400000),
-        // secure: process.env.NODE_ENV === "production",
-        secure: true,
-        // sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        sameSite: "none",
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         path: "/",
       });
 
@@ -330,7 +328,7 @@ export const usersRouter = tsServer.router(userContract, {
         subject: "Password Reset",
         text: `You are receiving this because you (or someone else) have requested to reset your password for your account.\n\n
              Please click on the following link, or paste it into your browser to complete the process within one hour of receiving it:\n\n
-             http://localhost:3000/change-password/${resetToken}\n\n
+             ${process.env.CORS_URI}/change-password/${resetToken}\n\n
              If you did not request this, please ignore this email and your password will remain unchanged.\n`,
       };
       await transporter.sendMail(mailOptions);

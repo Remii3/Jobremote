@@ -66,5 +66,5 @@ schedule("0 0 * * *", async () => {
 });
 
 app.listen(port, () => {
-  console.log(`Server is listening at http://localhost:${port}`);
+  console.log(`Server is listening at port:${port}`);
 });
