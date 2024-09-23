@@ -57,3 +57,8 @@
     @apply bg-background text-foreground;
   }
 }
+
+.ck-content {
+  @apply prose;
+  max-width: 100%;
+}

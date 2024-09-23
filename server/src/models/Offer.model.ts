@@ -46,7 +46,7 @@ const offerSchema = new Schema<OfferType>({
     enum: allowedCurrencies,
   },
   logo: {
-    type: String,
+    type: { key: String, url: String, name: String },
   },
   companyName: {
     type: String,

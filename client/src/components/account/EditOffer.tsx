@@ -36,34 +36,53 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { offerSchema } from "@/schemas/offerSchemas";
-import { useState } from "react";
+import {
+  FileInput,
+  FileUploader,
+  FileUploaderContent,
+  FileUploaderItem,
+} from "../ui/extension/file-upload";
+import Image from "next/image";
+import { DropzoneOptions } from "react-dropzone";
 
 interface EditOfferPropsTypes {
   setEditOfferData: (state: null) => void;
   offerData: OfferType;
   handleUpdateOffer: (values: any) => void;
 }
+const dropzone = {
+  accept: {
+    "application/pdf": [".png", ".img", ".jpeg", ".jpg", ".webp"],
+  },
+  multiple: true,
+  maxFiles: 1,
+  maxSize: 4 * 1024 * 10024,
+} satisfies DropzoneOptions;
+
+const editOfferSchema = offerSchema.partial();
 
 export default function EditOffer({
   setEditOfferData,
   offerData,
   handleUpdateOffer,
 }: EditOfferPropsTypes) {
-  const [technologies, setTechnologies] = useState<string[]>(
-    offerData.technologies || []
-  );
-
-  const form = useForm<z.infer<typeof offerSchema>>({
-    resolver: zodResolver(offerSchema),
+  console.log(offerData);
+  const form = useForm<z.infer<typeof editOfferSchema>>({
+    resolver: zodResolver(editOfferSchema),
     defaultValues: {
       title: offerData.title || "",
       content: offerData.content || "",
       experience: offerData.experience || "",
       employmentType: offerData.employmentType || "",
+      companyName: offerData.companyName || "",
+      contractType: offerData.contractType || "",
       localization: offerData.localization || "",
       minSalary: offerData.minSalary || 0,
       maxSalary: offerData.maxSalary || 0,
       currency: offerData.currency || "USD",
+      technologies: offerData.technologies || [],
+      logo: null,
+      pricing: offerData.pricing || "basic",
     },
   });
 
@@ -71,16 +90,18 @@ export default function EditOffer({
     setEditOfferData(null);
   }
 
-  function handleSubmit(values: any) {
+  function handleSubmit(values: z.infer<typeof editOfferSchema>) {
+    console.log(values);
     handleUpdateOffer(values);
   }
 
   function handleTechnologies(technology: string) {
-    if (technologies.includes(technology)) {
-      setTechnologies(technologies.filter((tech) => tech !== technology));
-    } else {
-      setTechnologies([...technologies, technology]);
-    }
+    const currentTechnologies = form.getValues("technologies") || [];
+    const updatedTechnologies = currentTechnologies.includes(technology)
+      ? currentTechnologies.filter((tech) => tech !== technology)
+      : [...currentTechnologies, technology];
+
+    form.setValue("technologies", updatedTechnologies);
   }
 
   const { avLocalizations } = useGetAvailableLocalizations();
@@ -89,6 +110,11 @@ export default function EditOffer({
   const { avExperiences } = useGetAvailableExperiences();
   const { avContractTypes } = useGetAvailableContractTypes();
   const { allowedCurrencies } = useCurrency();
+  function test() {
+    console.log(form.formState.errors);
+  }
+  console.log(avEmploymentTypes);
+  console.log(offerData.employmentType);
   return (
     <section className="space-y-6">
       <div>
@@ -112,6 +138,67 @@ export default function EditOffer({
       <div>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="p-4">
+            <FormField
+              name="logo"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FileUploader
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    dropzoneOptions={dropzone}
+                    reSelect
+                  >
+                    <FileInput>Upload your logo</FileInput>
+                    {field.value && field.value.length > 0 && (
+                      <FileUploaderContent>
+                        {field.value.map((file, i) => (
+                          <FileUploaderItem
+                            key={i}
+                            index={i}
+                            aria-roledescription={`file ${i + 1} containing ${
+                              file.name
+                            }`}
+                            className="p-0 size-20"
+                          >
+                            <div className="aspect-square size-full">
+                              <Image
+                                src={URL.createObjectURL(file)}
+                                alt={file.name}
+                                className="object-cover rounded-md"
+                                fill
+                              />
+                            </div>
+                          </FileUploaderItem>
+                        ))}
+                      </FileUploaderContent>
+                    )}
+                    {offerData.logo && (
+                      <Image
+                        src={offerData.logo}
+                        alt="Offer post company logo"
+                        width={100}
+                        height={100}
+                      />
+                    )}
+                  </FileUploader>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="companyName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Company name</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="title"
@@ -172,7 +259,7 @@ export default function EditOffer({
               name="contractType"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Type of work</FormLabel>
+                  <FormLabel>Contract type</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     value={field.value}
@@ -180,7 +267,7 @@ export default function EditOffer({
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Type of work" />
+                        <SelectValue placeholder="Contract type" />
                       </SelectTrigger>
                     </FormControl>
                     <FormMessage />
@@ -321,7 +408,7 @@ export default function EditOffer({
             <FormField
               control={form.control}
               name="technologies"
-              render={() => (
+              render={({ field }) => (
                 <FormItem className="flex flex-col items-start mt-2">
                   <DropdownMenu>
                     <FormLabel>Technologies</FormLabel>
@@ -329,9 +416,9 @@ export default function EditOffer({
                       <DropdownMenuTrigger asChild>
                         <Button variant={"outline"} className="gap-2">
                           <span>Add tech stack</span>
-                          {technologies.length > 0 && (
+                          {field.value && field.value.length > 0 && (
                             <Badge variant={"secondary"}>
-                              {technologies.length}
+                              {field.value.length}
                             </Badge>
                           )}
                         </Button>
@@ -343,7 +430,10 @@ export default function EditOffer({
                         avTechnologies.body.technologies.map((technology) => (
                           <DropdownMenuCheckboxItem
                             key={technology._id}
-                            checked={technologies.includes(technology.name)}
+                            checked={
+                              field.value &&
+                              field.value.includes(technology.name)
+                            }
                             onCheckedChange={() =>
                               handleTechnologies(technology.name)
                             }
@@ -354,9 +444,9 @@ export default function EditOffer({
                         ))}
                     </DropdownMenuContent>
                   </DropdownMenu>
-                  {technologies.length > 0 && (
+                  {field.value && field.value.length > 0 && (
                     <ul className="flex gap-2">
-                      {technologies.map((tech) => (
+                      {field.value.map((tech) => (
                         <li key={tech}>
                           <button
                             type="button"
@@ -378,7 +468,8 @@ export default function EditOffer({
               <Button
                 type="button"
                 variant={"outline"}
-                onClick={resetOfferData}
+                // onClick={resetOfferData}
+                onClick={test}
               >
                 Go back
               </Button>

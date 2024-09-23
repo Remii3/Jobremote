@@ -14,6 +14,8 @@ import ContractTypeModel from "../models/ContractType.model";
 import Stripe from "stripe";
 import bodyParser from "body-parser";
 import { priceLogic } from "../middleware/priceLogic";
+import { uploadFile } from "../utils/uploadthing";
+import { sanitizeOfferContent } from "../middleware/sanitizer";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "TESTING", {
   apiVersion: "2024-06-20",
@@ -27,10 +29,12 @@ export const offersRouter = tsServer.router(offersContract, {
     middleware: [
       upload.array("logo"),
       (req, res, next) => priceLogic(req, res, next),
+      (req, res, next) => sanitizeOfferContent(req, res, next),
     ],
     handler: async ({ body, req, res }) => {
       const data = body;
       const price = res.locals.price;
+
       if (!price) {
         return {
           status: 404,
@@ -59,28 +63,11 @@ export const offersRouter = tsServer.router(offersContract, {
       } = data;
 
       try {
-        const utapi = new UTApi();
-        let uploadedImg;
-
-        if (req.files && Array.isArray(req.files) && req.files.length > 0) {
-          const logo = req.files[0]!;
-          const metadata = {};
-          const uploadResponse = await utapi.uploadFiles(
-            new File([logo.buffer], logo.originalname),
-            { metadata }
-          );
-          if (uploadResponse.error) {
-            console.error("error", uploadResponse.error);
-            return {
-              status: 500,
-              body: {
-                msg: "We failed to add your new offer.",
-              },
-            };
-          }
-          uploadedImg = uploadResponse.data;
-        }
-
+        const uploadedImg =
+          req.files && Array.isArray(req.files)
+            ? await uploadFile(req.files)
+            : null;
+        console.log(uploadedImg);
         const offerId = new mongoose.Types.ObjectId();
         const offer = await OfferModel.create({
           _id: offerId,
@@ -94,7 +81,7 @@ export const offersRouter = tsServer.router(offersContract, {
           minSalary,
           technologies,
           currency,
-          logo: uploadedImg?.url,
+          logo: uploadedImg,
           companyName,
           isPaid: false,
           pricing,
@@ -299,6 +286,7 @@ export const offersRouter = tsServer.router(offersContract, {
   },
   updateOffer: async ({ body }) => {
     const { offerId } = body;
+    console.log("body", body);
     const offer = await OfferModel.findByIdAndUpdate({ _id: offerId }, body);
     if (!offer) {
       return {

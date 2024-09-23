@@ -9,7 +9,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -40,7 +39,7 @@ import useGetAvailableEmploymentTypes from "@/hooks/useGetAvailableEmploymentTyp
 import useGetAvailableExperiences from "@/hooks/useGetAvailableExperiences";
 import useGetAvailableContractTypes from "@/hooks/useGetAvailableContractTypes";
 import { useCurrency } from "@/context/CurrencyContext";
-import { client, cn } from "@/lib/utils";
+import { client } from "@/lib/utils";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -51,6 +50,23 @@ import Image from "next/image";
 import { loadStripe } from "@stripe/stripe-js";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import {
+  Link as LinkEditor,
+  Bold,
+  ClassicEditor,
+  Essentials,
+  Italic,
+  Paragraph,
+  Undo,
+  List,
+  Heading,
+  Underline,
+  Strikethrough,
+  BlockQuote,
+} from "ckeditor5";
+
+import "ckeditor5/ckeditor5-editor.css";
 
 const dropzone = {
   accept: {
@@ -63,7 +79,7 @@ const dropzone = {
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY || ""
 );
-console.log("off", process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
+
 const pricingOptions = [
   {
     name: "Basic",
@@ -74,7 +90,7 @@ const pricingOptions = [
         <li>Some other option</li>
       </ul>
     ),
-    price: 10,
+    price: 100,
   },
   {
     name: "Standard",
@@ -85,7 +101,7 @@ const pricingOptions = [
         <li>Some other option</li>
       </ul>
     ),
-    price: 20,
+    price: 200,
   },
   {
     name: "Premium",
@@ -96,9 +112,16 @@ const pricingOptions = [
         <li>Some other option</li>
       </ul>
     ),
-    price: 30,
+    price: 300,
   },
 ];
+
+const createNewOfferFormSchema = offerSchema.refine(
+  (data) => {
+    return data.maxSalary >= data.minSalary;
+  },
+  { message: "Max salary must be greater than min salary" }
+);
 
 const OfferForm = () => {
   const queryClient = useQueryClient();
@@ -110,8 +133,8 @@ const OfferForm = () => {
   const { avContractTypes } = useGetAvailableContractTypes();
   const { allowedCurrencies } = useCurrency();
 
-  const form = useForm<z.infer<typeof offerSchema>>({
-    resolver: zodResolver(offerSchema),
+  const form = useForm<z.infer<typeof createNewOfferFormSchema>>({
+    resolver: zodResolver(createNewOfferFormSchema),
     defaultValues: {
       title: "",
       content: "",
@@ -152,10 +175,11 @@ const OfferForm = () => {
     }
 
     const formData = new FormData();
-    console.log(values);
+
     if (values.logo) {
       formData.append("logo", values.logo[0]);
     }
+
     formData.append("title", values.title);
     formData.append("content", values.content);
     formData.append("experience", values.experience);
@@ -169,6 +193,7 @@ const OfferForm = () => {
     formData.append("technologies", JSON.stringify(values.technologies));
     formData.append("companyName", values.companyName);
     formData.append("pricing", values.pricing);
+
     createOffer({
       body: formData,
     });
@@ -259,8 +284,61 @@ const OfferForm = () => {
             <FormItem>
               <FormLabel>Content</FormLabel>
               <FormControl>
-                <Textarea {...field} />
+                <CKEditor
+                  editor={ClassicEditor}
+                  config={{
+                    style: {},
+                    toolbar: {
+                      items: [
+                        "undo",
+                        "redo",
+                        "|",
+                        "heading",
+                        "|",
+                        "bold",
+                        "italic",
+                        "underline",
+                        "strikethrough",
+                        "|",
+                        "link",
+                        "|",
+                        "bulletedList",
+                        "numberedList",
+                        "|",
+                        "blockQuote",
+                      ],
+                    },
+                    plugins: [
+                      Essentials,
+                      Paragraph,
+                      Bold,
+                      Italic,
+                      LinkEditor,
+                      Undo,
+                      List,
+                      Heading,
+                      Underline,
+                      Strikethrough,
+                      BlockQuote,
+                      List,
+                    ],
+
+                    placeholder: "Your offer description...",
+                  }}
+                  data={field.value || ""}
+                  onChange={(event, editor) => {
+                    const data = editor.getData();
+                    field.onChange(data);
+                  }}
+                  onBlur={() => {
+                    field.onBlur();
+                  }}
+                />
               </FormControl>
+              <span className="text-sm text-muted-foreground">
+                Tip: Use shift + enter if you want to break the line and not
+                start a new paragraph
+              </span>
               <FormMessage />
             </FormItem>
           )}
@@ -307,7 +385,7 @@ const OfferForm = () => {
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Type of work" />
+                    <SelectValue placeholder="Contract type" />
                   </SelectTrigger>
                 </FormControl>
                 <FormMessage />

@@ -18,6 +18,7 @@ export type OfferType = {
   logo?: string;
   companyName: string;
   createdAt: string;
+  pricing: "basic" | "standard" | "premium";
 };
 
 export type OfferFiltersType = {
