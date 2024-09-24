@@ -50,9 +50,7 @@ import Image from "next/image";
 import { loadStripe } from "@stripe/stripe-js";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CKEditor } from "@ckeditor/ckeditor5-react";
 
-import "ckeditor5/ckeditor5-editor.css";
 import { OfferCkEditor } from "@/components/ui/ckeditor";
 
 const dropzone = {

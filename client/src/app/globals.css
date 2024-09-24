@@ -58,19 +58,12 @@
   }
 }
 
-.ck-content {
-  @apply prose;
-  max-width: 100%;
-}
-
 .ck-sticky-panel__content,
 .ck-toolbar {
-  @apply rounded-t-md !important;
-  @apply border-input !important;
+  @apply rounded-t-md border-input !important;
 }
 .ck-content {
-  @apply rounded-b-md !important;
-  @apply border-input !important;
+  @apply rounded-b-md border-input prose max-h-64 max-w-full !important;
 }
 .ck-focused {
   @apply shadow-none !important;

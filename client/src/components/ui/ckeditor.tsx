@@ -14,6 +14,8 @@ import {
   BlockQuote,
 } from "ckeditor5";
 
+import "ckeditor5/ckeditor5-editor.css";
+
 export function OfferCkEditor({
   value,
   onChange,
