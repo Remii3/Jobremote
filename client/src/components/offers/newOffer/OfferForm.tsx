@@ -271,7 +271,11 @@ const OfferForm = () => {
             <FormItem>
               <FormLabel>Content</FormLabel>
               <FormControl>
-                <OfferCkEditor />
+                <OfferCkEditor
+                  value={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                />
               </FormControl>
               <span className="text-sm text-muted-foreground">
                 Tip: Use shift + enter if you want to break the line and not

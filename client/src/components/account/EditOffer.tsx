@@ -44,6 +44,7 @@ import {
 } from "../ui/extension/file-upload";
 import Image from "next/image";
 import { DropzoneOptions } from "react-dropzone";
+import { OfferCkEditor } from "../ui/ckeditor";
 
 interface EditOfferPropsTypes {
   setEditOfferData: (state: null) => void;
@@ -219,7 +220,11 @@ export default function EditOffer({
                 <FormItem>
                   <FormLabel>Content</FormLabel>
                   <FormControl>
-                    <Textarea {...field} />
+                    <OfferCkEditor
+                      value={field.value || ""}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

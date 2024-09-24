@@ -14,7 +14,15 @@ import {
   BlockQuote,
 } from "ckeditor5";
 
-export function OfferCkEditor(params: any) {
+export function OfferCkEditor({
+  value,
+  onChange,
+  onBlur,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  onBlur: () => void;
+}) {
   return (
     <CKEditor
       editor={ClassicEditor}
@@ -70,13 +78,13 @@ export function OfferCkEditor(params: any) {
         },
         placeholder: "Your offer description...",
       }}
-      data={field.value || ""}
+      data={value || ""}
       onChange={(event, editor) => {
         const data = editor.getData();
-        field.onChange(data);
+        onChange(data);
       }}
       onBlur={() => {
-        field.onBlur();
+        onBlur();
       }}
     />
   );
