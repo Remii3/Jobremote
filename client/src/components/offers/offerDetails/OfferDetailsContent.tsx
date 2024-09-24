@@ -15,6 +15,7 @@ import {
   X,
   FilePlus as FileIcon,
   Loader2,
+  FilePenIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -151,93 +152,95 @@ export default function OfferDetailsContent({
   return (
     <Form {...form}>
       <form
-        className="space-y-3 flex flex-col h-full"
+        className="space-y-3 flex flex-col h-full pt-3"
         onSubmit={form.handleSubmit(submitApplicationHandler)}
         encType="multipart/form-data"
       >
-        <div className="lg:p-[25px] p-4 bg-gradient-to-br shadow from-indigo-500  to-violet-400  dark:from-indigo-800 dark:to-violet-700 lg:rounded-lg w-full space-y-4">
-          <div className="flex gap-2 justify-between flex-wrap ">
-            <div className="flex gap-4">
-              {offer.logo ? (
-                <div className="rounded-full overflow-hidden bg-background border border-input">
-                  <Image
-                    src={offer.logo}
-                    alt="Company logo"
-                    height={60}
-                    width={60}
-                    className="object-scale-down h-16 w-16 object-center"
-                  />
+        <div className="px-3 space-y-3">
+          <div className="lg:p-[25px] p-4 bg-gradient-to-br shadow from-indigo-500  to-violet-400  dark:from-indigo-800 dark:to-violet-700 lg:rounded-lg w-full space-y-4">
+            <div className="flex gap-2 justify-between flex-wrap ">
+              <div className="flex gap-4">
+                {offer.logo ? (
+                  <div className="rounded-full overflow-hidden bg-background border border-input">
+                    <Image
+                      src={offer.logo}
+                      alt="Company logo"
+                      height={60}
+                      width={60}
+                      className="object-scale-down h-16 w-16 object-center"
+                    />
+                  </div>
+                ) : (
+                  <div className="rounded-full overflow-hidden bg-background border border-input">
+                    <div className="h-16 w-16 bg-muted"></div>
+                  </div>
+                )}
+                <div className="space-y-2">
+                  <h2 className="text-2xl font-semibold text-white">
+                    {offer.title}
+                  </h2>
+                  <p className="flex items-center gap-2 text-white font-medium">
+                    <Building2 className="h-5 w-5" />
+                    <span>{offer.companyName}</span>
+                  </p>
                 </div>
-              ) : (
-                <div className="rounded-full overflow-hidden bg-background border border-input">
-                  <div className="h-16 w-16 bg-muted"></div>
+              </div>
+              <p className="p-3 bg-violet-600/50 dark:bg-violet-800/50 font-medium text-lg text-white flex items-center rounded-md">
+                <Wallet className="h-6 w-6 mr-2" />
+                <span>{formatCurrency(offer.minSalary, currency)}</span>
+                <span className="px-1">-</span>
+                <span>{formatCurrency(offer.maxSalary, currency)}</span>
+              </p>
+              {isMobile && (
+                <div className="flex items-center justify-end absolute top-2 right-2">
+                  <DialogPrimitive.Close className="bg-white rounded-md opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground text-[hsl(224,71.4%,4.1%)]">
+                    <X className="h-6 w-6" />
+                    <span className="sr-only">Close</span>
+                  </DialogPrimitive.Close>
                 </div>
               )}
-              <div className="space-y-2">
-                <h2 className="text-2xl font-semibold text-white">
-                  {offer.title}
-                </h2>
-                <p className="flex items-center gap-2 text-white font-medium">
-                  <Building2 className="h-5 w-5" />
-                  <span>{offer.companyName}</span>
-                </p>
-              </div>
             </div>
-            <p className="p-3 bg-violet-600/50 dark:bg-violet-800/50 font-medium text-lg text-white flex items-center rounded-md">
-              <Wallet className="h-6 w-6 mr-2" />
-              <span>{formatCurrency(offer.minSalary, currency)}</span>
-              <span className="px-1">-</span>
-              <span>{formatCurrency(offer.maxSalary, currency)}</span>
-            </p>
-            {isMobile && (
-              <div className="flex items-center justify-end absolute top-2 right-2">
-                <DialogPrimitive.Close className="bg-white rounded-md opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground text-[hsl(224,71.4%,4.1%)]">
-                  <X className="h-6 w-6" />
-                  <span className="sr-only">Close</span>
-                </DialogPrimitive.Close>
-              </div>
-            )}
+          </div>
+          <div className="px-4 lg:px-0 grid gap-4 grid-rows-2 grid-cols-2 sm:grid-rows-1 sm:grid-cols-4 lg:grid-rows-2 lg:grid-cols-2 xl:grid-rows-1 xl:grid-cols-4">
+            <div className="flex bg-green-50 dark:bg-green-700/50 rounded-md p-3 items-center justify-start h-20 shadow">
+              <FileText className="h-full w-10 text-teal-400/90 mr-2" />
+              <p className="flex flex-col">
+                <span className="font-medium text-teal-400/90 text-sm">
+                  Contract
+                </span>
+                {offer.contractType}
+              </p>
+            </div>
+            <div className="flex bg-sky-50 dark:bg-sky-700/50 p-3 rounded-md items-center justify-start h-20 shadow">
+              <MapPin className="h-full w-10 mr-2 text-sky-400/90" />
+              <p className="flex flex-col">
+                <span className="font-medium text-sky-400/90 text-sm">
+                  Localization
+                </span>
+                {offer.localization}
+              </p>
+            </div>
+            <div className="flex bg-indigo-50 dark:bg-indigo-700/50 p-3 rounded-md items-center justify-start h-20 shadow">
+              <ArrowBigUpDash className="h-12 w-10 mr-2 text-indigo-400/90" />
+              <p className="flex flex-col">
+                <span className="text-indigo-400/90 font-medium text-sm">
+                  Experience
+                </span>
+                {offer.experience}
+              </p>
+            </div>
+            <div className="flex bg-amber-50 dark:bg-amber-700/50 rounded-md p-3 items-center justify-start h-20 shadow">
+              <Gauge className="h-full w-10 mr-2 text-amber-400/90" />
+              <p className="flex flex-col">
+                <span className="font-medium text-amber-400/90 text-sm">
+                  Employment
+                </span>
+                {offer.employmentType}
+              </p>
+            </div>
           </div>
         </div>
-        <div className="px-4 lg:px-0 grid gap-4 grid-rows-2 grid-cols-2 sm:grid-rows-1 sm:grid-cols-4 lg:grid-rows-2 lg:grid-cols-2 xl:grid-rows-1 xl:grid-cols-4">
-          <div className="flex bg-green-50 dark:bg-green-700/50 rounded-md p-3 items-center justify-start h-20 shadow">
-            <FileText className="h-full w-10 text-teal-400/90 mr-2" />
-            <p className="flex flex-col">
-              <span className="font-medium text-teal-400/90 text-sm">
-                Contract
-              </span>
-              {offer.contractType}
-            </p>
-          </div>
-          <div className="flex bg-sky-50 dark:bg-sky-700/50 p-3 rounded-md items-center justify-start h-20 shadow">
-            <MapPin className="h-full w-10 mr-2 text-sky-400/90" />
-            <p className="flex flex-col">
-              <span className="font-medium text-sky-400/90 text-sm">
-                Localization
-              </span>
-              {offer.localization}
-            </p>
-          </div>
-          <div className="flex bg-indigo-50 dark:bg-indigo-700/50 p-3 rounded-md items-center justify-start h-20 shadow">
-            <ArrowBigUpDash className="h-12 w-10 mr-2 text-indigo-400/90" />
-            <p className="flex flex-col">
-              <span className="text-indigo-400/90 font-medium text-sm">
-                Experience
-              </span>
-              {offer.experience}
-            </p>
-          </div>
-          <div className="flex bg-amber-50 dark:bg-amber-700/50 rounded-md p-3 items-center justify-start h-20 shadow">
-            <Gauge className="h-full w-10 mr-2 text-amber-400/90" />
-            <p className="flex flex-col">
-              <span className="font-medium text-amber-400/90 text-sm">
-                Employment
-              </span>
-              {offer.employmentType}
-            </p>
-          </div>
-        </div>
-        <div className="space-y-6 flex-grow">
+        <div className="space-y-6 px-3 flex-grow">
           <div className="px-4 lg:px-0">
             <h3 className="text-2xl font-medium mb-2">Tech stack</h3>
             <div className="flex gap-2 flex-wrap">
@@ -330,8 +333,17 @@ export default function OfferDetailsContent({
                     >
                       <FileInput>
                         <div className="p-5 border-2 border-dashed rounded-md flex items-center gap-3">
-                          <FileIcon className="h-8 w-8" />
-                          <span>Add CV</span>
+                          {field.value && field.value.length > 0 ? (
+                            <>
+                              <FilePenIcon className="h-8 w-8" />
+                              <span>{field.value[0].name}</span>
+                            </>
+                          ) : (
+                            <>
+                              <FileIcon className="h-8 w-8" />
+                              <span>Add CV</span>
+                            </>
+                          )}
                         </div>
                       </FileInput>
                       {field.value && field.value.length > 0 && (
@@ -340,11 +352,12 @@ export default function OfferDetailsContent({
                             <FileUploaderItem
                               key={i}
                               index={i}
+                              className="p-4 flex items-center justify-center"
                               aria-roledescription={`file ${i + 1} containing ${
                                 file.name
                               }`}
                             >
-                              <div className="size-full">{file.name}</div>
+                              <div>{file.name}</div>
                             </FileUploaderItem>
                           ))}
                         </FileUploaderContent>
@@ -359,7 +372,7 @@ export default function OfferDetailsContent({
           </div>
         </div>
 
-        <div className="sticky bottom-0 right-0 bg-background flex justify-between px-4 lg:px-0 py-3 h-[72px]">
+        <div className="sticky bottom-0 right-0 border-t border-t-input bg-background flex justify-between px-4 lg:px-3 py-3 h-[72px] w-full">
           <div>
             <div className="flex font-medium text-green-500">
               <span>{formatCurrency(offer.minSalary, currency)}</span>

@@ -114,7 +114,7 @@ const Offers = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <section className="px-2 py-3 space-y-3">
+      <section className="px-2 py-3 space-y-3 border-b border-b-input">
         <Filters
           filters={filters}
           changeFilters={updateFilters}
@@ -139,7 +139,7 @@ const Offers = () => {
         <section
           ref={offerDetailsRef}
           className={`w-1/2 
-          overflow-y-auto px-3 lg:block hidden`}
+          overflow-y-auto lg:block hidden`}
         >
           <OfferDetails
             isMobile={isMobile}

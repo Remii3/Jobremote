@@ -123,9 +123,9 @@ const OfferDetails = ({
           src="/marketing_man.webp"
           alt="No offer selected"
           width={500}
-          height={500}
-          quality={100}
-          className="aspect-auto"
+          height={332}
+          className="aspect-auto h-[332px] w-[500px]"
+          priority
         />
         <span className="text-muted-foreground">Choose an offer</span>
       </div>
