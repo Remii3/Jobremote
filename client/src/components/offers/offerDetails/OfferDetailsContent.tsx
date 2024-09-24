@@ -239,7 +239,7 @@ export default function OfferDetailsContent({
         </div>
         <div className="space-y-6 flex-grow">
           <div className="px-4 lg:px-0">
-            <h3 className="text-xl font-medium mb-2">Tech stack</h3>
+            <h3 className="text-2xl font-medium mb-2">Tech stack</h3>
             <div className="flex gap-2 flex-wrap">
               {offer.technologies &&
                 offer.technologies.map((technology) => (
@@ -254,18 +254,17 @@ export default function OfferDetailsContent({
             </div>
           </div>
           <div className="px-4 lg:px-0">
-            <h3 className="text-xl font-medium mb-2">Job description</h3>
-            <p
+            <h3 className="text-2xl font-medium mb-2">Job description</h3>
+            <div
               id="offerContent"
               tabIndex={0}
               aria-label="Scrollable offer content"
-              className="prose max-w-[85ch] text-foreground text-sm"
-            >
-              {offer.content}
-            </p>
+              className="prose max-w-[85ch] text-foreground"
+              dangerouslySetInnerHTML={{ __html: offer.content }}
+            />
           </div>
           <div className="px-4 lg:px-0">
-            <h3 className="text-xl font-medium mb-2">Apply for this job</h3>
+            <h3 className="text-2xl font-medium mb-2">Apply for this job</h3>
             <div className="space-y-4">
               <div className="flex gap-8 w-full justify-between">
                 <FormField

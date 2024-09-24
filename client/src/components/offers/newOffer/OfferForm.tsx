@@ -51,22 +51,9 @@ import { loadStripe } from "@stripe/stripe-js";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
-import {
-  Link as LinkEditor,
-  Bold,
-  ClassicEditor,
-  Essentials,
-  Italic,
-  Paragraph,
-  Undo,
-  List,
-  Heading,
-  Underline,
-  Strikethrough,
-  BlockQuote,
-} from "ckeditor5";
 
 import "ckeditor5/ckeditor5-editor.css";
+import { OfferCkEditor } from "@/components/ui/ckeditor";
 
 const dropzone = {
   accept: {
@@ -284,56 +271,7 @@ const OfferForm = () => {
             <FormItem>
               <FormLabel>Content</FormLabel>
               <FormControl>
-                <CKEditor
-                  editor={ClassicEditor}
-                  config={{
-                    style: {},
-                    toolbar: {
-                      items: [
-                        "undo",
-                        "redo",
-                        "|",
-                        "heading",
-                        "|",
-                        "bold",
-                        "italic",
-                        "underline",
-                        "strikethrough",
-                        "|",
-                        "link",
-                        "|",
-                        "bulletedList",
-                        "numberedList",
-                        "|",
-                        "blockQuote",
-                      ],
-                    },
-                    plugins: [
-                      Essentials,
-                      Paragraph,
-                      Bold,
-                      Italic,
-                      LinkEditor,
-                      Undo,
-                      List,
-                      Heading,
-                      Underline,
-                      Strikethrough,
-                      BlockQuote,
-                      List,
-                    ],
-
-                    placeholder: "Your offer description...",
-                  }}
-                  data={field.value || ""}
-                  onChange={(event, editor) => {
-                    const data = editor.getData();
-                    field.onChange(data);
-                  }}
-                  onBlur={() => {
-                    field.onBlur();
-                  }}
-                />
+                <OfferCkEditor />
               </FormControl>
               <span className="text-sm text-muted-foreground">
                 Tip: Use shift + enter if you want to break the line and not
