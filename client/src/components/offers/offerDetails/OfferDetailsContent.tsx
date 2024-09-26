@@ -352,7 +352,7 @@ export default function OfferDetailsContent({
                             <FileUploaderItem
                               key={i}
                               index={i}
-                              className="p-4 flex items-center justify-center"
+                              className="p-4 flex items-center justify-between"
                               aria-roledescription={`file ${i + 1} containing ${
                                 file.name
                               }`}

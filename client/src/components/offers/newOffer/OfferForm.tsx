@@ -3,6 +3,7 @@
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -52,6 +53,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { OfferCkEditor } from "@/components/ui/ckeditor";
+import { FileIcon } from "lucide-react";
 
 const dropzone = {
   accept: {
@@ -101,12 +103,7 @@ const pricingOptions = [
   },
 ];
 
-const createNewOfferFormSchema = offerSchema.refine(
-  (data) => {
-    return data.maxSalary >= data.minSalary;
-  },
-  { message: "Max salary must be greater than min salary" }
-);
+const createNewOfferFormSchema = offerSchema;
 
 const OfferForm = () => {
   const queryClient = useQueryClient();
@@ -158,6 +155,21 @@ const OfferForm = () => {
     if (!user) {
       return;
     }
+    if (values.minSalary <= 0) {
+      return form.setError("minSalary", {
+        message: "Min salary must be greater than 0",
+      });
+    }
+    if (values.maxSalary <= 0) {
+      return form.setError("maxSalary", {
+        message: "Max salary must be greater than 0",
+      });
+    }
+    if (values.maxSalary < values.minSalary) {
+      return form.setError("maxSalary", {
+        message: "Max salary must be greater than min salary",
+      });
+    }
 
     const formData = new FormData();
 
@@ -194,380 +206,427 @@ const OfferForm = () => {
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="p-4">
-        <FormField
-          name="logo"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem className="w-full">
-              <FileUploader
-                value={field.value}
-                onValueChange={field.onChange}
-                dropzoneOptions={dropzone}
-                reSelect
-              >
-                <FileInput>Upload your logo</FileInput>
-                {field.value && field.value.length > 0 && (
-                  <FileUploaderContent>
-                    {field.value.map((file, i) => (
-                      <FileUploaderItem
-                        key={i}
-                        index={i}
-                        aria-roledescription={`file ${i + 1} containing ${
-                          file.name
-                        }`}
-                        className="p-0 size-20"
-                      >
-                        <div className="aspect-square size-full">
-                          <Image
-                            src={URL.createObjectURL(file)}
-                            alt={file.name}
-                            className="object-cover rounded-md"
-                            fill
-                          />
+    <div className="flex max-w-screen-2xl mx-auto gap-8">
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(handleSubmit)}
+          className="px-4 py-8 w-full space-y-6"
+        >
+          <h2 className="text-3xl font-semibold">Post a new job</h2>
+          <div className="flex gap-8 flex-col md:flex-row">
+            <FormField
+              name="logo"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem className="space-y-2">
+                  <FormLabel>Company logo</FormLabel>
+                  <FileUploader
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    dropzoneOptions={dropzone}
+                    reSelect
+                  >
+                    {(!field.value ||
+                      (field.value && field.value.length <= 0)) && (
+                      <FileInput className="h-[200px] w-[200px]">
+                        <div className="p-4 h-full border-2 border-dashed rounded-md flex items-center justify-center gap-3">
+                          <FileIcon className="h-8 w-8" />
+                          <span>Select image</span>
                         </div>
-                      </FileUploaderItem>
-                    ))}
-                  </FileUploaderContent>
-                )}
-              </FileUploader>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="companyName"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Company name</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Title</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="content"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Content</FormLabel>
-              <FormControl>
-                <OfferCkEditor
-                  value={field.value}
-                  onChange={field.onChange}
-                  onBlur={field.onBlur}
-                />
-              </FormControl>
-              <span className="text-sm text-muted-foreground">
-                Tip: Use shift + enter if you want to break the line and not
-                start a new paragraph
-              </span>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="experience"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Experience</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                value={field.value || ""}
-                defaultValue={field.value || ""}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Experience" />
-                  </SelectTrigger>
-                </FormControl>
-                <FormMessage />
-                <SelectContent>
-                  {avExperiences &&
-                    avExperiences.body.experiences.map((exp) => (
-                      <SelectItem key={exp._id} value={exp.name}>
-                        {exp.name}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="contractType"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Type of contract</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                value={field.value}
-                defaultValue={field.value}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Contract type" />
-                  </SelectTrigger>
-                </FormControl>
-                <FormMessage />
-                <SelectContent>
-                  {avContractTypes &&
-                    avContractTypes.body.contractTypes.map((workType) => (
-                      <SelectItem key={workType._id} value={workType.name}>
-                        {workType.name}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="employmentType"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Employment type</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                value={field.value}
-                defaultValue={field.value}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Employment type" />
-                  </SelectTrigger>
-                </FormControl>
-                <FormMessage />
-                <SelectContent>
-                  {avEmploymentTypes &&
-                    avEmploymentTypes.body.employmentTypes.map(
-                      (employmentType) => (
-                        <SelectItem
-                          key={employmentType._id}
-                          value={employmentType.name}
-                        >
-                          {employmentType.name}
-                        </SelectItem>
-                      )
+                      </FileInput>
                     )}
-                </SelectContent>
-              </Select>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="localization"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Localization</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                value={field.value}
-                defaultValue={field.value}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Localization" />
-                  </SelectTrigger>
-                </FormControl>
-                <FormMessage />
-                <SelectContent>
-                  {avLocalizations &&
-                    avLocalizations.body.localizations.map((localization) => (
-                      <SelectItem
-                        key={localization._id}
-                        value={localization.name}
-                      >
-                        {localization.name}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="currency"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Currency</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                value={field.value}
-                defaultValue={field.value}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Currency" />
-                  </SelectTrigger>
-                </FormControl>
-                <FormMessage />
-                <SelectContent>
-                  {allowedCurrencies.map((currency) => (
-                    <SelectItem key={currency} value={currency}>
-                      {currency}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="minSalary"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Min salary</FormLabel>
-              <FormControl>
-                <Input {...field} type="number" min={1} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="maxSalary"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Max salary</FormLabel>
-              <FormControl>
-                <Input {...field} type="number" min={1} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="technologies"
-          render={({ field }) => (
-            <FormItem className="flex flex-col items-start mt-2">
-              <DropdownMenu>
-                <Label>Technologies</Label>
-                <FormControl>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant={"outline"} className="gap-2">
-                      <span>Add tech stack</span>
-                      {field.value.length > 0 && (
-                        <Badge variant={"secondary"}>
-                          {field.value.length}
-                        </Badge>
-                      )}
-                    </Button>
-                  </DropdownMenuTrigger>
-                </FormControl>
-                <DropdownMenuContent>
-                  {avTechnologies &&
-                    avTechnologies.body.technologies.map((technology) => (
-                      <DropdownMenuCheckboxItem
-                        key={technology._id}
-                        checked={field.value.includes(technology.name)}
-                        onCheckedChange={() =>
-                          handleTechnologies(technology.name)
-                        }
-                        preventCloseOnSelect
-                      >
-                        {technology.name}
-                      </DropdownMenuCheckboxItem>
-                    ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-              {field.value && field.value.length > 0 && (
-                <ul className="flex gap-2">
-                  {field.value.map((tech) => (
-                    <li key={tech}>
-                      <button
-                        type="button"
-                        onClick={() => handleTechnologies(tech)}
-                      >
-                        <Badge variant={"outline"}>{tech}</Badge>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
+                    {field.value && field.value.length > 0 && (
+                      <FileUploaderContent>
+                        {field.value.map((file, i) => (
+                          <FileUploaderItem
+                            key={i}
+                            index={i}
+                            aria-roledescription={`file ${i + 1} containing ${
+                              file.name
+                            }`}
+                            className="p-0 size-full"
+                            absoluteRemove
+                          >
+                            <div className="aspect-square size-full">
+                              <Image
+                                src={URL.createObjectURL(file)}
+                                alt={file.name}
+                                className="object-cover rounded-md"
+                                fill
+                              />
+                            </div>
+                          </FileUploaderItem>
+                        ))}
+                      </FileUploaderContent>
+                    )}
+                  </FileUploader>
+                  <FormMessage />
+                </FormItem>
               )}
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="pricing"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Pricing</FormLabel>
-              <FormControl>
-                <RadioGroup
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  className="flex gap-4"
-                >
-                  {pricingOptions.map((option) => (
-                    <FormItem key={option.name} className="relative">
-                      <FormControl>
-                        <RadioGroupItem
-                          value={option.code}
-                          className="absolute top-2 left-2"
-                        />
-                      </FormControl>
-                      <FormLabel className="cursor-pointer">
-                        <Card
-                          className={`${
-                            field.value === option.name &&
-                            "ring-2 ring-ring ring-offset-2"
-                          }`}
-                        >
-                          <CardHeader>
-                            <CardTitle>{option.name}</CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            {option.description}
-                            <div className="mt-4">{option.price} USD</div>
-                          </CardContent>
-                        </Card>
-                      </FormLabel>
-                    </FormItem>
-                  ))}
-                </RadioGroup>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <div className="flex mt-4 gap-4">
-          <Button type="submit" variant={"default"} disabled={isLoading}>
-            Post new offer
-          </Button>
-          <Link href={"/"} className={buttonVariants({ variant: "outline" })}>
-            Go back
-          </Link>
-        </div>
-      </form>
-    </Form>
+            />
+            <div className="space-y-4 flex-grow">
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Title</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="" />
+                    </FormControl>
+                    <FormDescription>
+                      You should type a title for your offer, for example:
+                      Senior Java dev
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="companyName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Company name</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+          <div className="flex gap-8 flex-col md:flex-row">
+            <FormField
+              control={form.control}
+              name="contractType"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel>Type of contract</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Contract type" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <FormMessage />
+                    <SelectContent>
+                      {avContractTypes &&
+                        avContractTypes.body.contractTypes.map((workType) => (
+                          <SelectItem key={workType._id} value={workType.name}>
+                            {workType.name}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="localization"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel>Localization</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Localization" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <FormMessage />
+                    <SelectContent>
+                      {avLocalizations &&
+                        avLocalizations.body.localizations.map(
+                          (localization) => (
+                            <SelectItem
+                              key={localization._id}
+                              value={localization.name}
+                            >
+                              {localization.name}
+                            </SelectItem>
+                          )
+                        )}
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            />
+          </div>
+          <div className="flex gap-8 flex-col md:flex-row">
+            <FormField
+              control={form.control}
+              name="experience"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel>Experience</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value || ""}
+                    defaultValue={field.value || ""}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Experience" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <FormMessage />
+                    <SelectContent>
+                      {avExperiences &&
+                        avExperiences.body.experiences.map((exp) => (
+                          <SelectItem key={exp._id} value={exp.name}>
+                            {exp.name}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="employmentType"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel>Employment type</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Employment type" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <FormMessage />
+                    <SelectContent>
+                      {avEmploymentTypes &&
+                        avEmploymentTypes.body.employmentTypes.map(
+                          (employmentType) => (
+                            <SelectItem
+                              key={employmentType._id}
+                              value={employmentType.name}
+                            >
+                              {employmentType.name}
+                            </SelectItem>
+                          )
+                        )}
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            />
+          </div>
+          <FormField
+            control={form.control}
+            name="content"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Content</FormLabel>
+                <FormControl>
+                  <OfferCkEditor
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                  />
+                </FormControl>
+                <span className="text-sm text-muted-foreground">
+                  Tip: Use shift + enter if you want to break the line and not
+                  start a new paragraph
+                </span>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <div className="flex gap-8 flex-col md:flex-row">
+            <FormField
+              control={form.control}
+              name="minSalary"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel>Min salary</FormLabel>
+                  <FormControl>
+                    <Input {...field} type="number" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="maxSalary"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel>Max salary</FormLabel>
+                  <FormControl>
+                    <Input {...field} type="number" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="currency"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel>Currency</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Currency" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <FormMessage />
+                    <SelectContent>
+                      {allowedCurrencies.map((currency) => (
+                        <SelectItem key={currency} value={currency}>
+                          {currency}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            />
+          </div>
+          <div>
+            <FormField
+              control={form.control}
+              name="technologies"
+              render={({ field }) => (
+                <FormItem className="flex flex-col items-start mt-2">
+                  <DropdownMenu>
+                    <Label>Technologies</Label>
+                    <FormControl>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant={"outline"} className="gap-2">
+                          <span>Add tech stack</span>
+                          {field.value.length > 0 && (
+                            <Badge variant={"secondary"}>
+                              {field.value.length}
+                            </Badge>
+                          )}
+                        </Button>
+                      </DropdownMenuTrigger>
+                    </FormControl>
+                    <DropdownMenuContent>
+                      {avTechnologies &&
+                        avTechnologies.body.technologies.map((technology) => (
+                          <DropdownMenuCheckboxItem
+                            key={technology._id}
+                            checked={field.value.includes(technology.name)}
+                            onCheckedChange={() =>
+                              handleTechnologies(technology.name)
+                            }
+                            preventCloseOnSelect
+                          >
+                            {technology.name}
+                          </DropdownMenuCheckboxItem>
+                        ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  <div className="pt-3">
+                    {field.value && field.value.length > 0 && (
+                      <ul className="flex gap-3">
+                        {field.value.map((tech) => (
+                          <li key={tech}>
+                            <button
+                              type="button"
+                              onClick={() => handleTechnologies(tech)}
+                            >
+                              <Badge variant={"outline"} className="py-1 px-3">
+                                {tech}
+                              </Badge>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <FormField
+            control={form.control}
+            name="pricing"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Model</FormLabel>
+                <FormControl>
+                  <RadioGroup
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    className="flex gap-4"
+                  >
+                    {pricingOptions.map((option) => (
+                      <FormItem key={option.name} className="relative">
+                        <FormControl>
+                          <RadioGroupItem
+                            value={option.code}
+                            className="absolute top-2 left-2"
+                          />
+                        </FormControl>
+                        <FormLabel className="cursor-pointer">
+                          <Card
+                            className={`${
+                              field.value === option.name &&
+                              "ring-2 ring-ring ring-offset-2"
+                            }`}
+                          >
+                            <CardHeader>
+                              <CardTitle>{option.name}</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              {option.description}
+                              <div className="mt-4">{option.price} USD</div>
+                            </CardContent>
+                          </Card>
+                        </FormLabel>
+                      </FormItem>
+                    ))}
+                  </RadioGroup>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <div className="flex mt-4 gap-4">
+            <Button
+              type="submit"
+              variant={"default"}
+              disabled={isLoading}
+              size={"lg"}
+            >
+              Post new offer
+            </Button>
+            <Link href={"/"} className={buttonVariants({ variant: "outline" })}>
+              Go back
+            </Link>
+          </div>
+        </form>
+      </Form>
+      <div className="w-full hidden lg:block">
+        <div className="bg-violet-50 dark:bg-violet-950/50 flex items-center justify-center p-4 w-full h-[calc(100vh-67px)] sticky top-[67px]"></div>
+      </div>
+    </div>
   );
 };
 

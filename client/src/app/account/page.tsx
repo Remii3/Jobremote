@@ -26,7 +26,7 @@ export default function AccountPage() {
 
   return (
     <AuthGuard>
-      <div className="h-full content-start grid px-4 py-6 md:p-8 grid-cols-1 md:grid-cols-sideNav_1 md:gap-8 md:grid-rows-1">
+      <div className="h-full max-w-screen-2xl mx-auto content-start grid px-4 py-6 md:p-8 grid-cols-1 md:grid-cols-sideNav_1 md:gap-8 md:grid-rows-1">
         <Select onValueChange={(e: TabsTypes) => changeTab(e)}>
           <SelectTrigger className="md:hidden mb-6">
             {currentTab.charAt(0).toUpperCase() + currentTab.slice(1)}
