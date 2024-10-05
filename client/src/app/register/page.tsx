@@ -19,19 +19,38 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { client } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { RegisterUserSchemaRefined } from "@/schemas/userSchemas";
+import { CreateUserSchema } from "jobremotecontracts/dist/schemas/userSchemas";
+
+export const CreateUserSchemaRefined = CreateUserSchema.superRefine(
+  (data, ctx) => {
+    if (data.password !== data.passwordRepeat) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Passwords don't match",
+        path: ["passwordRepeat"],
+      });
+    }
+    if (data.privacyPolicyConsent === false) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Privacy policy needs to be accepted",
+        path: ["privacyPolicyConsent"],
+      });
+    }
+  }
+);
 
 export default function RegisterPage() {
   const router = useRouter();
   const {
     mutate: register,
-    isLoading,
+    isPending,
     isError,
     error,
   } = client.users.createUser.useMutation({
     onSuccess: () => router.push("/login"),
     onError: (error) => {
-      if (error.status === 404) {
+      if (error.status === 400 || error.status === 409) {
         form.setError(error.body.field, {
           type: "manual",
           message: error.body.msg,
@@ -50,8 +69,8 @@ export default function RegisterPage() {
     passwordRepeat: false,
   });
 
-  const form = useForm<z.infer<typeof RegisterUserSchemaRefined>>({
-    resolver: zodResolver(RegisterUserSchemaRefined),
+  const form = useForm<z.infer<typeof CreateUserSchemaRefined>>({
+    resolver: zodResolver(CreateUserSchemaRefined),
     defaultValues: {
       email: "",
       password: "",
@@ -65,7 +84,7 @@ export default function RegisterPage() {
     setShowPasswords((prev) => ({ ...prev, [name]: !prev[name] }));
   }
 
-  function submitHandler(data: z.infer<typeof RegisterUserSchemaRefined>) {
+  function submitHandler(data: z.infer<typeof CreateUserSchemaRefined>) {
     register({ body: data });
   }
   return (
@@ -211,11 +230,11 @@ export default function RegisterPage() {
             <div className="flex flex-col gap-2 mt-4">
               <Button
                 type="submit"
-                disabled={isLoading}
+                disabled={isPending}
                 variant={"default"}
                 size={"lg"}
               >
-                {isLoading ? (
+                {isPending ? (
                   <Loader2 className="h-6 w-6 animate-spin" />
                 ) : (
                   "Create an account"

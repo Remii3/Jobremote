@@ -1,10 +1,9 @@
 import { offersContract } from "jobremotecontracts";
 import OfferModel, { OfferType } from "../models/Offer.model";
 import { User } from "../models/User.model";
-import { tsServer } from "../utils/utils";
+import { activeUntilOfferDateCalculator, tsServer } from "../utils/utils";
 import { createTransport } from "nodemailer";
 import multer from "multer";
-import { UTApi } from "uploadthing/server";
 import mongoose from "mongoose";
 import TechnologyModel from "../models/Technology.model";
 import EmploymentTypeModel from "../models/EmploymentType.model";
@@ -14,7 +13,7 @@ import ContractTypeModel from "../models/ContractType.model";
 import Stripe from "stripe";
 import bodyParser from "body-parser";
 import { priceLogic } from "../middleware/priceLogic";
-import { uploadFile } from "../utils/uploadthing";
+import { updateFiles, uploadFile } from "../utils/uploadthing";
 import { sanitizeOfferContent } from "../middleware/sanitizer";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "TESTING", {
@@ -35,7 +34,7 @@ export const offersRouter = tsServer.router(offersContract, {
       const data = body;
       const price = res.locals.price;
 
-      if (!price) {
+      if (!price || res.locals.pricing === null) {
         return {
           status: 404,
           body: {
@@ -43,31 +42,30 @@ export const offersRouter = tsServer.router(offersContract, {
           },
         };
       }
-
-      data.technologies = JSON.parse(data.technologies);
-
-      const {
-        title,
-        content,
-        experience,
-        localization,
-        employmentType,
-        contractType,
-        minSalary,
-        maxSalary,
-        technologies,
-        currency,
-        userId,
-        companyName,
-        pricing,
-      } = data;
-
       try {
+        data.technologies = JSON.parse(data.technologies);
+
+        const {
+          title,
+          content,
+          experience,
+          localization,
+          employmentType,
+          contractType,
+          minSalary,
+          maxSalary,
+          technologies,
+          currency,
+          userId,
+          companyName,
+          pricing,
+        } = data;
+
         const uploadedImg =
-          req.files && Array.isArray(req.files)
+          req.files && Array.isArray(req.files) && req.files.length > 0
             ? await uploadFile(req.files)
             : null;
-        console.log(uploadedImg);
+
         const offerId = new mongoose.Types.ObjectId();
         const offer = await OfferModel.create({
           _id: offerId,
@@ -81,16 +79,13 @@ export const offersRouter = tsServer.router(offersContract, {
           minSalary,
           technologies,
           currency,
-          logo: uploadedImg,
+          logo: uploadedImg || null,
           companyName,
           isPaid: false,
           pricing,
+          expireAt: null,
+          userId,
         });
-
-        await User.findByIdAndUpdate(
-          { _id: userId },
-          { $push: { createdOffers: offer._id } }
-        );
 
         const session = await stripe.checkout.sessions.create({
           payment_method_types: ["card"],
@@ -108,10 +103,11 @@ export const offersRouter = tsServer.router(offersContract, {
           ],
           metadata: {
             offerId: offerId.toString(),
+            pricing,
           },
           mode: "payment",
-          success_url: `${process.env.CORS_URI}/hire-remotely/success?session_id={CHECKOUT_SESSION_ID}`,
-          cancel_url: `${process.env.CORS_URI}/hire-remotely/cancel`,
+          success_url: `${process.env.CORS_URI}/hire-remotely/success/${offerId}`,
+          cancel_url: `${process.env.CORS_URI}/hire-remotely/cancel/${offerId}`,
         });
 
         return {
@@ -122,6 +118,8 @@ export const offersRouter = tsServer.router(offersContract, {
           },
         };
       } catch (err) {
+        console.error("Error creating offer", err);
+
         return {
           status: 500,
           body: {
@@ -152,11 +150,8 @@ export const offersRouter = tsServer.router(offersContract, {
       if (query.filters?.experience && query.filters.experience.length > 0) {
         filters.experience = { $in: query.filters.experience };
       }
-      if (
-        query.filters?.technologies &&
-        query.filters.technologies.length > 0
-      ) {
-        filters.technologies = { $in: query.filters.technologies };
+      if (query.filters?.technology && query.filters.technology.length > 0) {
+        filters.technologies = { $in: query.filters.technology };
       }
       if (query.filters?.keyword) {
         filters.$or = [
@@ -170,7 +165,7 @@ export const offersRouter = tsServer.router(offersContract, {
       filters.isDeleted = false;
       filters.isPaid = true;
       let sortValue = {};
-      switch (query.sortOption) {
+      switch (query.sort) {
         case "salary_highest":
           sortValue = { minSalary: -1 };
           break;
@@ -210,6 +205,7 @@ export const offersRouter = tsServer.router(offersContract, {
       const preparedOffers = fetchedOffers.map((offer) => ({
         ...offer,
         _id: offer._id.toString(),
+        userId: offer.userId.toString(),
       }));
       return {
         status: 200,
@@ -224,6 +220,7 @@ export const offersRouter = tsServer.router(offersContract, {
         },
       };
     } catch (err) {
+      console.error("Error fetching offers", err);
       return {
         status: 500,
         body: {
@@ -232,34 +229,14 @@ export const offersRouter = tsServer.router(offersContract, {
       };
     }
   },
-  getUserOffers: async ({ query }) => {
-    const { ids } = query;
-    const offers = await OfferModel.find({ _id: { $in: ids } }).lean();
-    if (!offers.length) {
-      return {
-        status: 200,
-        body: {
-          offers: [],
-          msg: "No offers found",
-        },
-      };
-    }
-    const preparedOffers = offers.map((offer) => ({
-      ...offer,
-      _id: offer._id.toString(),
-    }));
-    return {
-      status: 200,
-      body: {
-        offers: preparedOffers,
-        msg: "Offers fetched successfully",
-      },
-    };
-  },
-  getOffer: async ({ query }) => {
-    try {
-      const offer = await OfferModel.findById(query.id).lean();
-      if (!offer) {
+
+  updateOffer: {
+    middleware: [upload.array("logo")],
+    handler: async ({ body, files }) => {
+      const { _id, ...updatedData } = body;
+      const offerData = await OfferModel.findById(_id).lean();
+
+      if (!offerData) {
         return {
           status: 404,
           body: {
@@ -267,49 +244,45 @@ export const offersRouter = tsServer.router(offersContract, {
           },
         };
       }
-      const preparedOffer = { ...offer, _id: offer._id.toString() };
+      console.log(_id, body, files);
+      if (files && Array.isArray(files) && files.length > 0) {
+        const uploadedImg = await updateFiles(
+          offerData.logo ? offerData.logo.key : "",
+          files
+        );
+
+        await OfferModel.findByIdAndUpdate(
+          { _id },
+          {
+            ...updatedData,
+            logo: uploadedImg,
+          }
+        );
+      } else {
+        await OfferModel.findByIdAndUpdate(
+          { _id },
+          {
+            ...updatedData,
+          }
+        );
+      }
+
       return {
         status: 200,
         body: {
-          offer: preparedOffer,
-          msg: "Offer fetched successfully",
+          msg: "Offer updated successfully",
         },
       };
-    } catch (err) {
-      return {
-        status: 500,
-        body: {
-          msg: "We failed to get you the selected offer.",
-        },
-      };
-    }
-  },
-  updateOffer: async ({ body }) => {
-    const { offerId } = body;
-    console.log("body", body);
-    const offer = await OfferModel.findByIdAndUpdate({ _id: offerId }, body);
-    if (!offer) {
-      return {
-        status: 404,
-        body: {
-          msg: "Offer not found",
-        },
-      };
-    }
-    return {
-      status: 200,
-      body: {
-        msg: "Offer updated successfully",
-      },
-    };
+    },
   },
   deleteOffer: async ({ body }) => {
-    const { offerId } = body;
-    const offer = await OfferModel.findByIdAndUpdate(
-      { _id: offerId },
-      { isDeleted: true, deletedAt: new Date() }
+    const { _id } = body;
+    const deletedOffer = await OfferModel.findByIdAndUpdate(
+      { _id },
+      { $set: { isDeleted: true, deletedAt: new Date() } },
+      { new: true }
     );
-    if (!offer) {
+    if (!deletedOffer) {
       return {
         status: 404,
         body: {
@@ -317,10 +290,7 @@ export const offersRouter = tsServer.router(offersContract, {
         },
       };
     }
-    await User.updateMany(
-      { createdOffers: offerId },
-      { $pull: { createdOffers: offerId } }
-    );
+
     return {
       status: 200,
       body: {
@@ -584,7 +554,7 @@ export const offersRouter = tsServer.router(offersContract, {
     }
   },
   payForOffer: async ({ body }) => {
-    const { offerId, title, currency } = body;
+    const { offerId, title, currency, pricing } = body;
     const offerPrice = 1000;
     try {
       const session = await stripe.checkout.sessions.create({
@@ -603,10 +573,11 @@ export const offersRouter = tsServer.router(offersContract, {
         ],
         metadata: {
           offerId: offerId.toString(),
+          pricing,
         },
         mode: "payment",
-        success_url: `${process.env.CORS_URI}/hire-remotely/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${process.env.CORS_URI}/hire-remotely/cancel`,
+        success_url: `${process.env.CORS_URI}/account`,
+        cancel_url: `${process.env.CORS_URI}/account`,
       });
       return {
         status: 200,
@@ -640,43 +611,49 @@ export const offersRouter = tsServer.router(offersContract, {
         };
       }
 
-      let event;
-
       try {
-        event = stripe.webhooks.constructEvent(
+        const event = stripe.webhooks.constructEvent(
           body,
           sig,
           process.env.STRIPE_WEBHOOK_SECRET || ""
         );
+
+        if (event.type === "checkout.session.completed") {
+          const session = event.data.object;
+          if (session.metadata) {
+            const activeUntil = activeUntilOfferDateCalculator(
+              session.metadata.pricing
+            );
+
+            await OfferModel.findByIdAndUpdate(session.metadata.offerId, {
+              $set: {
+                isPaid: true,
+                activeUntil,
+              },
+            });
+          }
+        }
+
+        return {
+          status: 200,
+          body: {
+            msg: `Webhook received ${event.id}`,
+          },
+        };
       } catch (err) {
         console.error(
           `Webhook signature verification failed.`,
           (err as Error).message
         );
         return {
-          status: 400,
+          status: 500,
           body: {
-            msg: "Webhook signature verification failed.",
+            msg: `Webhook signature verification failed: ${
+              (err as Error).message
+            }`,
           },
         };
       }
-
-      if (event.type === "checkout.session.completed") {
-        const session = event.data.object;
-
-        if (session.metadata) {
-          await OfferModel.findByIdAndUpdate(session.metadata.offerId, {
-            isPaid: true,
-          });
-        }
-      }
-
-      return {
-        status: 200,
-        body: {
-          msg: `Webhook received`,
-        },
-      };
     },
   },
 });

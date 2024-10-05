@@ -6,7 +6,11 @@ import { useIsMobile } from "@/hooks/useIsMobile";
 import Filters from "../filters/Filters";
 import { findFocusableElements } from "@/lib/utils";
 import OffersList from "./offersList/OffersList";
-import { OfferFiltersType, OfferSortOptionsTypes } from "@/types/types";
+import {
+  OfferFiltersType,
+  OfferSortOptionsTypes,
+  OfferType,
+} from "@/types/types";
 
 import {
   Dialog,
@@ -31,16 +35,16 @@ const initialFilters: OfferFiltersType = {
 };
 
 const Offers = () => {
-  const [selectedOffer, setSelectedOffer] = useState<null | string>(null);
   const offerDetailsRef = useRef<HTMLElement | null>(null);
   const offersListRef = useRef<HTMLElement | null>(null);
   const lastOfferRef = useRef<HTMLElement | null>(null);
+  const [selectedOffer, setSelectedOffer] = useState<null | OfferType>(null);
   const [sortOption, setSortOption] = useState<OfferSortOptionsTypes>("latest");
-  const isMobile = useIsMobile();
   const [isSuccessApplied, setIsSuccessApplied] = useState<boolean>(false);
-
   const [filters, setFilters] =
     useState<Required<OfferFiltersType>>(initialFilters);
+
+  const isMobile = useIsMobile();
 
   function toggleSuccessApplied() {
     setIsSuccessApplied((prev) => !prev);
@@ -76,8 +80,8 @@ const Offers = () => {
     setFilters(initialFilters);
   }, []);
 
-  const changeCurrentOffer = (newId: string | null) => {
-    setSelectedOffer(newId);
+  const changeCurrentOffer = (newOfferData: OfferType | null) => {
+    setSelectedOffer(newOfferData);
   };
 
   const handleKeyDown = useCallback((event: KeyboardEvent) => {

@@ -4,7 +4,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useCurrency } from "@/context/CurrencyContext";
 import { Slider } from "@/components/ui/slider";
-import { Input } from "@/components/ui/input";
 import useGetAvailableExperiences from "@/hooks/useGetAvailableExperiences";
 import useGetAvailableContractTypes from "@/hooks/useGetAvailableContractTypes";
 import useGetAvailableLocalizations from "@/hooks/useGetAvailableLocalizations";

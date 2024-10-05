@@ -103,25 +103,22 @@ export default function OfferDetailsContent({
     },
   });
 
-  const {
-    mutate: applyForOffer,
-    error,
-    isLoading,
-  } = client.offers.offerApply.useMutation({
-    onSuccess: () => {
-      fetchUserData();
-      form.reset();
-      toggleSuccessApplied();
-    },
-    onError: (error) => {
-      if (error.status === 404 || error.status === 500) {
-        form.setError("root", {
-          type: "manual",
-          message: error.body.msg,
-        });
-      }
-    },
-  });
+  const { mutate: applyForOffer, isPending } =
+    client.offers.offerApply.useMutation({
+      onSuccess: () => {
+        fetchUserData();
+        form.reset();
+        toggleSuccessApplied();
+      },
+      onError: (error) => {
+        if (error.status === 404 || error.status === 500) {
+          form.setError("root", {
+            type: "manual",
+            message: error.body.msg,
+          });
+        }
+      },
+    });
 
   function submitApplicationHandler(values: z.infer<typeof applicationSchema>) {
     if (values.cv === null) return;
@@ -160,10 +157,10 @@ export default function OfferDetailsContent({
           <div className="lg:p-[25px] p-4 bg-gradient-to-br shadow from-indigo-500  to-violet-400  dark:from-indigo-800 dark:to-violet-700 lg:rounded-lg w-full space-y-4">
             <div className="flex gap-2 justify-between flex-wrap ">
               <div className="flex gap-4">
-                {offer.logo ? (
+                {offer.logo?.url ? (
                   <div className="rounded-full overflow-hidden bg-background border border-input">
                     <Image
-                      src={offer.logo}
+                      src={offer.logo.url}
                       alt="Company logo"
                       height={60}
                       width={60}
@@ -385,19 +382,19 @@ export default function OfferDetailsContent({
             variant={"default"}
             className="relative"
             aria-live="polite"
-            disabled={isLoading}
+            disabled={isPending}
           >
             <Loader2
               className={`absolute w-6 h-6 animate-spin transition-opacity ${
-                isLoading ? "opacity-100" : "opacity-0"
+                isPending ? "opacity-100" : "opacity-0"
               }`}
-              aria-hidden={isLoading ? "false" : "true"}
+              aria-hidden={isPending ? "false" : "true"}
             />
             <span
               className={`transition-opacity ${
-                isLoading ? "opacity-0" : "opacity-100"
+                isPending ? "opacity-0" : "opacity-100"
               }`}
-              aria-hidden={isLoading ? "true" : "false"}
+              aria-hidden={isPending ? "true" : "false"}
             >
               Apply
             </span>

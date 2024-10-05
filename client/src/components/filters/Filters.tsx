@@ -27,7 +27,6 @@ import Technologies from "./parts/Technologies";
 import EmploymentType from "./parts/EmploymentType";
 import Localizations from "./parts/Localizations";
 import Experience from "./parts/Experience";
-import { OfferSortOptionsSchema } from "@/schemas/offerSchemas";
 import useGetAvailableContractTypes from "@/hooks/useGetAvailableContractTypes";
 import ContractType from "./parts/ContractType";
 import useGetAvailableEmploymentTypes from "@/hooks/useGetAvailableEmploymentTypes";
@@ -48,6 +47,10 @@ const SORT_OPTIONS: Record<OfferSortOptionsTypes, string> = {
   salary_highest: "Highest salary",
   salary_lowest: "Lowest salary",
 };
+const SORT_OPTIONS_ARRAY = Object.keys(SORT_OPTIONS).map((key) => ({
+  key: key as OfferSortOptionsTypes,
+  value: SORT_OPTIONS[key as OfferSortOptionsTypes],
+}));
 
 const ServerErrorMessage = ({
   message,
@@ -364,9 +367,9 @@ const Filters = ({
                 setSortOption(option as OfferSortOptionsTypes)
               }
             >
-              {OfferSortOptionsSchema.options.map((option) => (
-                <DropdownMenuRadioItem key={option} value={option}>
-                  {SORT_OPTIONS[option]}
+              {SORT_OPTIONS_ARRAY.map((option) => (
+                <DropdownMenuRadioItem key={option.key} value={option.key}>
+                  {option.value}
                 </DropdownMenuRadioItem>
               ))}
             </DropdownMenuRadioGroup>

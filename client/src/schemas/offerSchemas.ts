@@ -16,12 +16,6 @@ export const offerSchema = z.object({
     allowedCurrencies as [AllowedCurrenciesType, ...AllowedCurrenciesType[]]
   ),
   technologies: z.array(z.string()),
-  logo: z.array(z.instanceof(File)).nullable(),
+  logo: z.array(z.instanceof(File)).nullish(),
   companyName: z.string().min(1),
 });
-
-export const OfferSortOptionsSchema = z.enum([
-  "latest",
-  "salary_highest",
-  "salary_lowest",
-]);

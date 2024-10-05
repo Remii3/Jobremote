@@ -1,58 +1,135 @@
 import { userContract } from "jobremotecontracts";
 import { User } from "../models/User.model";
-import { getDataFromToken, tsServer } from "../utils/utils";
-import { hashSync, compareSync, genSaltSync } from "bcrypt";
+import { genPassword, getDataFromToken, tsServer } from "../utils/utils";
 import { sign } from "jsonwebtoken";
 import { createTransport } from "nodemailer";
+import mongoose from "mongoose";
+import OfferModel from "../models/Offer.model";
 
 export const usersRouter = tsServer.router(userContract, {
   createUser: async ({ body }) => {
     const {
       email,
       password,
+      passwordRepeat,
       commercialConsent,
       privacyPolicyConsent,
-      passwordRepeat,
     } = body;
 
+    if (password !== passwordRepeat) {
+      return {
+        status: 400,
+        body: {
+          msg: "Passwords do not match",
+          field: "passwordRepeat",
+        },
+      };
+    }
+
     try {
-      const user = await User.findOne({ email });
-      if (user) {
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
         return {
-          status: 404,
+          status: 409,
           body: {
             msg: "User already exists",
             field: "email",
           },
         };
       }
-      const salt = genSaltSync(10);
-      const passwordHash = hashSync(password, salt);
 
-      await User.create({
+      const passwordHash = await genPassword(password);
+      const userId = new mongoose.Types.ObjectId();
+
+      const newUser = await User.create({
+        _id: userId,
         email,
         password: passwordHash,
-        description: "",
-        name: "",
         commercialConsent,
         privacyPolicyConsent,
       });
+
       return {
         status: 201,
         body: {
-          email,
-          password: passwordHash,
-          commercialConsent,
-          privacyPolicyConsent,
-          passwordRepeat,
+          msg: "User created successfully",
+          user: {
+            email: newUser.email,
+            commercialConsent: newUser.commercialConsent,
+            privacyPolicyConsent: newUser.privacyPolicyConsent,
+            createdAt: newUser.createdAt,
+          },
         },
       };
     } catch (err) {
-      console.error(err);
+      console.error("Error creating user:", err);
       return {
         status: 500,
         body: {
-          msg: "We failed to add your new account.",
+          msg: "We failed to create your new account. Please try again later.",
+        },
+      };
+    }
+  },
+  getUserOffers: async ({ query }) => {
+    const { _id } = query;
+    const offers = await User.findOne({ _id })
+      .select("_id")
+      .populate({ path: "createdOffers", match: { isDeleted: false } })
+      .lean();
+
+    if (!offers) {
+      return {
+        status: 200,
+        body: {
+          offers: [],
+          msg: "No offers found",
+        },
+      };
+    }
+
+    const preparedOffers = offers.createdOffers.map((offer) => ({
+      ...offer,
+      _id: offer._id.toString(),
+    }));
+
+    return {
+      status: 200,
+      body: {
+        offers: preparedOffers,
+        msg: "Offers fetched successfully",
+      },
+    };
+  },
+  getUserOffer: async ({ query }) => {
+    const { _id } = query;
+    try {
+      const offer = await OfferModel.findById(_id).lean();
+      if (!offer) {
+        return {
+          status: 404,
+          body: {
+            msg: "Offer not found",
+          },
+        };
+      }
+      const preparedOffer = {
+        ...offer,
+        _id: offer._id.toString(),
+        userId: offer.userId.toString(),
+      };
+      return {
+        status: 200,
+        body: {
+          offer: preparedOffer,
+          msg: "Offer fetched successfully",
+        },
+      };
+    } catch (err) {
+      return {
+        status: 500,
+        body: {
+          msg: "We failed to get you the selected offer.",
         },
       };
     }
@@ -62,8 +139,8 @@ export const usersRouter = tsServer.router(userContract, {
     try {
       const updatedUser = await User.findByIdAndUpdate(
         { _id },
-        { ...updatedFieldsValues },
-        { new: true }
+        { $set: { ...updatedFieldsValues } },
+        { new: true, runValidators: true }
       );
 
       if (!updatedUser) {
@@ -82,22 +159,22 @@ export const usersRouter = tsServer.router(userContract, {
         },
       };
     } catch (err) {
-      console.error(err);
+      console.error("Error updating user:", err);
       return {
         status: 500,
         body: {
-          msg: "We failed to update your account.",
+          msg: "We failed to update your account. Please try again later.",
         },
       };
     }
   },
-  updateSetings: async ({ body, req, res }) => {
-    const { userId, ...updatedSettings } = body;
+  updateUserSettings: async ({ body }) => {
+    const { _id, ...updatedSettings } = body;
     try {
       const updateStatus = await User.findByIdAndUpdate(
-        userId,
-        { ...updatedSettings },
-        { new: true }
+        _id,
+        { $set: { ...updatedSettings } },
+        { new: true, runValidators: true }
       );
       if (!updateStatus) {
         return {
@@ -154,27 +231,17 @@ export const usersRouter = tsServer.router(userContract, {
           },
         };
       }
-      const isPasswordCorrect = compareSync(password, user.password);
+
+      const isPasswordCorrect = await user.validatePassword(password);
+
       if (!isPasswordCorrect) {
-        user.loginAttempts += 1;
-
-        const invalidPasswordMsg = `Invalid password. You have ${
-          maxAttempts - user.loginAttempts
-        } attempt(s) left.`;
-
-        if (user.loginAttempts >= maxAttempts) {
-          user.lockUntil = Date.now() + 2 * 60 * 60 * 1000;
-          user.loginAttempts = 0;
-          user.lockCount += 1;
-        }
-
-        if (user.lockCount >= 3) {
-          user.banned = true;
-        }
-
-        await user.save();
-
-        if (user.isLocked() || user.loginAttempts >= maxAttempts - 2) {
+        const updatedUser: any = await user.incLoginAttempts();
+        const attemptsLeft = maxAttempts - updatedUser.loginAttempts;
+        const invalidPasswordMsg = `Invalid password. You have ${attemptsLeft} attempt(s) left.`;
+        if (
+          updatedUser.isLocked() ||
+          updatedUser.loginAttempts >= maxAttempts - 2
+        ) {
           return {
             status: 401,
             body: {
@@ -192,11 +259,7 @@ export const usersRouter = tsServer.router(userContract, {
         };
       }
 
-      user.loginAttempts = 0;
-      user.lockUntil = undefined;
-      user.lockCount = 0;
-
-      await user.save();
+      user.resetLoginAttempts();
 
       const tokenData = {
         _id: user._id,
@@ -222,7 +285,7 @@ export const usersRouter = tsServer.router(userContract, {
         },
       };
     } catch (err) {
-      console.error(err);
+      console.error("Error during login:", err);
       return {
         status: 500,
         body: {
@@ -248,11 +311,11 @@ export const usersRouter = tsServer.router(userContract, {
         commercialConsent: 1,
         updatedAt: 1,
         createdAt: 1,
-        createdOffers: 1,
         name: 1,
         description: 1,
         appliedToOffers: 1,
       }).lean();
+
       if (!user) {
         return {
           status: 404,
@@ -261,38 +324,54 @@ export const usersRouter = tsServer.router(userContract, {
           },
         };
       }
+
+      const preparedUser = {
+        ...user,
+        _id: user._id.toString(),
+      };
+
       return {
         status: 200,
         body: {
-          user,
+          user: preparedUser,
         },
       };
     } catch (err) {
-      console.error(err);
+      console.error("Error fetching user data:", err);
       return {
         status: 500,
         body: {
-          msg: "We failed to get your user data.",
+          msg: "We failed to retrieve your user data. Please try again later.",
         },
       };
     }
   },
   logoutUser: async ({ res }) => {
-    res.cookie("token", "", {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      path: "/",
-      expires: new Date(0),
-    });
-    return {
-      status: 200,
-      body: {
-        msg: "User logged out",
-      },
-    };
+    try {
+      res.cookie("token", "", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        path: "/",
+        expires: new Date(0),
+      });
+      return {
+        status: 200,
+        body: {
+          msg: "User logged out",
+        },
+      };
+    } catch (err) {
+      console.error("Error during logout:", err);
+      return {
+        status: 500,
+        body: {
+          msg: "We failed to log you out. Please try again later.",
+        },
+      };
+    }
   },
-  resetPassword: async ({ body, req }) => {
+  resetPassword: async ({ body }) => {
     const { email } = body;
     try {
       const user = await User.findOne({ email });
@@ -314,8 +393,8 @@ export const usersRouter = tsServer.router(userContract, {
       await user.save();
 
       const transporter = createTransport({
-        service: "gmail",
-        secure: false,
+        service: process.env.EMAIL_SERVICE || "gmail",
+        secure: process.env.NODE_ENV === "production",
         auth: {
           user: process.env.EMAIL_USER,
           pass: process.env.EMAIL_PASS,
@@ -339,17 +418,18 @@ export const usersRouter = tsServer.router(userContract, {
         },
       };
     } catch (err) {
-      console.error(err);
+      console.error("Error resetting password:", err);
       return {
         status: 500,
         body: {
-          msg: "We failed to reset your password.",
+          msg: "We failed to reset your password. Please try again later.",
         },
       };
     }
   },
   changePassword: async ({ body }) => {
     const { password, resetToken } = body;
+
     if (!resetToken) {
       return {
         status: 400,
@@ -358,11 +438,13 @@ export const usersRouter = tsServer.router(userContract, {
         },
       };
     }
+
     try {
       const user = await User.findOne({
         resetPasswordToken: resetToken,
         resetPasswordExpires: { $gt: Date.now() },
       });
+
       if (!user) {
         return {
           status: 400,
@@ -371,13 +453,7 @@ export const usersRouter = tsServer.router(userContract, {
           },
         };
       }
-      user.password = hashSync(password, genSaltSync(10));
-      user.resetPasswordToken = undefined;
-      user.resetPasswordExpires = undefined;
-      user.lockUntil = undefined;
-      user.banned = false;
-      user.lockCount = 0;
-      await user.save();
+      user.setPassword(password);
 
       return {
         status: 200,
@@ -386,10 +462,12 @@ export const usersRouter = tsServer.router(userContract, {
         },
       };
     } catch (err) {
+      console.error("Error changing password:", err);
+
       return {
         status: 500,
         body: {
-          msg: "We failed to change your password.",
+          msg: "We failed to change your password. Please try again later.",
         },
       };
     }
@@ -402,6 +480,7 @@ export const usersRouter = tsServer.router(userContract, {
         return {
           status: 200,
           body: {
+            msg: "User session is inactive",
             state: false,
           },
         };
@@ -409,14 +488,49 @@ export const usersRouter = tsServer.router(userContract, {
       return {
         status: 200,
         body: {
+          msg: "User session is active",
           state: true,
         },
       };
     } catch (err) {
+      console.error("Error checking user session:", err);
+
       return {
         status: 500,
         body: {
-          msg: "We failed to check your session.",
+          msg: "We failed to check your session. Please try again later.",
+        },
+      };
+    }
+  },
+  deleteUser: async ({ body }) => {
+    const { _id } = body;
+    try {
+      const deletedUser = await User.findByIdAndUpdate(
+        { _id },
+        { $set: { isDeleted: true, deletedAt: new Date() } },
+        { new: true }
+      );
+      if (!deletedUser) {
+        return {
+          status: 404,
+          body: {
+            msg: "User not found",
+          },
+        };
+      }
+      return {
+        status: 200,
+        body: {
+          msg: "User deleted",
+        },
+      };
+    } catch (err) {
+      console.error("Error deleting user:", err);
+      return {
+        status: 500,
+        body: {
+          msg: "We failed to delete your account. Please try again later.",
         },
       };
     }

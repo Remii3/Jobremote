@@ -1,12 +1,11 @@
 "use client";
 import { client } from "@/lib/utils";
 import { createContext, useContext, useEffect, useState } from "react";
-import { z } from "zod";
 import { useRouter } from "next/navigation";
-import { PublicUserSchema } from "@/schemas/userSchemas";
-type UserTypes = z.infer<typeof PublicUserSchema>;
+import { UserType } from "@/types/types";
+
 interface UserContextTypes {
-  user: UserTypes | null;
+  user: UserType | null;
   logOut: () => void;
   fetchUserData: () => void;
   userDataIsLoading: boolean;
@@ -19,7 +18,7 @@ interface UserContextProviderTypes {
 const UserContext = createContext<UserContextTypes | undefined>(undefined);
 
 function UserContextProvider({ children }: UserContextProviderTypes) {
-  const [user, setUser] = useState<UserTypes | null>(null);
+  const [user, setUser] = useState<UserType | null>(null);
   const [userDataIsLoading, setUserDataIsLoading] = useState(true);
   const router = useRouter();
 
@@ -30,47 +29,50 @@ function UserContextProvider({ children }: UserContextProviderTypes) {
     },
   });
 
-  const { data: sessionState, isLoading } =
+  const { data: sessionState, isLoading: sessionLoading } =
     client.users.checkUserSession.useQuery(
       ["userSession"],
       {},
-      {
-        retry: false,
-        refetchOnWindowFocus: false,
-        onSuccess: () => {},
-      }
+      { queryKey: ["userSession"], retry: false }
     );
 
-  const { data, refetch, isError } = client.users.getUser.useQuery(
+  const {
+    data: userData,
+    refetch,
+    isError,
+  } = client.users.getUser.useQuery(
     ["userData"],
     {},
     {
+      queryKey: ["userData"],
+      enabled: false,
+      retry: false,
       refetchOnReconnect: false,
       refetchOnWindowFocus: false,
-      retry: false,
       refetchOnMount: false,
-      enabled: false,
     }
   );
-  useEffect(() => {
-    if (!isLoading && sessionState?.body.state === false) {
-      setUserDataIsLoading(false);
-    }
-  }, [isLoading, sessionState?.body.state]);
-  useEffect(() => {
-    if (sessionState?.body.state) {
-      refetch();
-    }
-  }, [sessionState, refetch]);
 
   useEffect(() => {
-    if (data && data.body.user) {
-      setUser(data.body.user);
+    if (!sessionLoading) {
+      if (sessionState?.body.state === true) {
+        refetch();
+      } else {
+        setUser(null);
+        setUserDataIsLoading(false);
+      }
+    }
+  }, [sessionLoading, sessionState, refetch]);
+
+  useEffect(() => {
+    if (userData) {
+      setUser(userData.body.user);
       setUserDataIsLoading(false);
     } else if (isError) {
       setUser(null);
+      setUserDataIsLoading(false);
     }
-  }, [data, isError]);
+  }, [userData, isError]);
 
   const fetchUserData = async () => {
     await refetch();

@@ -3,12 +3,13 @@ import { client } from "@/lib/utils";
 function useGetAvailableContractTypes() {
   const {
     data: avContractTypes,
-    isLoading: avContractTypesIsLoading,
+    isPending: avContractTypesIsLoading,
     error: avContractTypesError,
   } = client.offers.getContractTypes.useQuery(
     ["contract-types"],
     {},
     {
+      queryKey: ["contract-types"],
       refetchOnMount: false,
       refetchOnReconnect: false,
       refetchOnWindowFocus: false,

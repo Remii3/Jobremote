@@ -309,11 +309,11 @@ export const FileUploaderItem = forwardRef<
         {children}
         {absoluteRemove && (
           <>
-            <div className="group-hover:opacity-50 rounded-md group-hover:bg-black h-full w-full absolute top-0 left-0"></div>
+            <div className="group-hover:opacity-50 rounded-md bg-black opacity-0 h-full w-full absolute top-0 left-0 transition-opacity"></div>
             <button
               type="button"
               onClick={() => removeFileFromSet(index)}
-              className="absolute top-0 left-0 w-full h-full"
+              className="absolute top-0 left-0 w-full h-full opacity-0 group-hover:opacity-100 transition-opacity"
             >
               <span className="sr-only">remove item {index}</span>
               <RemoveIcon className="hidden group-hover:block w-6 h-6 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 group-hover:stroke-destructive duration-200 ease-in-out" />
