@@ -15,6 +15,7 @@ import bodyParser from "body-parser";
 import { priceLogic } from "../middleware/priceLogic";
 import { updateFiles, uploadFile } from "../utils/uploadthing";
 import { sanitizeOfferContent } from "../middleware/sanitizer";
+import { PaymentModel } from "../models/PaymentType.model";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "TESTING", {
   apiVersion: "2024-06-20",
@@ -34,32 +35,8 @@ export const offersRouter = tsServer.router(offersContract, {
       const data = body;
       const price = res.locals.price;
 
-      if (!price || res.locals.pricing === null) {
-        return {
-          status: 404,
-          body: {
-            msg: "Invalid pricing",
-          },
-        };
-      }
       try {
         data.technologies = JSON.parse(data.technologies);
-
-        const {
-          title,
-          content,
-          experience,
-          localization,
-          employmentType,
-          contractType,
-          minSalary,
-          maxSalary,
-          technologies,
-          currency,
-          userId,
-          companyName,
-          pricing,
-        } = data;
 
         const uploadedImg =
           req.files && Array.isArray(req.files) && req.files.length > 0
@@ -67,24 +44,12 @@ export const offersRouter = tsServer.router(offersContract, {
             : null;
 
         const offerId = new mongoose.Types.ObjectId();
-        const offer = await OfferModel.create({
+        await OfferModel.create({
+          ...data,
           _id: offerId,
-          title,
-          content,
-          experience,
-          localization,
-          contractType,
-          employmentType,
-          maxSalary,
-          minSalary,
-          technologies,
-          currency,
           logo: uploadedImg || null,
-          companyName,
           isPaid: false,
-          pricing,
           expireAt: null,
-          userId,
         });
 
         const session = await stripe.checkout.sessions.create({
@@ -92,9 +57,9 @@ export const offersRouter = tsServer.router(offersContract, {
           line_items: [
             {
               price_data: {
-                currency,
+                currency: data.currency,
                 product_data: {
-                  name: title,
+                  name: data.title,
                 },
                 unit_amount: price * 100,
               },
@@ -103,7 +68,7 @@ export const offersRouter = tsServer.router(offersContract, {
           ],
           metadata: {
             offerId: offerId.toString(),
-            pricing,
+            pricing: data.pricing,
           },
           mode: "payment",
           success_url: `${process.env.CORS_URI}/hire-remotely/success/${offerId}`,
@@ -274,6 +239,35 @@ export const offersRouter = tsServer.router(offersContract, {
         },
       };
     },
+  },
+  getPaymentTypes: async () => {
+    try {
+      const paymentTypes = await PaymentModel.find({});
+
+      if (!paymentTypes.length) {
+        return {
+          status: 200,
+          body: {
+            paymentTypes: [],
+            msg: "No payment types found",
+          },
+        };
+      }
+      return {
+        status: 200,
+        body: {
+          paymentTypes,
+          msg: "Payment types fetched successfully",
+        },
+      };
+    } catch (err) {
+      return {
+        status: 500,
+        body: {
+          msg: "We failed to get you available payment types. Try again later.",
+        },
+      };
+    }
   },
   deleteOffer: async ({ body }) => {
     const { _id } = body;
@@ -553,48 +547,52 @@ export const offersRouter = tsServer.router(offersContract, {
       };
     }
   },
-  payForOffer: async ({ body }) => {
-    const { offerId, title, currency, pricing } = body;
-    const offerPrice = 1000;
-    try {
-      const session = await stripe.checkout.sessions.create({
-        payment_method_types: ["card"],
-        line_items: [
-          {
-            price_data: {
-              currency,
-              product_data: {
-                name: title,
+  payForOffer: {
+    middleware: [(req, res, next) => priceLogic(req, res, next)],
+    handler: async ({ body, res }) => {
+      const { offerId, title, currency, pricing } = body;
+
+      try {
+        const price = res.locals.price;
+        const session = await stripe.checkout.sessions.create({
+          payment_method_types: ["card"],
+          line_items: [
+            {
+              price_data: {
+                currency,
+                product_data: {
+                  name: title,
+                },
+                unit_amount: price,
               },
-              unit_amount: offerPrice,
+              quantity: 1,
             },
-            quantity: 1,
+          ],
+          metadata: {
+            offerId: offerId.toString(),
+            pricing,
           },
-        ],
-        metadata: {
-          offerId: offerId.toString(),
-          pricing,
-        },
-        mode: "payment",
-        success_url: `${process.env.CORS_URI}/account`,
-        cancel_url: `${process.env.CORS_URI}/account`,
-      });
-      return {
-        status: 200,
-        body: {
-          msg: "Payment session created",
-          sessionId: session.id,
-        },
-      };
-    } catch (err) {
-      console.error(err);
-      return {
-        status: 500,
-        body: {
-          msg: "We failed to create payment session.",
-        },
-      };
-    }
+          mode: "payment",
+          success_url: `${process.env.CORS_URI}/account`,
+          cancel_url: `${process.env.CORS_URI}/account`,
+        });
+        return {
+          status: 200,
+          body: {
+            msg: "Payment session created",
+            sessionId: session.id,
+          },
+        };
+      } catch (err) {
+        console.error(err);
+        return {
+          status: 500,
+          body: {
+            msg: "We failed to create payment session.",
+          },
+        };
+      }
+    },
   },
   webhook: {
     middleware: [bodyParser.raw({ type: "application/json" })],

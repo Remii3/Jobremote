@@ -1,18 +1,25 @@
 import { NextFunction, Request, Response } from "express";
+import { PaymentModel } from "../models/PaymentType.model";
 
-export function priceLogic(req: Request, res: Response, next: NextFunction) {
-  switch (req.body.pricing) {
-    case "basic":
-      res.locals.price = 100;
-      break;
-    case "standard":
-      res.locals.price = 200;
-      break;
-    case "premium":
-      res.locals.price = 300;
-      break;
-    default:
-      res.locals.price = null;
+export async function priceLogic(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const price = await PaymentModel.findOne({ code: req.body.pricing }).select(
+      "price"
+    );
+    if (!price) {
+      next(new Error("Pricing code not found."));
+    }
+    res.locals.price = price;
+    next();
+  } catch (err) {
+    next(
+      new Error(
+        "An error occurred while fetching the offer price. Please try again later."
+      )
+    );
   }
-  next();
 }

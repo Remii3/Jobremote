@@ -29,7 +29,7 @@ const ClientOfferFormSchema = CreateOfferSchema.omit({
   technologies: z.array(z.string()),
 });
 
-const ClientModelFormSchema = CreateOfferSchema.pick({
+export const ClientModelFormSchema = CreateOfferSchema.pick({
   pricing: true,
 });
 
@@ -59,7 +59,7 @@ export default function HireRemotely() {
   const modelForm = useForm({
     resolver: zodResolver(ClientModelFormSchema),
     defaultValues: {
-      pricing: "basic",
+      pricing: "",
     },
   });
 

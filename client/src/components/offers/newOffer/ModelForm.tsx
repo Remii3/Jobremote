@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -9,46 +11,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-
-const pricingOptions = [
-  {
-    name: "Basic",
-    code: "basic",
-    description: (
-      <ul>
-        <li>Basic offer</li>
-        <li>Some other option</li>
-      </ul>
-    ),
-    price: 100,
-  },
-  {
-    name: "Standard",
-    code: "standard",
-    description: (
-      <ul>
-        <li>Standard offer</li>
-        <li>Some other option</li>
-      </ul>
-    ),
-    price: 200,
-  },
-  {
-    name: "Premium",
-    code: "premium",
-    description: (
-      <ul>
-        <li>Premium offer</li>
-        <li>Some other option</li>
-      </ul>
-    ),
-    price: 300,
-  },
-];
+import { client } from "@/lib/utils";
+import { ClientModelFormSchema } from "@/app/hire-remotely/page";
+import { z } from "zod";
+import { UseFormReturn } from "react-hook-form";
 
 type ModelFormPropsTypes = {
-  form: any;
-  handleSubmit: (values: any) => void;
+  form: UseFormReturn<z.infer<typeof ClientModelFormSchema>>;
+  handleSubmit: () => void;
   changeStepPrev: (step: number) => void;
 };
 
@@ -57,6 +27,11 @@ export default function ModelForm({
   handleSubmit,
   changeStepPrev,
 }: ModelFormPropsTypes) {
+  const {
+    data: paymentTypes,
+    isPending,
+    error,
+  } = client.offers.getPaymentTypes.useQuery(["paymentTypes"]);
   return (
     <div>
       <Button onClick={() => changeStepPrev(1)}>Edit offer data</Button>
@@ -74,7 +49,7 @@ export default function ModelForm({
                     defaultValue={field.value}
                     className="flex gap-4"
                   >
-                    {pricingOptions.map((option) => (
+                    {paymentTypes?.body.paymentTypes.map((option) => (
                       <FormItem key={option.name} className="relative">
                         <FormControl>
                           <RadioGroupItem
@@ -107,7 +82,12 @@ export default function ModelForm({
             )}
           />
           <div>
-            <Button type="submit">Pay for new offer</Button>
+            <Button
+              type="submit"
+              disabled={isPending || !form.getValues("pricing")}
+            >
+              Pay for new offer
+            </Button>
           </div>
         </form>
       </Form>
