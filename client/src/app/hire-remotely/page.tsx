@@ -8,6 +8,7 @@ import { MultiStepProgressBar } from "@/components/ui/multi-step-progress";
 import { useUser } from "@/context/UserContext";
 import { client } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import { useQueryClient } from "@ts-rest/react-query/tanstack";
 import { CreateOfferSchema } from "jobremotecontracts/dist/schemas/offerSchemas";
@@ -37,7 +38,9 @@ export default function HireRemotely() {
   const [currentStep, setCurrentStep] = useState(1);
   const { user, fetchUserData } = useUser();
   const queryClient = useQueryClient();
-
+  const options = {
+    clientSecret: `${process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY}`,
+  };
   const offerForm = useForm<z.infer<typeof ClientOfferFormSchema>>({
     resolver: zodResolver(ClientOfferFormSchema),
     defaultValues: {
@@ -168,10 +171,12 @@ export default function HireRemotely() {
         )}
         {currentStep === 3 && (
           <div>
-            <PaymentForm
-              changeStepPrev={changeStepPrev}
-              handleSubmit={handlePaymentFormSubmit}
-            />
+            <Elements stripe={stripePromise} options={options}>
+              <PaymentForm
+                changeStepPrev={changeStepPrev}
+                handleSubmit={handlePaymentFormSubmit}
+              />
+            </Elements>
           </div>
         )}
       </div>

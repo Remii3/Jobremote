@@ -50,7 +50,10 @@ export default function ModelForm({
                     className="flex gap-4"
                   >
                     {paymentTypes?.body.paymentTypes.map((option) => (
-                      <FormItem key={option.name} className="relative">
+                      <FormItem
+                        key={option.name}
+                        className="relative basis-[33%]"
+                      >
                         <FormControl>
                           <RadioGroupItem
                             value={option.code}
@@ -68,7 +71,11 @@ export default function ModelForm({
                               <CardTitle>{option.name}</CardTitle>
                             </CardHeader>
                             <CardContent>
-                              {option.description}
+                              <ul className="space-y-3">
+                                {option.benefits.map((benefit, i) => {
+                                  return <li key={i}>{benefit}</li>;
+                                })}
+                              </ul>
                               <div className="mt-4">{option.price} USD</div>
                             </CardContent>
                           </Card>
