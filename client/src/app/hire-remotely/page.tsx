@@ -2,10 +2,13 @@
 import AuthGuard from "@/components/AuthGuard";
 import ModelForm from "@/components/offers/newOffer/ModelForm";
 import OfferForm from "@/components/offers/newOffer/OfferForm";
-import { Button } from "@/components/ui/button";
 import { MultiStepProgressBar } from "@/components/ui/multi-step-progress";
 import { useUser } from "@/context/UserContext";
 import { client } from "@/lib/utils";
+import {
+  ClientModelFormSchema,
+  ClientOfferFormSchema,
+} from "@/schema/OfferSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loadStripe } from "@stripe/stripe-js";
 import { useQueryClient } from "@ts-rest/react-query/tanstack";
@@ -17,20 +20,6 @@ import { z } from "zod";
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY || ""
 );
-
-export const ClientOfferFormSchema = CreateOfferSchema.omit({
-  userId: true,
-  logo: true,
-  pricing: true,
-  technologies: true,
-}).extend({
-  // logo: z.array(z.instanceof(File)).nullable(),
-  technologies: z.array(z.string()),
-});
-
-export const ClientModelFormSchema = CreateOfferSchema.pick({
-  pricing: true,
-});
 
 export default function HireRemotely() {
   const [currentStep, setCurrentStep] = useState(1);

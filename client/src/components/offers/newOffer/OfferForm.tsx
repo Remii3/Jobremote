@@ -43,7 +43,7 @@ import Image from "next/image";
 import { FileIcon, FilePlusIcon } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
 import { z } from "zod";
-import { ClientOfferFormSchema } from "@/app/hire-remotely/page";
+import { ClientOfferFormSchema } from "@/schema/OfferSchema";
 import dynamic from "next/dynamic";
 import AvatarUploader from "@/components/ui/avatar-uploader";
 const OfferCkEditor = dynamic(

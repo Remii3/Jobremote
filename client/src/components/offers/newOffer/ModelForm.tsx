@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { client } from "@/lib/utils";
-import { ClientModelFormSchema } from "@/app/hire-remotely/page";
+import { ClientModelFormSchema } from "@/schema/OfferSchema";
 import { z } from "zod";
 import { UseFormReturn } from "react-hook-form";
 
