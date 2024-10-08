@@ -71,7 +71,6 @@ const offerSchema = new Schema<OfferType>(
     },
     pricing: {
       type: String,
-      enum: ["basic", "standard", "premium"],
       required: true,
     },
     expireAt: { type: Date, default: null, index: { expires: "0s" } },

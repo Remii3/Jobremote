@@ -1,7 +1,7 @@
 "use clinet";
 
 import { Button } from "../ui/button";
-import { ArrowLeft, FileIcon } from "lucide-react";
+import { ArrowLeft, FileEditIcon, FilePlusIcon } from "lucide-react";
 import { Separator } from "../ui/separator";
 import {
   Form,
@@ -93,7 +93,7 @@ export default function EditOffer({
       maxSalary: 0,
       currency: "USD",
       technologies: [],
-      logo: null,
+      logo: [],
     },
   });
 
@@ -172,11 +172,11 @@ export default function EditOffer({
         maxSalary: offerData.body.offer.maxSalary,
         currency: offerData.body.offer.currency,
         technologies: offerData.body.offer.technologies,
-        logo: null,
+        logo: [],
       });
     }
   }, [form, offerData]);
-
+  console.log("data: ", offerData);
   return (
     <section className="space-y-6">
       <div>
@@ -208,53 +208,54 @@ export default function EditOffer({
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(handleSubmit)}
-              className="px-4 py-8 w-full space-y-6"
+              className="px-4 w-full space-y-6"
             >
               <div className="flex gap-8 flex-col md:flex-row">
                 <FormField
                   name="logo"
                   control={form.control}
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Company logo</FormLabel>
+                    <FormItem className="flex flex-col">
+                      <div>
+                        <FormLabel>Company logo</FormLabel>
+                      </div>
                       <FileUploader
                         value={field.value}
                         onValueChange={field.onChange}
                         dropzoneOptions={dropzone}
                         reSelect
-                        className="w-[200px]"
+                        className="h-full"
                       >
                         {(!field.value ||
                           (field.value && field.value.length <= 0)) && (
-                          <FileInput className="group relative w-[200px] h-[200px]">
+                          <FileInput className="h-full">
                             {offerData.body.offer.logo ? (
-                              <div>
-                                <div className="opacity-0 group-hover:opacity-50 bg-black h-full w-full absolute inset-0 rounded-md transition-opacity"></div>
-                                <div>
-                                  <span className="group-hover:opacity-100 opacity-0 absolute inset-0 flex items-center justify-center gap-2 text-white text-xs font-semibold transition-opacity">
-                                    <span>Change</span>
-                                    <FileIcon className="h-4 w-4" />
-                                  </span>
-                                </div>
+                              <div className="group h-full min-h-[128px] min-w-[128px] max-w-[128px] relative">
                                 <Image
                                   src={offerData.body.offer.logo.url}
                                   alt="Company current uploaded logo"
-                                  height={200}
-                                  width={200}
-                                  className="object-cover w-[200px] h-[200px] rounded-md"
+                                  fill
+                                  quality={100}
+                                  className="h-full w-full aspect-square rounded-full"
                                 />
+                                <div className="group-hover:opacity-50 rounded-full bg-black opacity-0 h-full w-full absolute top-0 left-0 transition-opacity"></div>
+                                <button
+                                  type="button"
+                                  className="absolute top-0 left-0 w-full h-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <FileEditIcon className="hidden group-hover:block w-6 h-6 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 group-hover:stroke-white duration-200 ease-in-out" />
+                                </button>
                               </div>
                             ) : (
-                              <div className="p-4 h-full border-2 border-dashed rounded-md flex items-center justify-center gap-3">
-                                <FileIcon className="h-8 w-8" />
-                                <span>Select image</span>
+                              <div className="group p-4 h-full border-2 border-dashed rounded-full flex items-center justify-center gap-1 min-w-[128px] min-h-[128px] max-w-[128px]">
+                                <FilePlusIcon className="h-7 w-7 text-muted-foreground group-hover:text-foreground transition" />
                               </div>
                             )}
                           </FileInput>
                         )}
 
                         {field.value && field.value.length > 0 && (
-                          <FileUploaderContent>
+                          <FileUploaderContent className="w-full h-full">
                             {field.value.map((file, i) => (
                               <FileUploaderItem
                                 key={i}
@@ -263,17 +264,14 @@ export default function EditOffer({
                                   i + 1
                                 } containing ${file.name}`}
                                 absoluteRemove
-                                className="w-[200px] h-[200px] relative p-0"
+                                className="p-0 rounded-full min-h-[128px] min-w-[128px] max-w-[128px] relative"
                               >
-                                <div className="aspect-square size-full">
-                                  <Image
-                                    src={URL.createObjectURL(file)}
-                                    alt={file.name}
-                                    className="object-cover rounded-md w-[200px] h-[200px]"
-                                    height={200}
-                                    width={200}
-                                  />
-                                </div>
+                                <Image
+                                  src={URL.createObjectURL(file)}
+                                  alt={file.name}
+                                  className="object-cover rounded-full aspect-square min-w-[128px]"
+                                  fill
+                                />
                               </FileUploaderItem>
                             ))}
                           </FileUploaderContent>
@@ -284,13 +282,13 @@ export default function EditOffer({
                     </FormItem>
                   )}
                 />
-                <div className="space-y-4 flex-grow">
+                <div className="space-y-4 flex-grow flex flex-col justify-between h-full">
                   <FormField
                     control={form.control}
-                    name="companyName"
+                    name="title"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Company name</FormLabel>
+                        <FormLabel>Title</FormLabel>
                         <FormControl>
                           <Input {...field} />
                         </FormControl>
@@ -300,10 +298,10 @@ export default function EditOffer({
                   />
                   <FormField
                     control={form.control}
-                    name="title"
+                    name="companyName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Title</FormLabel>
+                        <FormLabel>Company name</FormLabel>
                         <FormControl>
                           <Input {...field} />
                         </FormControl>
@@ -318,7 +316,7 @@ export default function EditOffer({
                   control={form.control}
                   name="contractType"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="min-w-[200px]">
                       <FormLabel>Contract type</FormLabel>
                       <Select
                         onValueChange={field.onChange}
@@ -352,7 +350,7 @@ export default function EditOffer({
                   control={form.control}
                   name="localization"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="min-w-[200px]">
                       <FormLabel>Localization</FormLabel>
                       <Select
                         onValueChange={field.onChange}
@@ -388,7 +386,7 @@ export default function EditOffer({
                   control={form.control}
                   name="experience"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="min-w-[200px]">
                       <FormLabel>Experience</FormLabel>
                       <Select
                         onValueChange={field.onChange}
@@ -417,7 +415,7 @@ export default function EditOffer({
                   control={form.control}
                   name="employmentType"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="min-w-[200px]">
                       <FormLabel>Employment type</FormLabel>
                       <Select
                         onValueChange={field.onChange}
@@ -496,7 +494,7 @@ export default function EditOffer({
                   control={form.control}
                   name="currency"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="min-w-[200px]">
                       <FormLabel>Currency</FormLabel>
                       <Select
                         onValueChange={field.onChange}

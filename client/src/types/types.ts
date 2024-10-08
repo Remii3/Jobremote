@@ -22,7 +22,7 @@ export type OfferType = {
 };
 
 export type AdminOfferType = OfferType & {
-  pricing: "basic" | "standard" | "premium";
+  pricing: string;
   isPaid: boolean;
   activeUntil: string | null;
   userId: string;

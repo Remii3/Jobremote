@@ -12,9 +12,10 @@ export async function priceLogic(
     );
     if (!price) {
       next(new Error("Pricing code not found."));
+    } else {
+      res.locals.price = price.price * 100;
+      next();
     }
-    res.locals.price = price;
-    next();
   } catch (err) {
     next(
       new Error(

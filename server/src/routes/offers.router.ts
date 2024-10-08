@@ -38,12 +38,12 @@ export const offersRouter = tsServer.router(offersContract, {
       try {
         data.technologies = JSON.parse(data.technologies);
 
+        const offerId = new mongoose.Types.ObjectId();
         const uploadedImg =
           req.files && Array.isArray(req.files) && req.files.length > 0
-            ? await uploadFile(req.files)
+            ? await uploadFile(req.files, offerId.toString())
             : null;
 
-        const offerId = new mongoose.Types.ObjectId();
         await OfferModel.create({
           ...data,
           _id: offerId,
@@ -61,7 +61,7 @@ export const offersRouter = tsServer.router(offersContract, {
                 product_data: {
                   name: data.title,
                 },
-                unit_amount: price * 100,
+                unit_amount: price,
               },
               quantity: 1,
             },
@@ -209,7 +209,7 @@ export const offersRouter = tsServer.router(offersContract, {
           },
         };
       }
-      console.log(_id, body, files);
+
       if (files && Array.isArray(files) && files.length > 0) {
         const uploadedImg = await updateFiles(
           offerData.logo ? offerData.logo.key : "",
@@ -325,7 +325,7 @@ export const offersRouter = tsServer.router(offersContract, {
             },
           };
         }
-        console.log(req.files);
+
         const transporter = createTransport({
           service: "gmail",
           secure: false,

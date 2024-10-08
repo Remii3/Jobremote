@@ -39,8 +39,11 @@ export default function OfferItem({
   ) {
     changeCurrentOffer(offerData);
   }
-  const isYoungerThan2Days =
-    new Date(createdAt) > new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+  const daysOld = Math.floor(
+    (new Date().getTime() - new Date(createdAt).getTime()) /
+      (1000 * 60 * 60 * 24)
+  );
+  const isYoungerThan2Days = daysOld < 3;
   return (
     <li>
       <button
@@ -122,8 +125,10 @@ export default function OfferItem({
                     </Badge>
                   ))}
               </div>
-              {isYoungerThan2Days && (
+              {isYoungerThan2Days ? (
                 <Badge variant={"outlinePrimary"}>New</Badge>
+              ) : (
+                <Badge variant={"secondary"}>{daysOld}d ago</Badge>
               )}
             </div>
           </div>

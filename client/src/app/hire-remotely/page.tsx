@@ -2,13 +2,11 @@
 import AuthGuard from "@/components/AuthGuard";
 import ModelForm from "@/components/offers/newOffer/ModelForm";
 import OfferForm from "@/components/offers/newOffer/OfferForm";
-import PaymentForm from "@/components/offers/newOffer/PaymentForm";
 import { Button } from "@/components/ui/button";
 import { MultiStepProgressBar } from "@/components/ui/multi-step-progress";
 import { useUser } from "@/context/UserContext";
 import { client } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import { useQueryClient } from "@ts-rest/react-query/tanstack";
 import { CreateOfferSchema } from "jobremotecontracts/dist/schemas/offerSchemas";
@@ -20,13 +18,13 @@ const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY || ""
 );
 
-const ClientOfferFormSchema = CreateOfferSchema.omit({
+export const ClientOfferFormSchema = CreateOfferSchema.omit({
   userId: true,
   logo: true,
   pricing: true,
   technologies: true,
 }).extend({
-  logo: z.array(z.instanceof(File)).nullable(),
+  // logo: z.array(z.instanceof(File)).nullable(),
   technologies: z.array(z.string()),
 });
 
@@ -38,9 +36,8 @@ export default function HireRemotely() {
   const [currentStep, setCurrentStep] = useState(1);
   const { user, fetchUserData } = useUser();
   const queryClient = useQueryClient();
-  const options = {
-    clientSecret: `${process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY}`,
-  };
+  const [selectedLogo, setSelectedLogo] = useState<File[] | null>(null);
+
   const offerForm = useForm<z.infer<typeof ClientOfferFormSchema>>({
     resolver: zodResolver(ClientOfferFormSchema),
     defaultValues: {
@@ -51,7 +48,6 @@ export default function HireRemotely() {
       localization: "",
       maxSalary: 0,
       currency: "USD",
-      logo: null,
       minSalary: 0,
       contractType: "",
       technologies: [],
@@ -88,18 +84,14 @@ export default function HireRemotely() {
     setCurrentStep(2);
   }
 
-  function handleModelFormSubmit() {
-    setCurrentStep(3);
-  }
-
   function handlePaymentFormSubmit() {
     if (!user) return;
     const newOfferFormData = new FormData();
 
     const offerValues = offerForm.getValues();
     const modelValues = modelForm.getValues();
-    if (offerValues.logo) {
-      newOfferFormData.append("logo", offerValues.logo[0]);
+    if (selectedLogo) {
+      newOfferFormData.append("logo", selectedLogo[0]);
     }
 
     newOfferFormData.append("title", offerValues.title);
@@ -136,27 +128,21 @@ export default function HireRemotely() {
   function changeStepPrev(step: number) {
     setCurrentStep(step);
   }
+  function handleChangeLogo(newLogo: File[] | null) {
+    setSelectedLogo(newLogo);
+  }
   return (
     <AuthGuard>
-      <div className="max-w-screen-2xl mx-auto w-full">
+      <div className="max-w-screen-2xl mx-auto w-full px-2">
         <MultiStepProgressBar currentStep={currentStep} />
-        <Button
-          onClick={() => {
-            if (currentStep < 3) {
-              setCurrentStep((prev) => prev + 1);
-            } else {
-              setCurrentStep(1);
-            }
-          }}
-        >
-          Change step dev
-        </Button>
         {currentStep === 1 && (
           <div>
             <OfferForm
               form={offerForm}
               handleSubmit={handleOfferFormSubmit}
               handleTechnologies={handleTechnologies}
+              selectedLogo={selectedLogo}
+              handleChangeLogo={handleChangeLogo}
             />
           </div>
         )}
@@ -164,19 +150,9 @@ export default function HireRemotely() {
           <div>
             <ModelForm
               form={modelForm}
-              handleSubmit={handleModelFormSubmit}
+              handleSubmit={handlePaymentFormSubmit}
               changeStepPrev={changeStepPrev}
             />
-          </div>
-        )}
-        {currentStep === 3 && (
-          <div>
-            <Elements stripe={stripePromise} options={options}>
-              <PaymentForm
-                changeStepPrev={changeStepPrev}
-                handleSubmit={handlePaymentFormSubmit}
-              />
-            </Elements>
           </div>
         )}
       </div>

@@ -30,16 +30,10 @@ export function MultiStepProgressBar({ currentStep }: { currentStep: number }) {
       completed: currentStep > 2,
       active: currentStep === 2,
     },
-    {
-      label: "Step 3",
-      icon: CreditCard,
-      completed: currentStep > 3,
-      active: currentStep === 3,
-    },
   ];
 
   return (
-    <div className="flex items-center justify-between w-full max-w-2xl mx-auto py-6 px-4">
+    <div className="flex items-center justify-between w-full max-w-md mx-auto py-6 px-4">
       {steps.map((step, index) => (
         <div
           key={index}

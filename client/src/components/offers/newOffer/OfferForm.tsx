@@ -40,8 +40,16 @@ import useGetAvailableExperiences from "@/hooks/useGetAvailableExperiences";
 import useGetAvailableContractTypes from "@/hooks/useGetAvailableContractTypes";
 import { useCurrency } from "@/context/CurrencyContext";
 import Image from "next/image";
-import { OfferCkEditor } from "@/components/ui/ckeditor";
-import { FileIcon } from "lucide-react";
+import { FileIcon, FilePlusIcon } from "lucide-react";
+import { UseFormReturn } from "react-hook-form";
+import { z } from "zod";
+import { ClientOfferFormSchema } from "@/app/hire-remotely/page";
+import dynamic from "next/dynamic";
+import AvatarUploader from "@/components/ui/avatar-uploader";
+const OfferCkEditor = dynamic(
+  () => import("../../ui/ckeditor").then((mod) => mod.OfferCkEditor),
+  { ssr: false }
+);
 
 const dropzone = {
   accept: {
@@ -53,15 +61,19 @@ const dropzone = {
 } satisfies DropzoneOptions;
 
 type OfferFormPropsTypes = {
-  form: any;
+  form: UseFormReturn<z.infer<typeof ClientOfferFormSchema>>;
   handleSubmit: (values: any) => void;
   handleTechnologies: (tech: string) => void;
+  selectedLogo: File[] | null;
+  handleChangeLogo: (newLogo: File[] | null) => void;
 };
 
 const OfferForm = ({
   form,
   handleSubmit,
   handleTechnologies,
+  selectedLogo,
+  handleChangeLogo,
 }: OfferFormPropsTypes) => {
   const { avLocalizations } = useGetAvailableLocalizations();
   const { avTechnologies } = useGetAvailableTechnologies();
@@ -81,63 +93,26 @@ const OfferForm = ({
             className="px-4 py-8 w-full space-y-6"
           >
             <div className="flex gap-8 flex-col md:flex-row">
-              <FormField
-                name="logo"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem className="space-y-2">
-                    <FormLabel>Company logo</FormLabel>
-                    <FileUploader
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      dropzoneOptions={dropzone}
-                      reSelect
-                    >
-                      {(!field.value ||
-                        (field.value && field.value.length <= 0)) && (
-                        <FileInput className="h-[200px] w-[200px]">
-                          <div className="p-4 h-full border-2 border-dashed rounded-md flex items-center justify-center gap-3">
-                            <FileIcon className="h-8 w-8" />
-                            <span>Select image</span>
-                          </div>
-                        </FileInput>
-                      )}
-                      {field.value && field.value.length > 0 && (
-                        <FileUploaderContent>
-                          {field.value.map((file: any, i: any) => (
-                            <FileUploaderItem
-                              key={i}
-                              index={i}
-                              aria-roledescription={`file ${i + 1} containing ${
-                                file.name
-                              }`}
-                              className="p-0 size-full"
-                              absoluteRemove
-                            >
-                              <div className="aspect-square size-full">
-                                <Image
-                                  src={URL.createObjectURL(file)}
-                                  alt={file.name}
-                                  className="object-cover rounded-md"
-                                  fill
-                                />
-                              </div>
-                            </FileUploaderItem>
-                          ))}
-                        </FileUploaderContent>
-                      )}
-                    </FileUploader>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="flex flex-col gap-2">
+                <div>
+                  <Label>Company logo</Label>
+                </div>
+                <AvatarUploader
+                  dropzoneOptions={dropzone}
+                  onValueChange={(newValue) => handleChangeLogo(newValue)}
+                  value={selectedLogo}
+                />
+                <FormMessage />
+              </div>
               <div className="space-y-4 flex-grow">
                 <FormField
                   control={form.control}
                   name="title"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Title</FormLabel>
+                      <FormLabel>
+                        Title <span className="text-red-400">*</span>
+                      </FormLabel>
                       <FormControl>
                         <Input {...field} placeholder="" />
                       </FormControl>
@@ -154,7 +129,9 @@ const OfferForm = ({
                   name="companyName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Company name</FormLabel>
+                      <FormLabel>
+                        Company name <span className="text-red-400">*</span>
+                      </FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
@@ -170,7 +147,9 @@ const OfferForm = ({
                 name="contractType"
                 render={({ field }) => (
                   <FormItem className="w-full">
-                    <FormLabel>Type of contract</FormLabel>
+                    <FormLabel>
+                      Type of contract <span className="text-red-400">*</span>
+                    </FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       value={field.value}
@@ -202,7 +181,9 @@ const OfferForm = ({
                 name="localization"
                 render={({ field }) => (
                   <FormItem className="w-full">
-                    <FormLabel>Localization</FormLabel>
+                    <FormLabel>
+                      Localization <span className="text-red-400">*</span>
+                    </FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       value={field.value}
@@ -238,7 +219,9 @@ const OfferForm = ({
                 name="experience"
                 render={({ field }) => (
                   <FormItem className="w-full">
-                    <FormLabel>Experience</FormLabel>
+                    <FormLabel>
+                      Experience <span className="text-red-400">*</span>
+                    </FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       value={field.value || ""}
@@ -267,7 +250,9 @@ const OfferForm = ({
                 name="employmentType"
                 render={({ field }) => (
                   <FormItem className="w-full">
-                    <FormLabel>Employment type</FormLabel>
+                    <FormLabel>
+                      Employment type <span className="text-red-400">*</span>
+                    </FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       value={field.value}
@@ -302,7 +287,9 @@ const OfferForm = ({
               name="content"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Content</FormLabel>
+                  <FormLabel>
+                    Content <span className="text-red-400">*</span>
+                  </FormLabel>
                   <FormControl>
                     <OfferCkEditor
                       value={field.value}
@@ -324,7 +311,9 @@ const OfferForm = ({
                 name="minSalary"
                 render={({ field }) => (
                   <FormItem className="w-full">
-                    <FormLabel>Min salary</FormLabel>
+                    <FormLabel>
+                      Min salary <span className="text-red-400">*</span>
+                    </FormLabel>
                     <FormControl>
                       <Input {...field} type="number" />
                     </FormControl>
@@ -337,7 +326,9 @@ const OfferForm = ({
                 name="maxSalary"
                 render={({ field }) => (
                   <FormItem className="w-full">
-                    <FormLabel>Max salary</FormLabel>
+                    <FormLabel>
+                      Max salary <span className="text-red-400">*</span>
+                    </FormLabel>
                     <FormControl>
                       <Input {...field} type="number" />
                     </FormControl>
@@ -438,7 +429,12 @@ const OfferForm = ({
             </div>
 
             <div className="flex mt-4 gap-4">
-              <Button type="submit" variant={"default"} size={"lg"}>
+              <Button
+                type="submit"
+                variant={"default"}
+                size={"lg"}
+                disabled={!form.formState.isDirty}
+              >
                 Choose your model
               </Button>
             </div>

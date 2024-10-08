@@ -235,13 +235,9 @@ export const FileUploader = forwardRef<
           ref={ref}
           tabIndex={0}
           onKeyDownCapture={handleKeyDown}
-          className={cn(
-            "grid w-full focus:outline-none overflow-hidden ",
-            className,
-            {
-              "gap-2": value && value.length > 0,
-            }
-          )}
+          className={cn("grid w-full focus:outline-none", className, {
+            "gap-2": value && value.length > 0,
+          })}
           dir={dir}
           {...props}
         >
@@ -305,11 +301,11 @@ export const FileUploaderItem = forwardRef<
       )}
       {...props}
     >
-      <div className="group font-medium leading-none tracking-tight flex items-center gap-1.5 h-[200px] w-[200px] relative">
+      <div className="group font-medium leading-none tracking-tight flex items-center h-full w-full gap-1.5 relative">
         {children}
         {absoluteRemove && (
           <>
-            <div className="group-hover:opacity-50 rounded-md bg-black opacity-0 h-full w-full absolute top-0 left-0 transition-opacity"></div>
+            <div className="group-hover:opacity-50 rounded-full bg-black opacity-0 h-full w-full absolute top-0 left-0 transition-opacity"></div>
             <button
               type="button"
               onClick={() => removeFileFromSet(index)}

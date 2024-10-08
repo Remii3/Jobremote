@@ -17,13 +17,20 @@ export const uploadRouter = {
 
 export type OurFileRouter = typeof uploadRouter;
 
-export async function uploadFile(files: Express.Multer.File[]) {
+export async function uploadFile(
+  files: Express.Multer.File[],
+  offerId: string
+) {
   if (files && files.length > 0) {
     const utapi = new UTApi();
     const logo = files[0];
-    const metadata = {};
+    const metadata = {
+      offerId,
+      name: logo.originalname,
+      type: logo.mimetype,
+    };
     const uploadResponse = await utapi.uploadFiles(
-      new File([logo.buffer], logo.originalname),
+      new File([logo.buffer], offerId),
       { metadata }
     );
     if (uploadResponse.error) {
@@ -38,12 +45,15 @@ export async function uploadFile(files: Express.Multer.File[]) {
   }
 }
 
-export async function updateFiles(key: string, files: Express.Multer.File[]) {
+export async function updateFiles(
+  offerId: string,
+  files: Express.Multer.File[]
+) {
   if (files && files.length > 0) {
     const utapi = new UTApi();
     const logo = files[0];
     const metadata = {};
-    const deleteOldFileResponse = await utapi.deleteFiles(key);
+    const deleteOldFileResponse = await utapi.deleteFiles(offerId);
     if (deleteOldFileResponse.success === false) {
       throw new Error("There was an issue with deleting file.");
     }

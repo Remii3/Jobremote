@@ -70,7 +70,7 @@ export default function AccountPage() {
               Logout
             </Button>
           </div>
-          <section className="md:col-span-4">
+          <section className="md:col-span-4 overflow-y-auto">
             {currentTab === "account" && (
               <Account user={user} fetchUserData={fetchUserData} />
             )}
