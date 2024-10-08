@@ -1,7 +1,7 @@
 import { client } from "@/lib/utils";
 import { UserType } from "@/types/types";
-import { SquarePen, Trash2, Wallet } from "lucide-react";
-import React, { useState } from "react";
+import { ArrowLeft, Loader2, SquarePen, Trash2, Wallet } from "lucide-react";
+import React, { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import EditOffer from "./EditOffer";
 import {
@@ -27,6 +27,17 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "../ui/alert-dialog";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { UpdateOfferSchema } from "jobremotecontracts/dist/schemas/offerSchemas";
+import { getOnlyDirtyFormFields } from "@/lib/utils";
+import { Skeleton } from "../ui/skeleton";
+
+const editOfferSchema = UpdateOfferSchema.omit({ _id: true }).extend({
+  logo: z.array(z.instanceof(File)).optional().nullable(),
+  technologies: z.array(z.string()).optional(),
+});
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY || ""
@@ -51,6 +62,22 @@ export default function YourOffers({
       refetchOnReconnect: false,
       refetchOnWindowFocus: false,
       refetchInterval: false,
+    }
+  );
+
+  const {
+    data: offerData,
+    isPending: userOfferIsLoading,
+    refetch: refetchOfferData,
+  } = client.users.getUserOffer.useQuery(
+    ["userOffer"],
+    { query: { _id: editOfferDataId || "" } },
+    {
+      queryKey: ["userOffer"],
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+      enabled: !!editOfferDataId,
     }
   );
 
@@ -90,13 +117,155 @@ export default function YourOffers({
     setEditOfferDataId(offerId);
   }
 
+  const form = useForm<z.infer<typeof editOfferSchema>>({
+    resolver: zodResolver(editOfferSchema),
+    defaultValues: {
+      title: "",
+      content: "",
+      experience: "",
+      employmentType: "",
+      companyName: "",
+      contractType: "",
+      localization: "",
+      minSalary: 0,
+      maxSalary: 0,
+      currency: "USD",
+      technologies: [],
+      logo: [],
+    },
+  });
+
+  const { mutate: updateOffer, isPending: updateOfferIsLoading } =
+    client.offers.updateOffer.useMutation({
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["userOffersList"] });
+        resetOfferData();
+        queryClient.invalidateQueries({ queryKey: ["offersList"] });
+      },
+      onError: (error) => {
+        if (error.status === 404 || error.status === 500) {
+          form.setError("root", {
+            type: "manual",
+            message: error.body.msg,
+          });
+        }
+      },
+    });
+
+  function resetOfferData() {
+    handleChangeCurrentEditOffer(null);
+    form.reset({
+      title: "",
+      content: "",
+      experience: "",
+      employmentType: "",
+      companyName: "",
+      contractType: "",
+      localization: "",
+      minSalary: 0,
+      maxSalary: 0,
+      currency: "USD",
+      technologies: [],
+      logo: [],
+    });
+  }
+
+  function handleSubmit(values: z.infer<typeof editOfferSchema>) {
+    if (!offerData) return;
+    const updatedFieldsValues = getOnlyDirtyFormFields(values, form);
+
+    const formData = new FormData();
+    Object.entries(updatedFieldsValues).forEach(([key, value]) => {
+      if (key === "logo" && value) {
+        if (Array.isArray(value) && value.length > 0) {
+          formData.append("logo", value[0]);
+        }
+      } else {
+        formData.append(key, value as string);
+      }
+    });
+
+    formData.append("_id", offerData.body.offer._id);
+    updateOffer({ body: formData });
+  }
+
+  function handleTechnologies(technology: string) {
+    const currentTechnologies = form.getValues("technologies") || [];
+    const updatedTechnologies = currentTechnologies.includes(technology)
+      ? currentTechnologies.filter((tech) => tech !== technology)
+      : [...currentTechnologies, technology];
+
+    form.setValue("technologies", updatedTechnologies);
+  }
+
+  useEffect(() => {
+    if (offerData) {
+      form.reset({
+        // title: offerData.body.offer.title,
+        // content: offerData.body.offer.content,
+        // experience: offerData.body.offer.experience,
+        // employmentType: offerData.body.offer.employmentType,
+        // companyName: offerData.body.offer.companyName,
+        // contractType: offerData.body.offer.contractType,
+        // localization: offerData.body.offer.localization,
+        // minSalary: offerData.body.offer.minSalary,
+        // maxSalary: offerData.body.offer.maxSalary,
+        // currency: offerData.body.offer.currency,
+        // technologies: offerData.body.offer.technologies,
+        logo: [],
+      });
+    }
+  }, [form, offerData]);
+
+  useEffect(() => {
+    if (editOfferDataId) {
+      refetchOfferData();
+    }
+  }, [editOfferDataId, refetchOfferData]);
+
+  console.log(form.getValues());
   return (
     <div>
       {editOfferDataId && (
-        <EditOffer
-          handleChangeCurrentEditOffer={handleChangeCurrentEditOffer}
-          offerDataId={editOfferDataId}
-        />
+        <div>
+          <div>
+            <div className="flex gap-4 items-center">
+              <Button
+                variant={"outline"}
+                size={"icon"}
+                type="button"
+                onClick={() => {
+                  resetOfferData();
+                }}
+                className={`rounded-full h-auto w-auto p-2`}
+              >
+                <ArrowLeft className="h-[18px] w-[18px]" />
+              </Button>
+              {offerData ? (
+                <h2 className="text-3xl font-semibold">
+                  {offerData.body.offer.title}
+                </h2>
+              ) : (
+                <Skeleton className="w-1/2" />
+              )}
+            </div>
+            <Separator className="my-2" />
+          </div>
+          {offerData ? (
+            <EditOffer
+              offerData={offerData}
+              form={form}
+              handleSubmit={handleSubmit}
+              handleTechnologies={handleTechnologies}
+              resetOfferData={resetOfferData}
+              updateOfferIsLoading={updateOfferIsLoading}
+            />
+          ) : (
+            <div>
+              <Loader2 />
+            </div>
+          )}
+        </div>
       )}
       {!editOfferDataId && (
         <div>
