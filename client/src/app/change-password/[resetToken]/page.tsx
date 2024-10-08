@@ -14,27 +14,41 @@ import {
   FormMessage,
   FormRootError,
 } from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useState } from "react";
-import { ChangeUserPasswordSchemaRefined } from "@/schemas/userSchemas";
+import { ChangeUserPasswordSchema } from "jobremotecontracts/dist/schemas/userSchemas";
+import Link from "next/link";
+
+const ClientChangeUserPasswordSchema = ChangeUserPasswordSchema.omit({
+  resetToken: true,
+});
+
+const ChangeUserPasswordSchemaRefined =
+  ClientChangeUserPasswordSchema.superRefine((data, ctx) => {
+    if (data.password !== data.passwordRepeat) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Passwords don't match",
+        path: ["passwordRepeat"],
+      });
+    }
+  });
 
 interface ChangePasswordPageProps {
-  params: { slug: string };
+  params: { resetToken: string };
 }
 
 export default function ChangePasswordPage({
-  params: { slug: resetToken },
+  params: { resetToken },
 }: ChangePasswordPageProps) {
+  const router = useRouter();
+
   const [showPassword, setShowPassword] = useState(false);
   const [showRepeatPassword, setShowRepeatPassword] = useState(false);
-  const { mutate, isLoading, isError, error } =
-    client.users.changePassword.useMutation({
-      onSuccess: () => router.push("/login"),
-    });
-  const router = useRouter();
+
   const form = useForm<z.infer<typeof ChangeUserPasswordSchemaRefined>>({
     resolver: zodResolver(ChangeUserPasswordSchemaRefined),
     defaultValues: {
@@ -42,20 +56,30 @@ export default function ChangePasswordPage({
       passwordRepeat: "",
     },
   });
+
+  const { mutate, isPending } = client.users.changePassword.useMutation({
+    onSuccess: () => {
+      router.push("/login");
+    },
+    onError: (error) => {
+      if (error.status === 404 || error.status === 500) {
+        form.setError("root", {
+          type: "manual",
+          message: error.body.msg,
+        });
+      }
+    },
+  });
+
   function toggleShowPassword() {
     setShowPassword((prev) => !prev);
   }
+
   function toggleShowRepeatPassword() {
     setShowRepeatPassword((prev) => !prev);
   }
+
   function handleSubmit(data: z.infer<typeof ChangeUserPasswordSchemaRefined>) {
-    if (!resetToken) {
-      form.setError("root", {
-        type: "manual",
-        message: "Reset token is invalid or has expired.",
-      });
-      return;
-    }
     mutate({
       body: {
         password: data.password,
@@ -77,7 +101,7 @@ export default function ChangePasswordPage({
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel>New Password</FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Input
@@ -112,7 +136,7 @@ export default function ChangePasswordPage({
                 name="passwordRepeat"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Repeat password</FormLabel>
+                    <FormLabel>Repeat new password</FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Input
@@ -148,27 +172,23 @@ export default function ChangePasswordPage({
                 variant={"default"}
                 type="submit"
                 size={"lg"}
-                disabled={isLoading}
+                disabled={isPending}
+                showLoader
+                isLoading={isPending}
               >
-                {isLoading ? (
-                  <Loader2 className="h-6 w-6 animate-spin" />
-                ) : (
-                  "Change password"
-                )}
+                Change password
               </Button>
-              <Button
-                variant={"link"}
-                type="button"
-                onClick={() => router.back()}
+              <Button onClick={() => console.log(form.formState.errors)}>
+                Show errors
+              </Button>
+              <Link
+                className={buttonVariants({ variant: "link" })}
+                href={"/"}
+                replace
               >
-                Go back
-              </Button>
+                Go back to homepage
+              </Link>
             </div>
-            {isError && (error.status === 400 || error.status === 500) && (
-              <p className="text-sm font-medium text-destructive">
-                {error.body.msg}
-              </p>
-            )}
             <FormRootError />
           </form>
         </Form>

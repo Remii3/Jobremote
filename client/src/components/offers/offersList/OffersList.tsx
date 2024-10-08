@@ -2,14 +2,18 @@ import { cleanEmptyData, client } from "@/lib/utils";
 import { debounce } from "lodash";
 import { useEffect, useRef } from "react";
 import OfferItem from "./OfferItem";
-import { OfferFiltersType, OfferSortOptionsTypes } from "@/types/types";
+import {
+  OfferFiltersType,
+  OfferSortOptionsTypes,
+  OfferType,
+} from "@/types/types";
 import { useUser } from "@/context/UserContext";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface OffersListProps {
   filters: OfferFiltersType;
   sortOption: OfferSortOptionsTypes;
-  changeCurrentOffer: (newId: string | null) => void;
+  changeCurrentOffer: (newId: OfferType | null) => void;
 }
 
 export default function OffersList({
@@ -19,22 +23,30 @@ export default function OffersList({
 }: OffersListProps) {
   const { user } = useUser();
 
-  const { data, error, isLoading, isError, refetch } =
-    client.offers.getOffers.useQuery(
-      ["offersList", user?.createdOffers],
-      {
-        query: {
-          filters: cleanEmptyData(filters),
-          sortOption,
-          limit: "100",
-        },
+  const {
+    data: offers,
+    error,
+    isLoading,
+    isError,
+    refetch,
+  } = client.offers.getOffers.useQuery(
+    ["offersList"],
+    {
+      query: {
+        filters: cleanEmptyData(filters),
+        sort: sortOption,
+        limit: "100",
+        page: "1",
       },
-      {
-        refetchOnReconnect: false,
-        refetchOnWindowFocus: false,
-        refetchInterval: false,
-      }
-    );
+    },
+    {
+      queryKey: ["offersList"],
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+      refetchInterval: false,
+      refetchOnMount: false,
+    }
+  );
 
   const debouncedSearch = useRef(
     debounce(async () => {
@@ -56,30 +68,19 @@ export default function OffersList({
         </div>
       )}
       {isError && <p>Error: {error.status}</p>}
-      {data && data.body.offers.length > 0 && (
+      {offers && offers.body.offers.length > 0 && (
         <ul className="space-y-3">
-          {data.body.offers.map((offer) => (
+          {offers.body.offers.map((offer) => (
             <OfferItem
-              key={offer._id.toString()}
-              _id={offer._id.toString()}
-              title={offer.title}
-              experience={offer.experience}
-              localization={offer.localization}
+              key={offer._id}
+              offerData={offer}
               changeCurrentOffer={changeCurrentOffer}
-              maxSalary={offer.maxSalary}
-              minSalary={offer.minSalary}
-              currency={offer.currency}
-              technologies={offer.technologies}
-              logo={offer.logo}
-              createdAt={offer.createdAt}
               isApplied={user ? user.appliedToOffers.includes(offer._id) : null}
-              contractType={offer.contractType}
-              employmentType={offer.employmentType}
             />
           ))}
         </ul>
       )}
-      {data && data.body.offers.length === 0 && (
+      {offers && offers.body.offers.length === 0 && (
         <div className="text-center">
           <span className="text-muted-foreground">No offers</span>
         </div>

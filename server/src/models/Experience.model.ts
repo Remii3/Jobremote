@@ -1,6 +1,6 @@
 import { model, Schema } from "mongoose";
 import { z } from "zod";
-import { ExperienceOfferSchema } from "../schemas/offerSchemas";
+import { ExperienceOfferSchema } from "jobremotecontracts/dist/schemas/offerSchemas";
 
 type ExperienceType = z.infer<typeof ExperienceOfferSchema>;
 

@@ -12,10 +12,11 @@ import { Loader2 } from "lucide-react";
 import OfferDetailsContent from "./OfferDetailsContent";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { OfferType } from "@/types/types";
 
 interface OfferDetailsProps {
-  selectedOffer: string | null;
-  changeSelectedOffer: (newId: string | null) => void;
+  selectedOffer: OfferType | null;
+  changeSelectedOffer: (newOfferData: null) => void;
   isMobile: boolean;
   toggleSuccessApplied: () => void;
 }
@@ -27,18 +28,6 @@ const OfferDetails = ({
   toggleSuccessApplied,
 }: OfferDetailsProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const { data, isLoading, error } = client.offers.getOffer.useQuery(
-    ["currentOffer", selectedOffer],
-    {
-      query: { id: selectedOffer! },
-    },
-    {
-      enabled: !!selectedOffer,
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-      refetchOnReconnect: false,
-    }
-  );
 
   function closeCurrentOfferHandler() {
     setDialogOpen(false);
@@ -54,35 +43,32 @@ const OfferDetails = ({
   }, [selectedOffer]);
 
   const renderContent = () => {
-    if (isLoading) {
-      return (
-        <div className="w-full h-full flex items-center justify-center">
-          <Loader2 className="w-7 h-7 animate-spin" />
-        </div>
-      );
-    }
+    // if (isLoading) {
+    //   return (
+    //     <div className="w-full h-full flex items-center justify-center">
+    //       <Loader2 className="w-7 h-7 animate-spin" />
+    //     </div>
+    //   );
+    // }
 
-    if (error && (error.status === 404 || error.status === 500)) {
-      return (
-        <div className="w-full h-full flex items-center justify-center">
-          <div>
-            <h2>Error: {error.status || "Unknown error"}</h2>
-            <p>
-              {(error && error.body.msg) ||
-                "An error occurred while fetching the offer."}
-            </p>
-          </div>
-        </div>
-      );
-    }
+    // if (error && (error.status === 404 || error.status === 500)) {
+    //   return (
+    //     <div className="w-full h-full flex items-center justify-center">
+    //       <div>
+    //         <h2>Error: {error.status || "Unknown error"}</h2>
+    //         <p>
+    //           {(error && error.body.msg) ||
+    //             "An error occurred while fetching the offer."}
+    //         </p>
+    //       </div>
+    //     </div>
+    //   );
+    // }
 
-    if (data) {
+    if (selectedOffer) {
       return (
         <OfferDetailsContent
-          offer={{
-            ...data.body.offer,
-            _id: data.body.offer._id.toString(),
-          }}
+          offer={selectedOffer}
           isMobile={isMobile}
           toggleSuccessApplied={toggleSuccessApplied}
         />
@@ -98,11 +84,11 @@ const OfferDetails = ({
           <div className="overflow-y-auto">
             <DialogHeader className="text-left">
               <DialogTitle className="sr-only">
-                {data ? data.body.offer.title : "Offer details"}
+                {selectedOffer ? selectedOffer.title : "Offer details"}
               </DialogTitle>
               <DialogDescription className="sr-only">
-                {data
-                  ? data.body.offer.content
+                {selectedOffer
+                  ? selectedOffer.content
                   : "Details of the selected offer."}
               </DialogDescription>
             </DialogHeader>
@@ -123,9 +109,9 @@ const OfferDetails = ({
           src="/marketing_man.webp"
           alt="No offer selected"
           width={500}
-          height={500}
-          quality={100}
-          className="aspect-auto"
+          height={332}
+          className="aspect-auto h-[332px] w-[500px]"
+          priority
         />
         <span className="text-muted-foreground">Choose an offer</span>
       </div>

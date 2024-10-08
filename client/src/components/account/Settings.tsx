@@ -1,4 +1,5 @@
-import React, { useEffect } from "react";
+"use client";
+
 import { Separator } from "../ui/separator";
 import {
   Form,
@@ -13,45 +14,48 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useUser } from "@/context/UserContext";
 import { Switch } from "../ui/switch";
 import { Button } from "../ui/button";
 import { client } from "@/lib/utils";
-import { Loader2 } from "lucide-react";
-const userSettingsSchema = z.object({
-  commercialConsent: z.boolean().optional(),
-});
-export default function Settings() {
-  const { user, fetchUserData } = useUser();
-  const {
-    mutate: updateSettings,
-    isLoading,
-    error,
-  } = client.users.updateSetings.useMutation({
-    onSuccess: () => fetchUserData(),
-    onError: (error) => {
-      if (error.status === 404 || error.status === 500) {
-        form.setError("root", {
-          type: "manual",
-          message: error.body.msg,
-        });
-      }
-    },
-  });
-  const form = useForm<z.infer<typeof userSettingsSchema>>({
-    resolver: zodResolver(userSettingsSchema),
-    defaultValues: { commercialConsent: false },
+import { UpdateUserSettingsSchema } from "jobremotecontracts/dist/schemas/userSchemas";
+import { UserType } from "@/types/types";
+import { useEffect } from "react";
+
+const UserSettingsSchema = UpdateUserSettingsSchema.omit({ _id: true });
+
+type SettingsType = {
+  user: UserType;
+  fetchUserData: () => void;
+};
+
+export default function Settings({ user, fetchUserData }: SettingsType) {
+  const { mutate: updateSettings, isPending } =
+    client.users.updateUserSettings.useMutation({
+      onSuccess: () => fetchUserData(),
+      onError: (error) => {
+        if (error.status === 404 || error.status === 500) {
+          form.setError("root", {
+            type: "manual",
+            message: error.body.msg,
+          });
+        }
+      },
+    });
+
+  const form = useForm<z.infer<typeof UserSettingsSchema>>({
+    resolver: zodResolver(UserSettingsSchema),
+    defaultValues: { commercialConsent: user.commercialConsent },
   });
 
-  useEffect(() => {
-    if (user) {
-      form.reset({ commercialConsent: user.commercialConsent || false });
-    }
-  }, [form, user]);
-  function handleSubmit(values: z.infer<typeof userSettingsSchema>) {
-    if (!user) return;
-    updateSettings({ body: { ...values, userId: user._id } });
+  function handleSubmit(values: z.infer<typeof UserSettingsSchema>) {
+    updateSettings({ body: { ...values, _id: user._id } });
   }
+
+  useEffect(() => {
+    if (form.formState.isDirty) {
+      form.reset({ commercialConsent: user.commercialConsent });
+    }
+  }, [user, form]);
 
   return (
     <div>
@@ -88,24 +92,11 @@ export default function Settings() {
           <div className="mt-6">
             <Button
               type="submit"
-              disabled={!form.formState.isDirty || isLoading}
-              className="relative"
-              aria-live="polite"
+              disabled={!form.formState.isDirty || isPending}
+              showLoader
+              isLoading={isPending}
             >
-              <Loader2
-                className={`h-6 w-6 animate-spin absolute transition-opacity ${
-                  isLoading ? "opacity-100" : "opacity-0"
-                }`}
-                aria-hidden={isLoading ? "false" : "true"}
-              />
-              <span
-                className={`transition-opacity ${
-                  isLoading ? "opacity-0" : "opacity-100"
-                }`}
-                aria-hidden={isLoading ? "true" : "false"}
-              >
-                Save changes
-              </span>
+              Save changes
             </Button>
             <FormRootError />
           </div>

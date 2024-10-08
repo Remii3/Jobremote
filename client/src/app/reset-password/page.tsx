@@ -21,7 +21,17 @@ import { z } from "zod";
 const emailResetSchema = z.object({ email: z.string().email() });
 
 export default function ResetPasswordPage() {
-  const { mutate, isLoading } = client.users.resetPassword.useMutation({
+  const router = useRouter();
+
+  const form = useForm<z.infer<typeof emailResetSchema>>({
+    resolver: zodResolver(emailResetSchema),
+    defaultValues: { email: "" },
+  });
+
+  const { mutate, isPending } = client.users.resetPassword.useMutation({
+    onSuccess: () => {
+      router.push("/login");
+    },
     onError: (error) => {
       if (error.status === 404) {
         form.setError("email", {
@@ -35,12 +45,6 @@ export default function ResetPasswordPage() {
         });
       }
     },
-  });
-  const router = useRouter();
-
-  const form = useForm<z.infer<typeof emailResetSchema>>({
-    resolver: zodResolver(emailResetSchema),
-    defaultValues: { email: "" },
   });
 
   function handleSubmit(data: z.infer<typeof emailResetSchema>) {
@@ -68,12 +72,13 @@ export default function ResetPasswordPage() {
               )}
             />
             <div className="flex flex-col gap-2 mt-4">
-              <Button variant={"default"} disabled={isLoading}>
-                {isLoading ? (
-                  <Loader2 className="h-6 w-6 animate-spin" />
-                ) : (
-                  "Reset password"
-                )}
+              <Button
+                variant={"default"}
+                disabled={isPending}
+                showLoader
+                isLoading={isPending}
+              >
+                Reset password
               </Button>
               <Button
                 type="button"

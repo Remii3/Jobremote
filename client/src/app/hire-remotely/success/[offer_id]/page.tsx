@@ -1,20 +1,22 @@
 import { buttonVariants } from "@/components/ui/button";
+import { MultiStepProgressBar } from "@/components/ui/multi-step-progress";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
 
-export default function OfferThankYou() {
+export default function page() {
   return (
-    <div className="flex h-full flex-col items-center relative">
-      <div className="flex flex-col relative top-40 items-center">
+    <div>
+      <MultiStepProgressBar currentStep={4} />
+
+      <div className="flex flex-col items-center top-20 relative">
         <Image
           src={"/success_award.webp"}
           alt="Successfuly posted new offer icon"
           width={400}
           height={400}
-          className="rounded-3xl aspect-auto mb-6"
+          className="rounded-3xl aspect-auto"
         />
-        <h2 className="text-2xl font-semibold mb-4">
+        <h2 className="text-2xl font-semibold mb-4 text-center sm:text-left">
           Your offer has been posted successfully!
         </h2>
         <div className="flex flex-col items-center gap-2">

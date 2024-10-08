@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ckeditor/ckeditor5-react": "^9.2.0",
     "@hookform/resolvers": "^3.9.0",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",
@@ -27,6 +28,7 @@
     "@stripe/stripe-js": "^4.4.0",
     "@ts-rest/core": "^3.46.0",
     "@ts-rest/react-query": "^3.46.0",
+    "ckeditor5": "^43.1.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "jobremotecontracts": "^1.0.0",

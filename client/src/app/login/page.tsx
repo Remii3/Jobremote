@@ -16,16 +16,20 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { client } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/context/UserContext";
-import { LoginUserSchema } from "@/schemas/userSchemas";
+import { LoginUserSchema } from "jobremotecontracts/dist/schemas/userSchemas";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { mutate: login, isLoading } = client.users.loginUser.useMutation({
+  const {
+    mutate: login,
+    isPending,
+    isSuccess,
+  } = client.users.loginUser.useMutation({
     onSuccess: () => {
       fetchUserData();
       router.push("/");
@@ -130,13 +134,11 @@ export default function LoginPage() {
                 variant={"default"}
                 type="submit"
                 size={"lg"}
-                disabled={isLoading}
+                disabled={isPending}
+                showLoader
+                isLoading={isPending}
               >
-                {isLoading ? (
-                  <Loader2 className="h-6 w-6 animate-spin" />
-                ) : (
-                  "Sign in"
-                )}
+                Sign in
               </Button>
               <Link
                 href={"/register"}

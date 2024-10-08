@@ -57,3 +57,63 @@
     @apply bg-background text-foreground;
   }
 }
+
+.ck-sticky-panel__content,
+.ck-toolbar {
+  @apply rounded-t-md border-input bg-background !important;
+}
+.ck-content {
+  @apply rounded-b-md border-input prose max-h-64 max-w-full bg-background !important;
+}
+.ck-focused {
+  @apply shadow-none !important;
+}
+.ck-button {
+  @apply text-foreground cursor-pointer !important;
+}
+.ck-button:hover {
+  @apply bg-muted !important;
+}
+.ck-button.ck-on {
+  @apply bg-primary/10 text-primary !important;
+}
+.ck-button.ck-on:hover {
+  @apply bg-primary/20 !important;
+}
+.ck-balloon-panel {
+  @apply border-input !important;
+}
+.ck-link-form {
+  @apply bg-background border-input !important;
+}
+.ck-input {
+  @apply bg-background border-input text-foreground !important;
+}
+.ck-input:focus {
+  @apply ring ring-ring !important;
+}
+.ck-list {
+  @apply p-0 !important;
+}
+.ck-list__item:has(.ck-button.ck-on) {
+  @apply bg-background border-input !important;
+}
+.ck-list__item:has(.ck-button.ck-on):hover {
+  @apply bg-background border-input !important;
+}
+.ck-list__item > button {
+  @apply bg-background border-input !important;
+}
+.ck-list__item > button:hover {
+  @apply bg-muted !important;
+}
+.ck-list__item > button:focus {
+  @apply ring ring-ring !important;
+}
+
+.prose h3,
+.prose p,
+.prose strong,
+.prose a {
+  @apply text-foreground;
+}

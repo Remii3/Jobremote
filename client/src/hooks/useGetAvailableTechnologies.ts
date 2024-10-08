@@ -3,12 +3,13 @@ import { client } from "@/lib/utils";
 function useGetAvailableTechnologies() {
   const {
     data: avTechnologies,
-    isLoading: avTechnologiesIsLoading,
+    isPending: avTechnologiesIsLoading,
     error: avTechnologiesError,
   } = client.offers.getTechnologies.useQuery(
     ["technologies"],
     {},
     {
+      queryKey: ["technologies"],
       refetchOnMount: false,
       refetchOnReconnect: false,
       refetchOnWindowFocus: false,

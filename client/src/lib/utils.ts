@@ -3,6 +3,7 @@ import { initQueryClient } from "@ts-rest/react-query";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { mainContract } from "jobremotecontracts";
+import { z } from "zod";
 
 interface ClientErrorType {
   status: number;
@@ -71,4 +72,17 @@ export function checkIsFilterChanged(filter: any) {
     }
   }
   return false; // No changes detected
+}
+
+export function getOnlyDirtyFormFields<T extends z.ZodTypeAny>(
+  values: z.infer<T>,
+  form: any
+) {
+  const dirtyFields = Object.keys(form.formState.dirtyFields);
+  return dirtyFields.reduce((acc, key) => {
+    if (key in values && values[key as keyof typeof values] !== undefined) {
+      acc[key as keyof typeof values] = values[key as keyof typeof values];
+    }
+    return acc;
+  }, {} as Partial<z.infer<T>>);
 }

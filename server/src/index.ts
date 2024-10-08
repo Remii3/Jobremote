@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
-import express, { Express } from "express";
+import express, { Express, NextFunction, Request, Response } from "express";
 import { connect } from "mongoose";
 import bodyParser from "body-parser";
 import cors from "cors";
@@ -49,19 +49,31 @@ app.use(
   })
 );
 
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  console.error(err.stack); // Log the error for debugging
+
+  res.status(500).json({
+    status: 500,
+    message: err.message || "Internal Server Error",
+  });
+});
+
 schedule("0 0 * * *", async () => {
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
   try {
-    const result = await OfferModel.deleteMany({
-      isDeleted: true,
-      deletedAt: { $lte: thirtyDaysAgo },
-    });
+    const result = await OfferModel.updateMany(
+      {
+        isPaid: true,
+        isDeleted: false,
+        activeUntil: { $lte: new Date() },
+      },
+      {
+        $set: { isPaid: false },
+      }
+    );
 
-    console.log(`${result.deletedCount} offers deleted permanently.`);
+    console.log(`${result.modifiedCount} offers disabled.`);
   } catch (err) {
-    console.error("Error deleting expired offers:", err);
+    console.error("Error disabling old offers:", err);
   }
 });
 

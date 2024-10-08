@@ -235,13 +235,9 @@ export const FileUploader = forwardRef<
           ref={ref}
           tabIndex={0}
           onKeyDownCapture={handleKeyDown}
-          className={cn(
-            "grid w-full focus:outline-none overflow-hidden ",
-            className,
-            {
-              "gap-2": value && value.length > 0,
-            }
-          )}
+          className={cn("grid w-full focus:outline-none", className, {
+            "gap-2": value && value.length > 0,
+          })}
           dir={dir}
           {...props}
         >
@@ -263,7 +259,7 @@ export const FileUploaderContent = forwardRef<
 
   return (
     <div
-      className={cn("w-full px-1")}
+      className={cn("w-full")}
       ref={containerRef}
       // eslint-disable-next-line jsx-a11y/aria-props
       aria-description="content file holder"
@@ -287,8 +283,11 @@ FileUploaderContent.displayName = "FileUploaderContent";
 
 export const FileUploaderItem = forwardRef<
   HTMLDivElement,
-  { index: number } & React.HTMLAttributes<HTMLDivElement>
->(({ className, index, children, ...props }, ref) => {
+  {
+    index: number;
+    absoluteRemove?: boolean;
+  } & React.HTMLAttributes<HTMLDivElement>
+>(({ className, index, children, absoluteRemove = false, ...props }, ref) => {
   const { removeFileFromSet, activeIndex, direction } = useFileUpload();
   const isSelected = index === activeIndex;
   return (
@@ -296,26 +295,34 @@ export const FileUploaderItem = forwardRef<
       ref={ref}
       className={cn(
         buttonVariants({ variant: "ghost" }),
-        "h-6 p-1 justify-between cursor-pointer relative",
+        "h-6 p-1 justify-between cursor-pointer relative flex items-center",
         className,
         isSelected ? "bg-muted" : ""
       )}
       {...props}
     >
-      <div className="font-medium leading-none tracking-tight flex items-center gap-1.5 h-full w-full">
+      <div className="group font-medium leading-none tracking-tight flex items-center h-full w-full gap-1.5 relative">
         {children}
-      </div>
-      <button
-        type="button"
-        className={cn(
-          "absolute",
-          direction === "rtl" ? "top-1 left-1" : "top-1 right-1"
+        {absoluteRemove && (
+          <>
+            <div className="group-hover:opacity-50 rounded-full bg-black opacity-0 h-full w-full absolute top-0 left-0 transition-opacity"></div>
+            <button
+              type="button"
+              onClick={() => removeFileFromSet(index)}
+              className="absolute top-0 left-0 w-full h-full opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <span className="sr-only">remove item {index}</span>
+              <RemoveIcon className="hidden group-hover:block w-6 h-6 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 group-hover:stroke-destructive duration-200 ease-in-out" />
+            </button>
+          </>
         )}
-        onClick={() => removeFileFromSet(index)}
-      >
-        <span className="sr-only">remove item {index}</span>
-        <RemoveIcon className="w-4 h-4 hover:stroke-destructive duration-200 ease-in-out" />
-      </button>
+      </div>
+      {!absoluteRemove && (
+        <button type="button" onClick={() => removeFileFromSet(index)}>
+          <span className="sr-only">remove item {index}</span>
+          <RemoveIcon className="w-4 h-4 hover:stroke-destructive duration-200 ease-in-out" />
+        </button>
+      )}
     </div>
   );
 });

@@ -31,6 +31,7 @@
     "node-cron": "^3.0.3",
     "nodemailer": "^6.9.14",
     "redis": "^4.6.15",
+    "sanitize-html": "^2.13.0",
     "stripe": "^16.10.0",
     "uploadthing": "^6.13.2",
     "zod": "^3.23.8"
@@ -43,6 +44,7 @@
     "@types/jsonwebtoken": "^9.0.6",
     "@types/node": "^20.14.10",
     "@types/nodemailer": "^6.4.15",
+    "@types/sanitize-html": "^2.13.0",
     "nodemon": "^3.1.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.3"

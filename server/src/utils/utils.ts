@@ -1,6 +1,8 @@
 import { initServer } from "@ts-rest/express";
+import { compare, genSalt, hash } from "bcrypt";
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
+import { PaymentModel } from "../models/PaymentType.model";
 
 export function handleError(err: unknown, message?: string) {
   if (process.env.NODE_ENV !== "production") {
@@ -34,3 +36,15 @@ export const getDataFromToken = (req: Request, res: Response) => {
     throw new Error("Invalid token");
   }
 };
+
+export async function genPassword(plainPassword: string) {
+  const salt = await genSalt(10);
+  return await hash(plainPassword, salt);
+}
+
+export async function comparePassword(
+  plainPassword: string,
+  hashedPassword: string
+) {
+  return await compare(plainPassword, hashedPassword);
+}

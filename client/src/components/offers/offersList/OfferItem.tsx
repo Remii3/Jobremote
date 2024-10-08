@@ -8,52 +8,42 @@ import { Mail, MailOpen } from "lucide-react";
 import Image from "next/image";
 import { MouseEvent } from "react";
 
-type OfferItemTypes = Pick<
-  OfferType,
-  | "title"
-  | "localization"
-  | "experience"
-  | "_id"
-  | "minSalary"
-  | "maxSalary"
-  | "currency"
-  | "technologies"
-  | "logo"
-  | "createdAt"
-  | "contractType"
-  | "employmentType"
-> & {
-  changeCurrentOffer: (
-    newId: string,
-    e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>
-  ) => void;
+type OfferItemTypes = {
+  changeCurrentOffer: (newData: OfferType) => void;
+  offerData: OfferType;
   isApplied: boolean | null;
 };
 
 export default function OfferItem({
-  experience,
-  localization,
-  title,
   changeCurrentOffer,
-  maxSalary,
-  minSalary,
-  currency,
-  technologies,
-  _id,
-  logo,
-  createdAt,
+  offerData,
   isApplied,
-  contractType,
-  employmentType,
 }: OfferItemTypes) {
   const { formatCurrency } = useCurrency();
+  const {
+    _id,
+    title,
+    logo,
+    localization,
+    experience,
+    contractType,
+    employmentType,
+    technologies,
+    minSalary,
+    maxSalary,
+    currency,
+    createdAt,
+  } = offerData;
   function showOfferHandler(
     e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>
   ) {
-    changeCurrentOffer(_id, e);
+    changeCurrentOffer(offerData);
   }
-  const isYoungerThan2Days =
-    new Date(createdAt) > new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+  const daysOld = Math.floor(
+    (new Date().getTime() - new Date(createdAt).getTime()) /
+      (1000 * 60 * 60 * 24)
+  );
+  const isYoungerThan2Days = daysOld < 3;
   return (
     <li>
       <button
@@ -61,14 +51,14 @@ export default function OfferItem({
         onClick={(e) => showOfferHandler(e)}
         className="bg-background shadow p-3 hover:shadow-md transition-shadow rounded-md flex justify-between items-center gap-2 w-full border border-input"
       >
-        {logo ? (
-          <div className="overflow-hidden rounded-full min-h-16 min-w-16 max-w-16 max-h-16 bg-background border border-input">
+        {logo?.url ? (
+          <div className="overflow-hidden flex-grow rounded-full min-h-16 max-h-16 min-w-16 max-w-16 bg-background border border-input">
             <Image
-              src={logo}
+              src={logo.url}
               alt="Company logo"
-              height={64}
-              width={64}
-              className="object-scale-down object-center h-16 w-16"
+              height={62}
+              width={62}
+              className="object-scale-down object-center aspect-auto h-[62px] w-[62px]"
             />
           </div>
         ) : (
@@ -101,13 +91,10 @@ export default function OfferItem({
                   </span>
                 )}
               </span>
-              {isYoungerThan2Days && (
-                <Badge variant={"outlinePrimary"}>New</Badge>
-              )}
             </div>
           </div>
-          <div className="flex gap-2 sm:justify-between flex-wrap">
-            <div className="flex gap-2 flex-wrap items-center justify-start">
+          <div className="flex gap-2 justify-between flex-wrap">
+            <div className="flex gap-2 flex-wrap justify-between items-center flex-grow">
               <span className="flex sm:hidden text-xs sm:text-sm text-green-500 font-medium">
                 {minSalary === maxSalary ? (
                   <span>{formatCurrency(minSalary, currency)}</span>
@@ -118,24 +105,31 @@ export default function OfferItem({
                   </div>
                 )}
               </span>
-              <Badge variant={"outline"} className="">
-                {localization}
-              </Badge>
-              <Badge variant={"outline"}>{experience}</Badge>
-              <Badge variant={"outline"} className="sm:inline-flex hidden">
-                {contractType}
-              </Badge>
-              <Badge variant={"outline"} className="sm:inline-flex hidden">
-                {employmentType}
-              </Badge>
+              <div className="flex gap-2 flex-wrap">
+                <Badge variant={"outline"}>{localization}</Badge>
+                <Badge variant={"outline"}>{experience}</Badge>
+                <Badge variant={"outline"} className="sm:inline-flex hidden">
+                  {contractType}
+                </Badge>
+                <Badge variant={"outline"} className="sm:inline-flex hidden">
+                  {employmentType}
+                </Badge>
+              </div>
             </div>
-            <div className="sm:flex sm:justify-end sm:items-start sm:flex-wrap sm:gap-2 hidden">
-              {technologies &&
-                technologies.slice(0, 2).map((technology) => (
-                  <Badge key={technology} variant={"outline"}>
-                    {technology}
-                  </Badge>
-                ))}
+            <div className="flex justify-end items-start flex-wrap gap-2">
+              <div className="hidden sm:flex gap-2">
+                {technologies &&
+                  technologies.slice(0, 2).map((technology) => (
+                    <Badge key={technology} variant={"outline"}>
+                      {technology}
+                    </Badge>
+                  ))}
+              </div>
+              {isYoungerThan2Days ? (
+                <Badge variant={"outlinePrimary"}>New</Badge>
+              ) : (
+                <Badge variant={"secondary"}>{daysOld}d ago</Badge>
+              )}
             </div>
           </div>
         </div>
