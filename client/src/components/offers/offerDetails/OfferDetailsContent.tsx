@@ -99,7 +99,7 @@ export default function OfferDetailsContent({
       name: "",
       email: "",
       description: "",
-      cv: null,
+      cv: [],
     },
   });
 
@@ -383,6 +383,7 @@ export default function OfferDetailsContent({
             className="relative"
             aria-live="polite"
             disabled={isPending}
+            type="submit"
           >
             <Loader2
               className={`absolute w-6 h-6 animate-spin transition-opacity ${

@@ -7,13 +7,16 @@ export async function priceLogic(
   next: NextFunction
 ) {
   try {
-    const price = await PaymentModel.findOne({ code: req.body.pricing }).select(
-      "price"
-    );
-    if (!price) {
+    const payment = await PaymentModel.findOne({
+      code: req.body.pricing,
+    })
+      .select({ price: 1, activeMonths: 1 })
+      .lean();
+    if (!payment) {
       next(new Error("Pricing code not found."));
     } else {
-      res.locals.price = price.price * 100;
+      res.locals.price = payment.price * 100;
+      res.locals.activeMonths = payment.activeMonths;
       next();
     }
   } catch (err) {

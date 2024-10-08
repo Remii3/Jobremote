@@ -1,7 +1,7 @@
 import { offersContract } from "jobremotecontracts";
 import OfferModel, { OfferType } from "../models/Offer.model";
 import { User } from "../models/User.model";
-import { activeUntilOfferDateCalculator, tsServer } from "../utils/utils";
+import { tsServer } from "../utils/utils";
 import { createTransport } from "nodemailer";
 import multer from "multer";
 import mongoose from "mongoose";
@@ -34,6 +34,7 @@ export const offersRouter = tsServer.router(offersContract, {
     handler: async ({ body, req, res }) => {
       const data = body;
       const price = res.locals.price;
+      const activeMonths = res.locals.activeMonths;
 
       try {
         data.technologies = JSON.parse(data.technologies);
@@ -68,7 +69,8 @@ export const offersRouter = tsServer.router(offersContract, {
           ],
           metadata: {
             offerId: offerId.toString(),
-            pricing: data.pricing,
+            activeMonths,
+            type: "activation",
           },
           mode: "payment",
           success_url: `${process.env.CORS_URI}/hire-remotely/success/${offerId}`,
@@ -300,7 +302,8 @@ export const offersRouter = tsServer.router(offersContract, {
       try {
         const offerData = await OfferModel.findById(objectOfferId, {
           title: 1,
-        });
+        }).lean();
+
         if (!offerData) {
           return {
             status: 404,
@@ -309,14 +312,14 @@ export const offersRouter = tsServer.router(offersContract, {
             },
           };
         }
-        const offerCreator = await User.findOne(
+        const offerCreator = await User.findById(
+          { _id: userId },
           {
-            createdOffers: {
-              $in: [objectOfferId],
-            },
-          },
-          { email: 1, _id: 1 }
-        );
+            email: 1,
+            _id: 1,
+            name: 1,
+          }
+        ).lean();
         if (!offerCreator) {
           return {
             status: 404,
@@ -344,13 +347,28 @@ export const offersRouter = tsServer.router(offersContract, {
           };
         }
 
-        const mailOptions = {
+        await transporter.sendMail({
           from: email,
           to: process.env.EMAIL_USER, // TODO change to offerCreator.email when ready for prod
-          subject: `New offer application ${offerData.title}`,
-          text: `${name} just applied for the position you posted!
-          Here is few words they wanted to say to you:
-          ${description}`,
+          subject: `New Application for Your Job Posting: ${offerData.title}`,
+          html: `<p>Hello <strong>${
+            offerCreator.name || offerCreator.email
+          }</strong>,</p>
+    <p>You have received a new application for the <strong>${
+      offerData.title
+    }</strong> position you posted on our website!</p>
+    
+    <p><strong>Applicant Name:</strong> ${name}</p>
+    <p><strong>Message from the Applicant:</strong><br>
+    "${description}"</p>
+    
+    <p><strong>What’s next?</strong><br>
+    We recommend reviewing the applicant’s details and getting in touch with them for next steps.</p>
+    
+    <p>Thank you for using <strong>JobRemote</strong> to post your job offer, and we wish you success in finding the perfect candidate!</p>
+    
+    <p>Best regards,<br>
+    <strong>Jobremote Team</strong></p>`,
           attachments: [
             {
               filename: `${name}_CV` || "empty field",
@@ -358,8 +376,7 @@ export const offersRouter = tsServer.router(offersContract, {
               contentType: req.files[0].mimetype || "application/pdf",
             },
           ],
-        };
-        await transporter.sendMail(mailOptions);
+        });
         if (userId) {
           await User.findByIdAndUpdate(userId, {
             $push: { appliedToOffers: objectOfferId },
@@ -550,10 +567,11 @@ export const offersRouter = tsServer.router(offersContract, {
   payForOffer: {
     middleware: [(req, res, next) => priceLogic(req, res, next)],
     handler: async ({ body, res }) => {
-      const { offerId, title, currency, pricing } = body;
+      const { offerId, title, currency } = body;
 
       try {
         const price = res.locals.price;
+        const activeMonths = res.locals.activeMonths;
         const session = await stripe.checkout.sessions.create({
           payment_method_types: ["card"],
           line_items: [
@@ -570,7 +588,8 @@ export const offersRouter = tsServer.router(offersContract, {
           ],
           metadata: {
             offerId: offerId.toString(),
-            pricing,
+            activeMonths,
+            type: "activation",
           },
           mode: "payment",
           success_url: `${process.env.CORS_URI}/account`,
@@ -589,6 +608,66 @@ export const offersRouter = tsServer.router(offersContract, {
           status: 500,
           body: {
             msg: "We failed to create payment session.",
+          },
+        };
+      }
+    },
+  },
+  extendActiveOffer: {
+    middleware: [(req, res, next) => priceLogic(req, res, next)],
+    handler: async ({ body, res }) => {
+      try {
+        const { offerId, title, currency } = body;
+        const price = res.locals.price;
+        const activeMonths = res.locals.activeMonths;
+
+        const offer = await OfferModel.findById(offerId)
+          .select({ activeUntil: 1 })
+          .lean();
+        if (!offer) {
+          return {
+            status: 404,
+            body: {
+              msg: "Offer not found",
+            },
+          };
+        }
+        const session = await stripe.checkout.sessions.create({
+          payment_method_types: ["card"],
+          line_items: [
+            {
+              price_data: {
+                currency,
+                product_data: {
+                  name: title,
+                },
+                unit_amount: price,
+              },
+              quantity: 1,
+            },
+          ],
+          metadata: {
+            offerId: offerId.toString(),
+            activeUntil: offer.activeUntil,
+            activeMonths,
+            type: "extend",
+          },
+          mode: "payment",
+          success_url: `${process.env.CORS_URI}/account`,
+          cancel_url: `${process.env.CORS_URI}/account`,
+        });
+        return {
+          status: 200,
+          body: {
+            msg: "Payment session created",
+            sessionId: session.id,
+          },
+        };
+      } catch (err) {
+        return {
+          status: 500,
+          body: {
+            msg: "We failed to extend your offer.",
           },
         };
       }
@@ -619,16 +698,33 @@ export const offersRouter = tsServer.router(offersContract, {
         if (event.type === "checkout.session.completed") {
           const session = event.data.object;
           if (session.metadata) {
-            const activeUntil = activeUntilOfferDateCalculator(
-              session.metadata.pricing
-            );
+            if (session.metadata.type === "activation") {
+              const activeUntil = new Date(
+                new Date().setMonth(
+                  new Date().getMonth() + Number(session.metadata.activeMonths)
+                )
+              );
 
-            await OfferModel.findByIdAndUpdate(session.metadata.offerId, {
-              $set: {
-                isPaid: true,
-                activeUntil,
-              },
-            });
+              await OfferModel.findByIdAndUpdate(session.metadata.offerId, {
+                $set: {
+                  isPaid: true,
+                  activeUntil,
+                },
+              });
+            }
+            if (session.metadata.type === "extend") {
+              const extendedUntil = new Date(
+                new Date(session.metadata.activeUntil).setMonth(
+                  new Date(session.metadata.activeUntil).getMonth() +
+                    Number(session.metadata.activeMonths)
+                )
+              );
+              await OfferModel.findByIdAndUpdate(session.metadata.offerId, {
+                $set: {
+                  activeUntil: extendedUntil,
+                },
+              });
+            }
           }
         }
 

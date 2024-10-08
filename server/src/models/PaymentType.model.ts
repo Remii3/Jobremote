@@ -8,7 +8,7 @@ const PaymentTypeSchema = new Schema<PaymentTypeSchemaType>({
   name: String,
   code: String,
   price: Number,
-  benefits: [String],
+  benefits: [String],activeMonths: Number,
 });
 
 export const PaymentModel = model<PaymentTypeSchemaType>(
