@@ -3,11 +3,12 @@ import { client } from "@/lib/utils";
 import { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { UserType } from "@/types/types";
+import { set } from "lodash";
 
 interface UserContextTypes {
   user: UserType | null;
   logOut: () => void;
-  fetchUserData: () => void;
+  fetchUserData: () => Promise<void>;
   userDataIsLoading: boolean;
 }
 

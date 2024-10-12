@@ -117,8 +117,12 @@ export const offersRouter = tsServer.router(offersContract, {
       if (query.filters?.experience && query.filters.experience.length > 0) {
         filters.experience = { $in: query.filters.experience };
       }
-      if (query.filters?.technology && query.filters.technology.length > 0) {
-        filters.technologies = { $in: query.filters.technology };
+      console.log("query.filters", query);
+      if (
+        query.filters?.technologies &&
+        query.filters.technologies.length > 0
+      ) {
+        filters.technologies = { $in: query.filters.technologies };
       }
       if (query.filters?.keyword) {
         filters.$or = [
@@ -129,6 +133,14 @@ export const offersRouter = tsServer.router(offersContract, {
       if (query.filters?.minSalary) {
         filters.minSalary = { $gte: query.filters.minSalary };
       }
+
+      if (
+        query.filters?.contractType &&
+        query.filters.contractType.length > 0
+      ) {
+        filters.contractType = { $in: query.filters.contractType };
+      }
+
       filters.isDeleted = false;
       filters.isPaid = true;
       let sortValue = {};
@@ -146,6 +158,7 @@ export const offersRouter = tsServer.router(offersContract, {
           sortValue = { createdAt: -1 };
           break;
       }
+      console.log("filters", filters);
       const [fetchedOffers, total]: [fetchedOffers: OfferType[], number] =
         await Promise.all([
           OfferModel.find(filters)

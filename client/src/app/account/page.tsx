@@ -1,8 +1,8 @@
 "use client";
-import Account from "@/components/account/Account";
+import Details from "@/components/account/Details";
 import Settings from "@/components/account/Settings";
 import YourOffers from "@/components/account/YourOffers";
-import AuthGuard from "@/components/AuthGuard";
+import withAuth from "@/components/AuthGuard";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -11,78 +11,111 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
-import { useUser } from "@/context/UserContext";
-import { useState } from "react";
-type TabsTypes = "account" | "settings" | "YourOffers";
-const tabs: TabsTypes[] = ["account", "settings", "YourOffers"];
+import { WithAuthProps } from "@/types/types";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
-export default function AccountPage() {
-  const { user, fetchUserData, logOut } = useUser();
-  const [currentTab, setCurrentTab] = useState<TabsTypes>("account");
-  function changeTab(tab: TabsTypes) {
+const tabs: { code: string; name: string }[] = [
+  { name: "Details", code: "details" },
+  { name: "Settings", code: "settings" },
+  { name: "Your Offers", code: "your-offers" },
+];
+type AccountPageProps = WithAuthProps;
+
+function AccountPage({ user, fetchUserData, logOut }: AccountPageProps) {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const initialTab = searchParams.get("tab") || "details";
+  const [currentTab, setCurrentTab] = useState(initialTab);
+
+  useEffect(() => {
+    const tabFromParams = searchParams.get("tab");
+    if (tabFromParams && tabFromParams !== currentTab) {
+      setCurrentTab(tabFromParams);
+    }
+  }, [searchParams, currentTab]);
+
+  function changeTab(tab: string) {
+    if (tab === currentTab) return;
+
     setCurrentTab(tab);
+    const tabFromParams = new URLSearchParams(searchParams);
+    tabFromParams.set("tab", tab);
+    router.replace(`/account?${tabFromParams.toString()}`);
   }
 
+  useEffect(() => {
+    if (!searchParams.get("tab")) {
+      const tabFromParams = new URLSearchParams(searchParams);
+      tabFromParams.set("tab", currentTab);
+      router.replace(`/account?${tabFromParams.toString()}`);
+    }
+  }, [searchParams, router, currentTab]);
+
   return (
-    <AuthGuard>
-      {user && (
-        <div className="h-full w-full max-w-screen-2xl mx-auto content-start grid px-4 py-6 md:p-8 grid-cols-1 md:grid-cols-sideNav_1 md:gap-8 md:grid-rows-1">
-          <Select onValueChange={(e: TabsTypes) => changeTab(e)}>
-            <SelectTrigger className="md:hidden mb-6">
-              {currentTab.charAt(0).toUpperCase() + currentTab.slice(1)}
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {tabs.map((tab) => (
-                  <SelectItem
-                    key={tab}
-                    value={tab}
-                    disabled={currentTab === tab}
-                  >
-                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-          <div className="hidden md:flex flex-col justify-between md:col-span-1 space-y-6">
-            <ul className="space-y-4">
-              {tabs.map((tab) => (
-                <li key={tab}>
-                  <Button
-                    onClick={() => changeTab(tab)}
-                    className="w-full"
-                    size={"lg"}
-                    variant={"outline"}
-                    disabled={currentTab === tab}
-                  >
-                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                  </Button>
-                </li>
-              ))}
-            </ul>
-            <Button
-              variant={"destructive"}
-              className="w-full"
-              size={"lg"}
-              onClick={() => logOut()}
-            >
-              Logout
-            </Button>
-          </div>
-          <section className="md:col-span-4 overflow-y-auto">
-            {currentTab === "account" && (
-              <Account user={user} fetchUserData={fetchUserData} />
-            )}
-            {currentTab === "settings" && (
-              <Settings user={user} fetchUserData={fetchUserData} />
-            )}
-            {currentTab === "YourOffers" && (
-              <YourOffers user={user} fetchUserData={fetchUserData} />
-            )}
-          </section>
-        </div>
+    <div
+      className="h-full w-full max-w-screen-2xl mx-auto content-start grid px-4 py-6 md:p-8 grid-cols-1 md:grid-cols-sideNav_1 md:gap-8 md:grid-rows-2"
+      style={{
+        gridTemplateRows: "auto 1fr",
+        rowGap: 0,
+      }}
+    >
+      <Select onValueChange={(e: string) => changeTab(e)}>
+        <SelectTrigger className="md:hidden mb-6">
+          {tabs.find((tab) => tab.code === currentTab)?.name}
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            {tabs.map((tab) => (
+              <SelectItem
+                key={tab.code}
+                value={tab.code}
+                disabled={currentTab === tab.code}
+              >
+                {tab.name}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+      <div className="hidden md:flex flex-col justify-between md:col-span-1 md:row-span-2 space-y-6">
+        <ul className="space-y-4">
+          {tabs.map((tab) => (
+            <li key={tab.code}>
+              <Button
+                onClick={() => changeTab(tab.code)}
+                className="w-full"
+                size={"lg"}
+                variant={"outline"}
+                disabled={currentTab === tab.code}
+              >
+                {tab.name}
+              </Button>
+            </li>
+          ))}
+        </ul>
+        <Button
+          variant={"destructive"}
+          className="w-full"
+          size={"lg"}
+          onClick={() => logOut()}
+        >
+          Logout
+        </Button>
+      </div>
+
+      {currentTab === "details" && (
+        <Details user={user} fetchUserData={fetchUserData} />
       )}
-    </AuthGuard>
+      {currentTab === "settings" && (
+        <Settings user={user} fetchUserData={fetchUserData} />
+      )}
+      {currentTab === "your-offers" && (
+        <YourOffers user={user} fetchUserData={fetchUserData} />
+      )}
+    </div>
   );
 }
+
+export default withAuth(AccountPage);

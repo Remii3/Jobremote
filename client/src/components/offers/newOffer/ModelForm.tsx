@@ -44,7 +44,7 @@ export default function ModelForm({
         Choose the model you wish to use
       </h2>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="px-2">
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="px-2 pb-4">
           <FormField
             control={form.control}
             name="pricing"
@@ -56,7 +56,7 @@ export default function ModelForm({
                     <RadioGroup
                       onValueChange={field.onChange}
                       defaultValue={field.value}
-                      className="flex gap-8 px-4"
+                      className="flex gap-8 px-4 lg:flex-row flex-col"
                     >
                       {paymentTypes.body.paymentTypes
                         .sort((a, b) => {
@@ -108,7 +108,7 @@ export default function ModelForm({
               </FormItem>
             )}
           />
-          <div className="flex mt-8 gap-4">
+          <div className="flex mt-8 gap-4 justify-end lg:justify-start">
             <Button
               onClick={() => changeStepPrev(1)}
               size={"lg"}

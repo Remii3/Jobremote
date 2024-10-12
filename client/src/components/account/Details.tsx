@@ -18,16 +18,19 @@ import { Textarea } from "../ui/textarea";
 import { client, getOnlyDirtyFormFields } from "@/lib/utils";
 import { UpdateUserSchema } from "jobremotecontracts/dist/schemas/userSchemas";
 import { UserType } from "@/types/types";
+import { useToast } from "../ui/use-toast";
+import { TOAST_TITLES } from "@/data/constant";
 import { useEffect } from "react";
 
 const UserDataSchema = UpdateUserSchema.omit({ _id: true });
 
-type AccountType = {
+type DetailsType = {
   user: UserType;
-  fetchUserData: () => void;
+  fetchUserData: () => Promise<void>;
 };
 
-export default function Account({ user, fetchUserData }: AccountType) {
+export default function Details({ user, fetchUserData }: DetailsType) {
+  const { toast } = useToast();
   const form = useForm<z.infer<typeof UserDataSchema>>({
     resolver: zodResolver(UserDataSchema),
     defaultValues: {
@@ -38,8 +41,12 @@ export default function Account({ user, fetchUserData }: AccountType) {
 
   const { mutate: updateUser, isPending } = client.users.updateUser.useMutation(
     {
-      onSuccess: () => {
-        fetchUserData();
+      onSuccess: async () => {
+        await fetchUserData();
+        toast({
+          title: TOAST_TITLES.SUCCESS,
+          description: "Account details have been updated successfully.",
+        });
       },
       onError: (error) => {
         if (error.status == 404 || error.status == 500) {
@@ -47,7 +54,18 @@ export default function Account({ user, fetchUserData }: AccountType) {
             type: "manual",
             message: error.body.msg,
           });
+        } else {
+          console.log("error", error);
+          form.setError("root", {
+            type: "manual",
+            message: "Something went wrong. Please try again later.",
+          });
         }
+        toast({
+          title: TOAST_TITLES.ERROR,
+          description: "An error occurred while updating the account details.",
+          variant: "destructive",
+        });
       },
     }
   );
@@ -57,15 +75,14 @@ export default function Account({ user, fetchUserData }: AccountType) {
     updateUser({ body: { ...updatedFieldsValues, _id: user._id } });
   }
 
-  // Update the defaults of the form when the user changes
   useEffect(() => {
     if (form.formState.isDirty) {
       form.reset({ name: user.name, description: user.description });
     }
-  }, [user, form]);
+  }, [form, user.name, user.description]);
 
   return (
-    <div>
+    <div className="px-2 md:col-span-4">
       <h2 className="text-3xl font-semibold">Account details</h2>
       <span className="text-muted-foreground text-sm">
         Here you can change or add your personal information that are going to
@@ -80,12 +97,7 @@ export default function Account({ user, fetchUserData }: AccountType) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>First and last name:</FormLabel>
-                <Input
-                  {...field}
-                  onChange={(data) => {
-                    field.onChange(data);
-                  }}
-                />
+                <Input {...field} />
                 <FormMessage />
               </FormItem>
             )}
@@ -106,7 +118,6 @@ export default function Account({ user, fetchUserData }: AccountType) {
             <Button
               type="submit"
               disabled={!form.formState.isDirty || isPending}
-              className="mt-2"
               showLoader
               isLoading={isPending}
             >

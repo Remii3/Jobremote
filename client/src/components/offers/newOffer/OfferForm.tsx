@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -26,12 +26,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import {
-  FileInput,
-  FileUploader,
-  FileUploaderContent,
-  FileUploaderItem,
-} from "@/components/ui/extension/file-upload";
+
 import { DropzoneOptions } from "react-dropzone";
 import useGetAvailableLocalizations from "@/hooks/useGetAvailableLocalizations";
 import useGetAvailableTechnologies from "@/hooks/useGetAvailableTechnologies";
@@ -39,8 +34,6 @@ import useGetAvailableEmploymentTypes from "@/hooks/useGetAvailableEmploymentTyp
 import useGetAvailableExperiences from "@/hooks/useGetAvailableExperiences";
 import useGetAvailableContractTypes from "@/hooks/useGetAvailableContractTypes";
 import { useCurrency } from "@/context/CurrencyContext";
-import Image from "next/image";
-import { FileIcon, FilePlusIcon } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
 import { z } from "zod";
 import { ClientOfferFormSchema } from "@/schema/OfferSchema";
@@ -297,7 +290,7 @@ const OfferForm = ({
                       onBlur={field.onBlur}
                     />
                   </FormControl>
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-sm text-muted-foreground lg:block hidden">
                     Tip: Use shift + enter if you want to break the line and not
                     start a new paragraph
                   </span>

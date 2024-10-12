@@ -21,7 +21,7 @@ const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY || ""
 );
 
-export default function HireRemotely() {
+function HireRemotely() {
   const [currentStep, setCurrentStep] = useState(1);
   const { user, fetchUserData } = useUser();
   const queryClient = useQueryClient();
@@ -121,30 +121,29 @@ export default function HireRemotely() {
     setSelectedLogo(newLogo);
   }
   return (
-    <AuthGuard>
-      <div className="max-w-screen-2xl mx-auto w-full px-2">
-        <MultiStepProgressBar currentStep={currentStep} />
-        {currentStep === 1 && (
-          <div>
-            <OfferForm
-              form={offerForm}
-              handleSubmit={handleOfferFormSubmit}
-              handleTechnologies={handleTechnologies}
-              selectedLogo={selectedLogo}
-              handleChangeLogo={handleChangeLogo}
-            />
-          </div>
-        )}
-        {currentStep === 2 && (
-          <div>
-            <ModelForm
-              form={modelForm}
-              handleSubmit={handlePaymentFormSubmit}
-              changeStepPrev={changeStepPrev}
-            />
-          </div>
-        )}
-      </div>
-    </AuthGuard>
+    <div className="max-w-screen-2xl mx-auto w-full px-2">
+      <MultiStepProgressBar currentStep={currentStep} />
+      {currentStep === 1 && (
+        <div>
+          <OfferForm
+            form={offerForm}
+            handleSubmit={handleOfferFormSubmit}
+            handleTechnologies={handleTechnologies}
+            selectedLogo={selectedLogo}
+            handleChangeLogo={handleChangeLogo}
+          />
+        </div>
+      )}
+      {currentStep === 2 && (
+        <div>
+          <ModelForm
+            form={modelForm}
+            handleSubmit={handlePaymentFormSubmit}
+            changeStepPrev={changeStepPrev}
+          />
+        </div>
+      )}
+    </div>
   );
 }
+export default AuthGuard(HireRemotely);

@@ -57,3 +57,9 @@ export type UserType = {
   name: string;
   description: string;
 };
+
+export type WithAuthProps = {
+  user: UserType;
+  fetchUserData: () => Promise<void>;
+  logOut: () => void;
+};

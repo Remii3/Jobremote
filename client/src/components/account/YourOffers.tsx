@@ -1,7 +1,9 @@
+"use client";
+
 import { client } from "@/lib/utils";
 import { UserType } from "@/types/types";
 import { ArrowLeft, Loader2, SquarePen, Trash2, Wallet } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Button } from "../ui/button";
 import EditOffer from "./EditOffer";
 import {
@@ -27,32 +29,30 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "../ui/alert-dialog";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { UpdateOfferSchema } from "jobremotecontracts/dist/schemas/offerSchemas";
-import { getOnlyDirtyFormFields } from "@/lib/utils";
 import { Skeleton } from "../ui/skeleton";
+import { useToast } from "../ui/use-toast";
+import { TOAST_TITLES } from "@/data/constant";
 
-const editOfferSchema = UpdateOfferSchema.omit({ _id: true }).extend({
-  logo: z.array(z.instanceof(File)).optional().nullable(),
-  technologies: z.array(z.string()).optional(),
-});
+type YourOffersProps = {
+  user: UserType;
+  fetchUserData: () => Promise<void>;
+};
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY || ""
 );
-export default function YourOffers({
-  user,
-  fetchUserData,
-}: {
-  user: UserType;
-  fetchUserData: () => void;
-}) {
+
+export default function YourOffers({ user, fetchUserData }: YourOffersProps) {
   const [editOfferDataId, setEditOfferDataId] = useState<string | null>(null);
+  const [isRefetching, setIsRefetching] = useState(false);
+  const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data, isLoading } = client.users.getUserOffers.useQuery(
+  const {
+    data: userOffers,
+    isLoading: userOffersIsLoading,
+    error: userOffersError,
+  } = client.users.getUserOffers.useQuery(
     ["userOffersList"],
     {
       query: { _id: user._id, limit: "3", page: "1", sort: "createdAt" },
@@ -65,26 +65,23 @@ export default function YourOffers({
     }
   );
 
-  const {
-    data: offerData,
-    isPending: userOfferIsLoading,
-    refetch: refetchOfferData,
-  } = client.users.getUserOffer.useQuery(
-    ["userOffer"],
-    { query: { _id: editOfferDataId || "" } },
-    {
-      queryKey: ["userOffer"],
-      refetchOnMount: false,
-      refetchOnReconnect: false,
-      refetchOnWindowFocus: false,
-      enabled: !!editOfferDataId,
-    }
-  );
+  // const {
+  //   data: offerData,
+  //   isPending: offerDataIsLoading,
+  //   refetch: offerDataRefetch,
+  // } = client.users.getUserOffer.useQuery(
+  //   ["userOffer"],
+  //   { query: { _id: editOfferDataId || "" } },
+  //   {
+  //     queryKey: ["userOffer"],
+  //     enabled: !!editOfferDataId,
+  //   }
+  // );
 
-  const { mutate: payForOffer, isPending } =
+  const { mutate: payForOffer, isPending: payForOfferIsPending } =
     client.offers.payForOffer.useMutation({
       onSuccess: async (param) => {
-        fetchUserData();
+        await fetchUserData();
         const stripe = await stripePromise;
         if (!stripe) return;
         const { error } = await stripe.redirectToCheckout({
@@ -93,21 +90,49 @@ export default function YourOffers({
 
         if (error) {
           console.error("Stripe error:", error);
+          toast({
+            title: TOAST_TITLES.ERROR,
+            description: "An error occurred while redirecting to the payment.",
+            variant: "destructive",
+          });
         }
         queryClient.invalidateQueries({ queryKey: ["offersList"] });
+        queryClient.invalidateQueries({ queryKey: ["userOffersList"] });
+        toast({
+          title: TOAST_TITLES.SUCCESS,
+          description: "Payment successful.",
+        });
+      },
+      onError: (error) => {
+        console.error("Error paying for offer: ", error);
+        toast({
+          title: TOAST_TITLES.ERROR,
+          description: "An error occurred while paying for the offer.",
+          variant: "destructive",
+        });
       },
     });
 
-  const { mutate: deleteOffer } = client.offers.deleteOffer.useMutation({
-    onSuccess: async () => {
-      fetchUserData();
-      queryClient.invalidateQueries({ queryKey: ["offersList"] });
-      queryClient.invalidateQueries({ queryKey: ["userOffersList"] });
-    },
-    onError: (error) => {
-      console.error("Error deleting offer", error);
-    },
-  });
+  const { mutate: deleteOffer, isPending: deleteOfferIsPending } =
+    client.offers.deleteOffer.useMutation({
+      onSuccess: async () => {
+        await fetchUserData();
+        queryClient.invalidateQueries({ queryKey: ["offersList"] });
+        queryClient.invalidateQueries({ queryKey: ["userOffersList"] });
+        toast({
+          title: TOAST_TITLES.SUCCESS,
+          description: "Offer deleted successfully.",
+        });
+      },
+      onError: (error) => {
+        console.error("Error deleting offer: ", error);
+        toast({
+          title: TOAST_TITLES.ERROR,
+          description: "An error occurred while deleting the offer.",
+          variant: "destructive",
+        });
+      },
+    });
 
   function handleDeleteOffer(offerId: string) {
     deleteOffer({ body: { _id: offerId } });
@@ -117,167 +142,51 @@ export default function YourOffers({
     setEditOfferDataId(offerId);
   }
 
-  const form = useForm<z.infer<typeof editOfferSchema>>({
-    resolver: zodResolver(editOfferSchema),
-    defaultValues: {
-      title: "",
-      content: "",
-      experience: "",
-      employmentType: "",
-      companyName: "",
-      contractType: "",
-      localization: "",
-      minSalary: 0,
-      maxSalary: 0,
-      currency: "USD",
-      technologies: [],
-      logo: [],
-    },
-  });
+  const currentOffer = useMemo(
+    () =>
+      userOffers?.body.offers.find((offer) => offer._id === editOfferDataId),
+    [editOfferDataId, userOffers]
+  );
 
-  const { mutate: updateOffer, isPending: updateOfferIsLoading } =
-    client.offers.updateOffer.useMutation({
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["userOffersList"] });
-        resetOfferData();
-        queryClient.invalidateQueries({ queryKey: ["offersList"] });
-      },
-      onError: (error) => {
-        if (error.status === 404 || error.status === 500) {
-          form.setError("root", {
-            type: "manual",
-            message: error.body.msg,
-          });
-        }
-      },
-    });
-
-  function resetOfferData() {
-    handleChangeCurrentEditOffer(null);
-    form.reset({
-      title: "",
-      content: "",
-      experience: "",
-      employmentType: "",
-      companyName: "",
-      contractType: "",
-      localization: "",
-      minSalary: 0,
-      maxSalary: 0,
-      currency: "USD",
-      technologies: [],
-      logo: [],
-    });
-  }
-
-  function handleSubmit(values: z.infer<typeof editOfferSchema>) {
-    if (!offerData) return;
-    const updatedFieldsValues = getOnlyDirtyFormFields(values, form);
-
-    const formData = new FormData();
-    Object.entries(updatedFieldsValues).forEach(([key, value]) => {
-      if (key === "logo" && value) {
-        if (Array.isArray(value) && value.length > 0) {
-          formData.append("logo", value[0]);
-        }
-      } else {
-        formData.append(key, value as string);
-      }
-    });
-
-    formData.append("_id", offerData.body.offer._id);
-    updateOffer({ body: formData });
-  }
-
-  function handleTechnologies(technology: string) {
-    const currentTechnologies = form.getValues("technologies") || [];
-    const updatedTechnologies = currentTechnologies.includes(technology)
-      ? currentTechnologies.filter((tech) => tech !== technology)
-      : [...currentTechnologies, technology];
-
-    form.setValue("technologies", updatedTechnologies);
-  }
-
-  useEffect(() => {
-    if (offerData) {
-      form.reset({
-        // title: offerData.body.offer.title,
-        // content: offerData.body.offer.content,
-        // experience: offerData.body.offer.experience,
-        // employmentType: offerData.body.offer.employmentType,
-        // companyName: offerData.body.offer.companyName,
-        // contractType: offerData.body.offer.contractType,
-        // localization: offerData.body.offer.localization,
-        // minSalary: offerData.body.offer.minSalary,
-        // maxSalary: offerData.body.offer.maxSalary,
-        // currency: offerData.body.offer.currency,
-        // technologies: offerData.body.offer.technologies,
-        logo: [],
-      });
-    }
-  }, [form, offerData]);
-
-  useEffect(() => {
-    if (editOfferDataId) {
-      refetchOfferData();
-    }
-  }, [editOfferDataId, refetchOfferData]);
-
-  console.log(form.getValues());
   return (
-    <div>
-      {editOfferDataId && (
-        <div>
-          <div>
+    <>
+      {editOfferDataId && currentOffer && (
+        <>
+          <div className="px-2 md:col-span-4">
             <div className="flex gap-4 items-center">
               <Button
                 variant={"outline"}
                 size={"icon"}
                 type="button"
-                onClick={() => {
-                  resetOfferData();
-                }}
+                onClick={() => handleChangeCurrentEditOffer(null)}
                 className={`rounded-full h-auto w-auto p-2`}
               >
                 <ArrowLeft className="h-[18px] w-[18px]" />
               </Button>
-              {offerData ? (
-                <h2 className="text-3xl font-semibold">
-                  {offerData.body.offer.title}
-                </h2>
-              ) : (
-                <Skeleton className="w-1/2" />
-              )}
+
+              <h2 className="text-3xl font-semibold">{currentOffer.title}</h2>
             </div>
             <Separator className="my-2" />
           </div>
-          {offerData ? (
-            <EditOffer
-              offerData={offerData}
-              form={form}
-              handleSubmit={handleSubmit}
-              handleTechnologies={handleTechnologies}
-              resetOfferData={resetOfferData}
-              updateOfferIsLoading={updateOfferIsLoading}
-            />
-          ) : (
-            <div>
-              <Loader2 />
-            </div>
-          )}
-        </div>
+
+          <EditOffer
+            offerData={currentOffer}
+            handleChangeCurrentEditOffer={handleChangeCurrentEditOffer}
+            queryClient={queryClient}
+          />
+        </>
       )}
       {!editOfferDataId && (
-        <div>
-          <div>
+        <>
+          <div className="md:col-span-4 px-2">
             <h2 className="text-3xl font-semibold">Your offers</h2>
             <span className="text-muted-foreground text-sm">
               Manage your offers
             </span>
             <Separator className="my-4" />
           </div>
-          {!isLoading && (
-            <>
+          {!userOffersIsLoading && (
+            <section className="md:col-span-4 md:col-start-2 px-2 overflow-y-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -300,8 +209,8 @@ export default function YourOffers({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {data &&
-                    data.body.offers.map((offer) => (
+                  {userOffers &&
+                    userOffers.body.offers.map((offer) => (
                       <TableRow key={offer._id}>
                         <TableCell className="min-w-[260px] max-w-[260px]">
                           <span className="line-clamp-2">{offer.title}</span>
@@ -333,7 +242,7 @@ export default function YourOffers({
                         <TableCell className="flex gap-2 justify-center">
                           <Button
                             onClick={() => {
-                              setEditOfferDataId(offer._id);
+                              handleChangeCurrentEditOffer(offer._id);
                             }}
                             variant={"outline"}
                             size={"icon"}
@@ -343,7 +252,7 @@ export default function YourOffers({
                           <Button
                             variant={"outline"}
                             size={"icon"}
-                            disabled={offer.isPaid || isPending}
+                            disabled={offer.isPaid || payForOfferIsPending}
                             onClick={() =>
                               payForOffer({
                                 body: {
@@ -387,15 +296,19 @@ export default function YourOffers({
                     ))}
                 </TableBody>
               </Table>
-              {data && data.body.offers.length === 0 && (
-                <div className="flex justify-center py-4">
-                  <span className="text-muted-foreground">No offers yet!</span>
+              {userOffers && userOffers.body.offers.length === 0 && (
+                <div className="h-full">
+                  <div className="flex justify-center py-4">
+                    <span className="text-muted-foreground">
+                      No offers yet!
+                    </span>
+                  </div>
                 </div>
               )}
-            </>
-          )}{" "}
-        </div>
+            </section>
+          )}
+        </>
       )}
-    </div>
+    </>
   );
 }

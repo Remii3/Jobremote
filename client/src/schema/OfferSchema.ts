@@ -6,9 +6,14 @@ export const ClientOfferFormSchema = CreateOfferSchema.omit({
   logo: true,
   pricing: true,
   technologies: true,
-}).extend({
-  technologies: z.array(z.string()),
-});
+})
+  .extend({
+    technologies: z.array(z.string()),
+  })
+  .refine((data) => data.minSalary < data.maxSalary, {
+    message: "Min salary must be lower than max salary",
+    path: ["minSalary"],
+  });
 
 export const ClientModelFormSchema = CreateOfferSchema.pick({
   pricing: true,
