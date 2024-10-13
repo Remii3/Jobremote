@@ -29,7 +29,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "../ui/alert-dialog";
-import { Skeleton } from "../ui/skeleton";
 import { useToast } from "../ui/use-toast";
 import { TOAST_TITLES } from "@/data/constant";
 
@@ -44,7 +43,6 @@ const stripePromise = loadStripe(
 
 export default function YourOffers({ user, fetchUserData }: YourOffersProps) {
   const [editOfferDataId, setEditOfferDataId] = useState<string | null>(null);
-  const [isRefetching, setIsRefetching] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -64,19 +62,6 @@ export default function YourOffers({ user, fetchUserData }: YourOffersProps) {
       refetchInterval: false,
     }
   );
-
-  // const {
-  //   data: offerData,
-  //   isPending: offerDataIsLoading,
-  //   refetch: offerDataRefetch,
-  // } = client.users.getUserOffer.useQuery(
-  //   ["userOffer"],
-  //   { query: { _id: editOfferDataId || "" } },
-  //   {
-  //     queryKey: ["userOffer"],
-  //     enabled: !!editOfferDataId,
-  //   }
-  // );
 
   const { mutate: payForOffer, isPending: payForOfferIsPending } =
     client.offers.payForOffer.useMutation({

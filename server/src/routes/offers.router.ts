@@ -215,7 +215,7 @@ export const offersRouter = tsServer.router(offersContract, {
     handler: async ({ body, files }) => {
       const { _id, ...updatedData } = body;
       const offerData = await OfferModel.findById(_id).lean();
-
+      
       if (!offerData) {
         return {
           status: 404,
@@ -224,7 +224,11 @@ export const offersRouter = tsServer.router(offersContract, {
           },
         };
       }
-
+console.log("updatedData", updatedData);
+      if (updatedData.technologies) {
+        updatedData.technologies = JSON.parse(updatedData.technologies);
+      }
+console.log("updatedData 2", updatedData);
       if (files && Array.isArray(files) && files.length > 0) {
         const uploadedImg = await updateFiles(
           offerData.logo ? offerData.logo.key : "",

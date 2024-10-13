@@ -12,7 +12,6 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loadStripe } from "@stripe/stripe-js";
 import { useQueryClient } from "@ts-rest/react-query/tanstack";
-import { CreateOfferSchema } from "jobremotecontracts/dist/schemas/offerSchemas";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";

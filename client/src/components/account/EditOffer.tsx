@@ -55,6 +55,7 @@ import { useToast } from "../ui/use-toast";
 import { TOAST_TITLES } from "@/data/constant";
 import { useEffect } from "react";
 import { QueryClient } from "@ts-rest/react-query/tanstack";
+import AvatarUploader from "../ui/avatar-uploader";
 const OfferCkEditor = dynamic(
   () => import("../ui/ckeditor").then((mod) => mod.OfferCkEditor),
   { ssr: false }
@@ -154,11 +155,14 @@ export default function EditOffer({
     const updatedFieldsValues = getOnlyDirtyFormFields(values, form);
 
     const formData = new FormData();
+
     Object.entries(updatedFieldsValues).forEach(([key, value]) => {
       if (key === "logo" && value) {
         if (Array.isArray(value) && value.length > 0) {
           formData.append("logo", value[0]);
         }
+      } else if (key === 'technologies'){
+        formData.append(key, JSON.stringify(value));
       } else {
         formData.append(key, value as string);
       }
@@ -174,7 +178,7 @@ export default function EditOffer({
       ? currentTechnologies.filter((tech) => tech !== technology)
       : [...currentTechnologies, technology];
 
-    form.setValue("technologies", updatedTechnologies);
+    form.setValue("technologies", updatedTechnologies, { shouldDirty: true });
   }
 
   useEffect(() => {
@@ -220,7 +224,7 @@ export default function EditOffer({
                 <div>
                   <FormLabel>Company logo</FormLabel>
                 </div>
-                <FileUploader
+                {/* <FileUploader
                   value={field.value}
                   onValueChange={field.onChange}
                   dropzoneOptions={dropzone}
@@ -277,8 +281,8 @@ export default function EditOffer({
                       ))}
                     </FileUploaderContent>
                   )}
-                </FileUploader>
-
+                </FileUploader> */}
+                <AvatarUploader dropzoneOptions={dropzone} onValueChange={field.onChange} value={field.value} oldFile={offerData.logo}/>
                 <FormMessage />
               </FormItem>
             )}
@@ -322,7 +326,7 @@ export default function EditOffer({
                 <Select
                   onValueChange={field.onChange}
                   value={field.value}
-                  defaultValue={"asd"}
+                  defaultValue={field.value}
                 >
                   <FormControl>
                     <SelectTrigger>
