@@ -53,9 +53,10 @@ import { client, getOnlyDirtyFormFields } from "@/lib/utils";
 import { UpdateOfferSchema } from "jobremotecontracts/dist/schemas/offerSchemas";
 import { useToast } from "../ui/use-toast";
 import { TOAST_TITLES } from "@/data/constant";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { QueryClient } from "@ts-rest/react-query/tanstack";
 import AvatarUploader from "../ui/avatar-uploader";
+import { Label } from "../ui/label";
 const OfferCkEditor = dynamic(
   () => import("../ui/ckeditor").then((mod) => mod.OfferCkEditor),
   { ssr: false }
@@ -99,6 +100,7 @@ export default function EditOffer({
   handleChangeCurrentEditOffer,
 }: EditOfferPropsTypes) {
   const { toast } = useToast();
+  const [selectedLogo, setSelectedLogo] = useState<File[] | null>(null);
 
   const form = useForm<z.infer<typeof editOfferSchema>>({
     resolver: zodResolver(editOfferSchema),
@@ -114,7 +116,6 @@ export default function EditOffer({
       maxSalary: offerData.maxSalary,
       currency: offerData.currency,
       technologies: offerData.technologies,
-      logo: null,
     },
   });
 
@@ -157,17 +158,15 @@ export default function EditOffer({
     const formData = new FormData();
 
     Object.entries(updatedFieldsValues).forEach(([key, value]) => {
-      if (key === "logo" && value) {
-        if (Array.isArray(value) && value.length > 0) {
-          formData.append("logo", value[0]);
-        }
-      } else if (key === 'technologies'){
+      if (key === "technologies") {
         formData.append(key, JSON.stringify(value));
       } else {
         formData.append(key, value as string);
       }
     });
-
+    if (selectedLogo) {
+      formData.append("logo", selectedLogo[0]);
+    }
     formData.append("_id", offerData._id);
     updateOffer({ body: formData });
   }
@@ -195,7 +194,6 @@ export default function EditOffer({
         maxSalary: offerData.maxSalary,
         currency: offerData.currency,
         technologies: offerData.technologies,
-        logo: [],
       });
     }
   }, [form, offerData]);
@@ -207,6 +205,10 @@ export default function EditOffer({
   const { avContractTypes } = useGetAvailableContractTypes();
   const { allowedCurrencies } = useCurrency();
 
+  function handleChangeLogo(newLogo: File[] | null) {
+    setSelectedLogo(newLogo);
+  }
+
   console.log(form.getValues("technologies"));
 
   return (
@@ -216,77 +218,18 @@ export default function EditOffer({
         className="space-y-6 px-2 md:col-span-4 overflow-y-auto"
       >
         <div className="flex gap-8 flex-col md:flex-row">
-          <FormField
-            name="logo"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <div>
-                  <FormLabel>Company logo</FormLabel>
-                </div>
-                {/* <FileUploader
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  dropzoneOptions={dropzone}
-                  reSelect
-                  className="h-full"
-                >
-                  {(!field.value ||
-                    (field.value && field.value.length <= 0)) && (
-                    <FileInput className="h-full">
-                      {offerData.logo ? (
-                        <div className="group h-full min-h-[128px] min-w-[128px] max-w-[128px] relative">
-                          <Image
-                            src={offerData.logo.url}
-                            alt="Company current uploaded logo"
-                            fill
-                            quality={100}
-                            className="h-full w-full aspect-square rounded-full"
-                          />
-                          <div className="group-hover:opacity-50 rounded-full bg-black opacity-0 h-full w-full absolute top-0 left-0 transition-opacity"></div>
-                          <button
-                            type="button"
-                            className="absolute top-0 left-0 w-full h-full opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <FileEditIcon className="hidden group-hover:block w-6 h-6 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 group-hover:stroke-white duration-200 ease-in-out" />
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="group p-4 h-full border-2 border-dashed rounded-full flex items-center justify-center gap-1 min-w-[128px] min-h-[128px] max-w-[128px]">
-                          <FilePlusIcon className="h-7 w-7 text-muted-foreground group-hover:text-foreground transition" />
-                        </div>
-                      )}
-                    </FileInput>
-                  )}
-
-                  {field.value && field.value.length > 0 && (
-                    <FileUploaderContent className="w-full h-full">
-                      {field.value.map((file: any, i: number) => (
-                        <FileUploaderItem
-                          key={i}
-                          index={i}
-                          aria-roledescription={`file ${i + 1} containing ${
-                            file.name
-                          }`}
-                          absoluteRemove
-                          className="p-0 rounded-full min-h-[128px] min-w-[128px] max-w-[128px] relative"
-                        >
-                          <Image
-                            src={URL.createObjectURL(file)}
-                            alt={file.name}
-                            className="object-cover rounded-full aspect-square min-w-[128px]"
-                            fill
-                          />
-                        </FileUploaderItem>
-                      ))}
-                    </FileUploaderContent>
-                  )}
-                </FileUploader> */}
-                <AvatarUploader dropzoneOptions={dropzone} onValueChange={field.onChange} value={field.value} oldFile={offerData.logo}/>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="flex flex-col gap-2">
+            <div>
+              <Label>Company logo</Label>
+            </div>
+            <AvatarUploader
+              dropzoneOptions={dropzone}
+              onValueChange={(newValue) => handleChangeLogo(newValue)}
+              value={selectedLogo}
+              oldFile={offerData.logo}
+            />
+            <FormMessage />
+          </div>
           <div className="space-y-4 flex-grow flex flex-col justify-between h-full">
             <FormField
               control={form.control}

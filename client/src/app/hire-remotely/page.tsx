@@ -116,9 +116,11 @@ function HireRemotely() {
   function changeStepPrev(step: number) {
     setCurrentStep(step);
   }
+
   function handleChangeLogo(newLogo: File[] | null) {
     setSelectedLogo(newLogo);
   }
+
   return (
     <div className="max-w-screen-2xl mx-auto w-full px-2">
       <MultiStepProgressBar currentStep={currentStep} />
