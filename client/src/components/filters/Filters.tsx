@@ -33,6 +33,14 @@ import useGetAvailableEmploymentTypes from "@/hooks/useGetAvailableEmploymentTyp
 import useGetAvailableLocalizations from "@/hooks/useGetAvailableLocalizations";
 import useGetAvailableExperiences from "@/hooks/useGetAvailableExperiences";
 import useGetAvailableTechnologies from "@/hooks/useGetAvailableTechnologies";
+import {
+  MultiSelector,
+  MultiSelectorContent,
+  MultiSelectorInput,
+  MultiSelectorItem,
+  MultiSelectorList,
+  MultiSelectorTrigger,
+} from "../ui/extension/multi-select";
 
 interface FiltersPropsType {
   filters: Required<OfferFiltersType>;
@@ -111,6 +119,7 @@ const Filters = ({
     e.preventDefault();
   }
 
+
   return (
     <>
       <div className="flex gap-4 justify-between">
@@ -133,6 +142,32 @@ const Filters = ({
               <Search className="h-5 w-5" />
             </button>
           </form>
+          <div>
+
+          <MultiSelector
+            values={filters.technologies}
+            onValuesChange={(value) => {
+              changeTextsHandler("technologies", value[value.length-1])}
+            }
+            loop
+            className="w-52"
+            
+          >
+            <MultiSelectorTrigger>
+              <MultiSelectorInput placeholder="Technologies..." />
+            </MultiSelectorTrigger>
+            <MultiSelectorContent>
+              <MultiSelectorList>
+                {avTechnologies?.body.technologies.map((technology) => {
+                  return (
+                  <MultiSelectorItem key={technology._id} value={technology.name}>{technology.name}</MultiSelectorItem>
+
+                  );
+                })}
+              </MultiSelectorList>
+            </MultiSelectorContent>
+          </MultiSelector>
+          </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild className="hidden sm:block">
               <Button variant={"outline"} className="space-x-1">
@@ -265,7 +300,8 @@ const Filters = ({
               )}
             </DropdownMenuContent>
           </DropdownMenu>
-          <DropdownMenu>
+        
+          {/* <DropdownMenu>
             <DropdownMenuTrigger asChild className="hidden lg:block">
               <Button variant={"outline"} className="space-x-1">
                 <span>Technologies</span>
@@ -297,7 +333,7 @@ const Filters = ({
                 />
               )}
             </DropdownMenuContent>
-          </DropdownMenu>
+          </DropdownMenu> */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild className="hidden lg:block">
               <Button variant={"outline"} className="space-x-1">
