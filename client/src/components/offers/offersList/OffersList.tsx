@@ -1,6 +1,6 @@
 import { cleanEmptyData, client } from "@/lib/utils";
 import { debounce } from "lodash";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import OfferItem from "./OfferItem";
 import {
   OfferFiltersType,
@@ -22,41 +22,69 @@ export default function OffersList({
   sortOption,
 }: OffersListProps) {
   const { user } = useUser();
+  const observerRef = useRef<null | HTMLDivElement>(null);
 
   const {
     data: offers,
     error,
     isLoading,
     isError,
-    refetch,
-  } = client.offers.getOffers.useQuery(
+    refetch,isFetchingNextPage,hasNextPage,fetchNextPage
+  } = client.offers.getOffers.useInfiniteQuery(
     ["offersList"],
-    {
-      query: {
-        filters: cleanEmptyData(filters),
-        sort: sortOption,
-        limit: "100",
-        page: "1",
-      },
-    },
-    {
-      queryKey: ["offersList"],
-      refetchOnReconnect: false,
-      refetchOnWindowFocus: false,
-      refetchInterval: false,
-      refetchOnMount: false,
-    }
+    
+     ({pageParam})=>({
+        query: {
+          filters: cleanEmptyData(filters), // Cleaning the filters
+          sort: sortOption,
+          limit: "10", // Number of offers per page
+          page: pageParam!.toString() as string, // Initial page
+        }
+      }),
+      {
+        queryKey: ["offersList", filters, sortOption],
+        getNextPageParam: (lastPage) => {
+          if (lastPage.body.offers.length === 0) return undefined;
+          return lastPage.body.pagination.page + 1;
+        },
+        initialPageParam: 1,
+      }
   );
 
-  const debouncedSearch = useRef(
-    debounce(async () => {
-      refetch();
-    }, 400)
-  ).current;
+  // const debouncedSearch = useRef(
+  //   debounce(async () => {
+  //     refetch();
+  //   }, 400)
+  // ).current;
+
+  // useEffect(() => {
+  //   debouncedSearch();
+  // }, [filters, sortOption, debouncedSearch]);
+
+  const handleObserver = useCallback(
+    (entries: IntersectionObserverEntry[]) => {
+      const target = entries[0];
+      if (target.isIntersecting && hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
+    },
+    [fetchNextPage, hasNextPage, isFetchingNextPage]
+  );
 
   useEffect(() => {
-    debouncedSearch();
-  }, [filters, sortOption, debouncedSearch]);
+    const option = {
+      root: null, // Observing viewport
+      rootMargin: "20px",
+      threshold: 1.0,
+    };
+    const observer = new IntersectionObserver(handleObserver, option);
+    if (observerRef.current) observer.observe(observerRef.current);
+    return () => {
+      if (observerRef.current) observer.unobserve(observerRef.current);
+    };
+  }, [handleObserver]);
+
+  const offersData = offers?.pages.map((page) => page.body.offers).flat();
 
   return (
     <>
@@ -68,9 +96,9 @@ export default function OffersList({
         </div>
       )}
       {isError && <p>Error: {error.status}</p>}
-      {offers && offers.body.offers.length > 0 && (
+      {offersData && offersData.length > 0 && (
         <ul className="space-y-3">
-          {offers.body.offers.map((offer) => (
+          {offersData.map((offer) => (
             <OfferItem
               key={offer._id}
               offerData={offer}
@@ -78,9 +106,10 @@ export default function OffersList({
               isApplied={user ? user.appliedToOffers.includes(offer._id) : null}
             />
           ))}
+          <div ref={observerRef} />
         </ul>
       )}
-      {offers && offers.body.offers.length === 0 && (
+      {offersData && offersData.length <=0 && (
         <div className="text-center">
           <span className="text-muted-foreground">No offers</span>
         </div>
