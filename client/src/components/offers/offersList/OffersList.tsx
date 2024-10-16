@@ -9,6 +9,7 @@ import {
 } from "@/types/types";
 import { useUser } from "@/context/UserContext";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Loader2 } from "lucide-react";
 
 interface OffersListProps {
   filters: OfferFiltersType;
@@ -29,37 +30,40 @@ export default function OffersList({
     error,
     isLoading,
     isError,
-    refetch,isFetchingNextPage,hasNextPage,fetchNextPage
+    refetch,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
   } = client.offers.getOffers.useInfiniteQuery(
-    ["offersList"],
-    
-     ({pageParam})=>({
-        query: {
-          filters: cleanEmptyData(filters), // Cleaning the filters
-          sort: sortOption,
-          limit: "10", // Number of offers per page
-          page: pageParam!.toString() as string, // Initial page
-        }
-      }),
-      {
-        queryKey: ["offersList", filters, sortOption],
-        getNextPageParam: (lastPage) => {
-          if (lastPage.body.offers.length === 0) return undefined;
-          return lastPage.body.pagination.page + 1;
-        },
-        initialPageParam: 1,
-      }
+    [`offersList`],
+    ({ pageParam = 1 }: { pageParam?: unknown }) => ({
+      query: {
+        filters: cleanEmptyData(filters), 
+        sort: sortOption,
+        limit: "10",
+        page: (pageParam as number).toString(),
+      },
+    }),
+    {
+      queryKey: ["offersList"],
+      getNextPageParam: (lastPage) => {
+        return lastPage.body.offers.length >= 10
+          ? lastPage.body.pagination.page + 1
+          : undefined;
+      },
+      initialPageParam: 1, // Start at page 1
+    }
   );
 
-  // const debouncedSearch = useRef(
-  //   debounce(async () => {
-  //     refetch();
-  //   }, 400)
-  // ).current;
+  const debouncedSearch = useRef(
+    debounce(async () => {
+      refetch();
+    }, 400)
+  ).current;
 
-  // useEffect(() => {
-  //   debouncedSearch();
-  // }, [filters, sortOption, debouncedSearch]);
+  useEffect(() => {
+    debouncedSearch();
+  }, [filters, sortOption, debouncedSearch]);
 
   const handleObserver = useCallback(
     (entries: IntersectionObserverEntry[]) => {
@@ -70,10 +74,10 @@ export default function OffersList({
     },
     [fetchNextPage, hasNextPage, isFetchingNextPage]
   );
-
+  
   useEffect(() => {
     const option = {
-      root: null, // Observing viewport
+      root: null, 
       rootMargin: "20px",
       threshold: 1.0,
     };
@@ -84,7 +88,9 @@ export default function OffersList({
     };
   }, [handleObserver]);
 
-  const offersData = offers?.pages.map((page) => page.body.offers).flat();
+  const offersData = offers?.pages.flatMap((page) =>
+    page.status === 200 ? page.body.offers : []
+  );
 
   return (
     <>
@@ -109,7 +115,12 @@ export default function OffersList({
           <div ref={observerRef} />
         </ul>
       )}
-      {offersData && offersData.length <=0 && (
+      {isFetchingNextPage && (
+        <div className="flex items-center justify-center w-full">
+          <Loader2 className="h-6 w-6 animate-spin" />
+        </div>
+      )}
+      {offersData && offersData.length <= 0 && (
         <div className="text-center">
           <span className="text-muted-foreground">No offers</span>
         </div>
