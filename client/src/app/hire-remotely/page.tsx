@@ -25,6 +25,7 @@ function HireRemotely() {
   const { user, fetchUserData } = useUser();
   const queryClient = useQueryClient();
   const [selectedLogo, setSelectedLogo] = useState<File[] | null>(null);
+  const [technologies, setTechnologies] = useState<string[]>([]);
 
   const offerForm = useForm<z.infer<typeof ClientOfferFormSchema>>({
     resolver: zodResolver(ClientOfferFormSchema),
@@ -38,7 +39,6 @@ function HireRemotely() {
       currency: "USD",
       minSalary: 0,
       contractType: "",
-      technologies: [],
       companyName: "",
     },
   });
@@ -81,6 +81,9 @@ function HireRemotely() {
     if (selectedLogo) {
       newOfferFormData.append("logo", selectedLogo[0]);
     }
+    if (technologies) {
+      newOfferFormData.append("technologies", JSON.stringify(technologies));
+    }
 
     newOfferFormData.append("title", offerValues.title);
     newOfferFormData.append("content", offerValues.content);
@@ -92,10 +95,6 @@ function HireRemotely() {
     newOfferFormData.append("maxSalary", offerValues.maxSalary.toString());
     newOfferFormData.append("currency", offerValues.currency);
     newOfferFormData.append("userId", user._id);
-    newOfferFormData.append(
-      "technologies",
-      JSON.stringify(offerValues.technologies)
-    );
     newOfferFormData.append("companyName", offerValues.companyName);
     newOfferFormData.append("pricing", modelValues.pricing);
 
@@ -105,12 +104,13 @@ function HireRemotely() {
   }
 
   function handleTechnologies(technology: string) {
-    const currentTechnologies = offerForm.getValues("technologies") || [];
-    const updatedTechnologies = currentTechnologies.includes(technology)
-      ? currentTechnologies.filter((tech) => tech !== technology)
-      : [...currentTechnologies, technology];
-
-    offerForm.setValue("technologies", updatedTechnologies);
+    setTechnologies((prevState) => {
+      if (prevState.includes(technology)) {
+        return prevState.filter((tech) => tech !== technology);
+      } else {
+        return [...prevState, technology];
+      }
+    });
   }
 
   function changeStepPrev(step: number) {
@@ -129,9 +129,10 @@ function HireRemotely() {
           <OfferForm
             form={offerForm}
             handleSubmit={handleOfferFormSubmit}
-            handleTechnologies={handleTechnologies}
             selectedLogo={selectedLogo}
             handleChangeLogo={handleChangeLogo}
+            technologies={technologies}
+            handleTechnologies={handleTechnologies}
           />
         </div>
       )}

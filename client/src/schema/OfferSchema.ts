@@ -7,9 +7,6 @@ export const ClientOfferFormSchema = CreateOfferSchema.omit({
   pricing: true,
   technologies: true,
 })
-  .extend({
-    technologies: z.array(z.string()),
-  })
   .refine((data) => data.minSalary < data.maxSalary, {
     message: "Min salary must be lower than max salary",
     path: ["minSalary"],

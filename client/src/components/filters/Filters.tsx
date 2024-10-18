@@ -17,7 +17,13 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { ArrowUpDown, Loader2, Search, Settings2 } from "lucide-react";
+import {
+  ArrowUpDown,
+  ChevronsUpDown,
+  Loader2,
+  Search,
+  Settings2,
+} from "lucide-react";
 import { Badge, badgeVariants } from "../ui/badge";
 import { FormEvent, useState } from "react";
 import { Slider } from "../ui/slider";
@@ -33,14 +39,14 @@ import useGetAvailableEmploymentTypes from "@/hooks/useGetAvailableEmploymentTyp
 import useGetAvailableLocalizations from "@/hooks/useGetAvailableLocalizations";
 import useGetAvailableExperiences from "@/hooks/useGetAvailableExperiences";
 import useGetAvailableTechnologies from "@/hooks/useGetAvailableTechnologies";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import {
-  MultiSelector,
-  MultiSelectorContent,
-  MultiSelectorInput,
-  MultiSelectorItem,
-  MultiSelectorList,
-  MultiSelectorTrigger,
-} from "../ui/extension/multi-select";
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandList,
+} from "../ui/command";
 
 interface FiltersPropsType {
   filters: Required<OfferFiltersType>;
@@ -92,6 +98,7 @@ const Filters = ({
   sortOption,
 }: FiltersPropsType) => {
   const { formatCurrency, currency } = useCurrency();
+  const [techOpen, setTechOpen] = useState(false);
   const [showMoreFilters, setShowMoreFilters] = useState(false);
   const { avContractTypes, avContractTypesError, avContractTypesIsLoading } =
     useGetAvailableContractTypes();
@@ -119,7 +126,6 @@ const Filters = ({
     e.preventDefault();
   }
 
-
   return (
     <>
       <div className="flex gap-4 justify-between">
@@ -142,32 +148,6 @@ const Filters = ({
               <Search className="h-5 w-5" />
             </button>
           </form>
-          <div>
-
-          <MultiSelector
-            values={filters.technologies}
-            onValuesChange={(value) => {
-              changeTextsHandler("technologies", value[value.length-1])}
-            }
-            loop
-            className="w-52"
-            
-          >
-            <MultiSelectorTrigger>
-              <MultiSelectorInput placeholder="Technologies..." />
-            </MultiSelectorTrigger>
-            <MultiSelectorContent>
-              <MultiSelectorList>
-                {avTechnologies?.body.technologies.map((technology) => {
-                  return (
-                  <MultiSelectorItem key={technology._id} value={technology.name}>{technology.name}</MultiSelectorItem>
-
-                  );
-                })}
-              </MultiSelectorList>
-            </MultiSelectorContent>
-          </MultiSelector>
-          </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild className="hidden sm:block">
               <Button variant={"outline"} className="space-x-1">
@@ -300,40 +280,49 @@ const Filters = ({
               )}
             </DropdownMenuContent>
           </DropdownMenu>
-        
-          {/* <DropdownMenu>
-            <DropdownMenuTrigger asChild className="hidden lg:block">
-              <Button variant={"outline"} className="space-x-1">
-                <span>Technologies</span>
-                {filters.technologies && filters.technologies.length > 0 && (
-                  <Badge variant={"secondary"}>
-                    {filters.technologies.length}
-                  </Badge>
-                )}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              {avTechnologies &&
-                avTechnologies.body.technologies.length > 0 && (
-                  <Technologies
-                    technologies={filters.technologies}
-                    changeTextsHandler={changeTextsHandler}
-                    avTechnologies={avTechnologies.body.technologies}
-                  />
-                )}
-              {avTechnologies &&
-                avTechnologies.body.technologies.length <= 0 && (
-                  <EmptyFilterComponent message="No technologies" />
-                )}
-              {avTechnologiesIsLoading && <LoadingComponent />}
-              {avTechnologiesError && avTechnologiesError.status === 500 && (
-                <ServerErrorMessage
-                  message={avTechnologiesError.body.msg}
-                  status={avTechnologiesError.status}
-                />
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu> */}
+          <Popover open={techOpen} onOpenChange={setTechOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={techOpen}
+                  className="w-[200px] justify-between"
+                >
+                  Technology
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[200px] p-0">
+                <Command>
+                  <CommandInput placeholder="Search technology..." />
+                  <CommandList>
+                    <CommandEmpty>No technology found.</CommandEmpty>
+                    <CommandGroup>
+                      {avTechnologies &&
+                        avTechnologies.body.technologies.length > 0 && (
+                          <Technologies
+                            technologies={filters.technologies}
+                            changeTextsHandler={changeTextsHandler}
+                            avTechnologies={avTechnologies.body.technologies}
+                          />
+                        )}
+                      {avTechnologies &&
+                        avTechnologies.body.technologies.length <= 0 && (
+                          <EmptyFilterComponent message="No technologies" />
+                        )}
+                      {avTechnologiesIsLoading && <LoadingComponent />}
+                      {avTechnologiesError &&
+                        avTechnologiesError.status === 500 && (
+                          <ServerErrorMessage
+                            message={avTechnologiesError.body.msg}
+                            status={avTechnologiesError.status}
+                          />
+                        )}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+          </Popover>
           <DropdownMenu>
             <DropdownMenuTrigger asChild className="hidden lg:block">
               <Button variant={"outline"} className="space-x-1">

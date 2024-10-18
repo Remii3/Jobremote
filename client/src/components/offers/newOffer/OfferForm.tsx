@@ -39,6 +39,23 @@ import { z } from "zod";
 import { ClientOfferFormSchema } from "@/schema/OfferSchema";
 import dynamic from "next/dynamic";
 import AvatarUploader from "@/components/ui/avatar-uploader";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Check, ChevronsUpDown } from "lucide-react";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import Technologies from "@/components/filters/parts/Technologies";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
 const OfferCkEditor = dynamic(
   () => import("../../ui/ckeditor").then((mod) => mod.OfferCkEditor),
   { ssr: false }
@@ -56,9 +73,10 @@ const dropzone = {
 type OfferFormPropsTypes = {
   form: UseFormReturn<z.infer<typeof ClientOfferFormSchema>>;
   handleSubmit: (values: any) => void;
-  handleTechnologies: (tech: string) => void;
   selectedLogo: File[] | null;
   handleChangeLogo: (newLogo: File[] | null) => void;
+  technologies: string[];
+  handleTechnologies: (tech: string) => void;
 };
 
 const OfferForm = ({
@@ -67,7 +85,10 @@ const OfferForm = ({
   handleTechnologies,
   selectedLogo,
   handleChangeLogo,
+  technologies,
 }: OfferFormPropsTypes) => {
+  const [techOpen, setTechOpen] = useState<boolean>(false);
+
   const { avLocalizations } = useGetAvailableLocalizations();
   const { avTechnologies } = useGetAvailableTechnologies();
   const { avEmploymentTypes } = useGetAvailableEmploymentTypes();
@@ -358,67 +379,66 @@ const OfferForm = ({
                 )}
               />
             </div>
-            <div>
-              <FormField
-                control={form.control}
-                name="technologies"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col items-start mt-2">
-                    <DropdownMenu>
-                      <Label>Technologies</Label>
-                      <FormControl>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant={"outline"} className="gap-2">
-                            <span>Add tech stack</span>
-                            {field.value.length > 0 && (
-                              <Badge variant={"secondary"}>
-                                {field.value.length}
-                              </Badge>
-                            )}
-                          </Button>
-                        </DropdownMenuTrigger>
-                      </FormControl>
-                      <DropdownMenuContent>
+            <div className="space-y-3">
+              <Popover open={techOpen} onOpenChange={setTechOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={techOpen}
+                    className="w-[200px] justify-between"
+                  >
+                    Technology
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[200px] p-0">
+                  <Command>
+                    <CommandInput placeholder="Search technology..." />
+                    <CommandList>
+                      <CommandEmpty>No technology found.</CommandEmpty>
+                      <CommandGroup>
                         {avTechnologies &&
-                          avTechnologies.body.technologies.map((technology) => (
-                            <DropdownMenuCheckboxItem
-                              key={technology._id}
-                              checked={field.value.includes(technology.name)}
-                              onCheckedChange={() =>
-                                handleTechnologies(technology.name)
-                              }
-                              preventCloseOnSelect
+                          avTechnologies.body.technologies.map((tech) => (
+                            <CommandItem
+                              key={tech._id}
+                              value={tech.name}
+                              onSelect={(currentValue) => {
+                                handleTechnologies(currentValue);
+                              }}
                             >
-                              {technology.name}
-                            </DropdownMenuCheckboxItem>
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  technologies.includes(tech.name)
+                                    ? "opacity-100"
+                                    : "opacity-0"
+                                )}
+                              />
+                              {tech.name}
+                            </CommandItem>
                           ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                    <div className="pt-3">
-                      {field.value && field.value.length > 0 && (
-                        <ul className="flex gap-3">
-                          {field.value.map((tech: string) => (
-                            <li key={tech}>
-                              <button
-                                type="button"
-                                onClick={() => handleTechnologies(tech)}
-                              >
-                                <Badge
-                                  variant={"outline"}
-                                  className="py-1 px-3"
-                                >
-                                  {tech}
-                                </Badge>
-                              </button>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+              {technologies.length > 0 && (
+                <ul className="flex gap-3">
+                  {technologies.map((tech: string) => (
+                    <li key={tech}>
+                      <button
+                        type="button"
+                        onClick={() => handleTechnologies(tech)}
+                      >
+                        <Badge variant={"outline"} className="py-1 px-3">
+                          {tech}
+                        </Badge>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
 
             <div className="flex mt-4 gap-4">

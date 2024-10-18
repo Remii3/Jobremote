@@ -1,8 +1,6 @@
 "use clinet";
 
 import { Button } from "../ui/button";
-import { ArrowLeft, FileEditIcon, FilePlusIcon } from "lucide-react";
-import { Separator } from "../ui/separator";
 import {
   Form,
   FormControl,
@@ -33,23 +31,13 @@ import useGetAvailableEmploymentTypes from "@/hooks/useGetAvailableEmploymentTyp
 import useGetAvailableExperiences from "@/hooks/useGetAvailableExperiences";
 import useGetAvailableContractTypes from "@/hooks/useGetAvailableContractTypes";
 import { useCurrency } from "@/context/CurrencyContext";
-
-import {
-  FileInput,
-  FileUploader,
-  FileUploaderContent,
-  FileUploaderItem,
-} from "../ui/extension/file-upload";
-import Image from "next/image";
 import { DropzoneOptions } from "react-dropzone";
 import dynamic from "next/dynamic";
-
-import { Skeleton } from "../ui/skeleton";
 import { OfferType } from "@/types/types";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { client, getOnlyDirtyFormFields } from "@/lib/utils";
+import { client, cn, getOnlyDirtyFormFields } from "@/lib/utils";
 import { UpdateOfferSchema } from "jobremotecontracts/dist/schemas/offerSchemas";
 import { useToast } from "../ui/use-toast";
 import { TOAST_TITLES } from "@/data/constant";
@@ -57,15 +45,18 @@ import { useEffect, useState } from "react";
 import { QueryClient } from "@ts-rest/react-query/tanstack";
 import AvatarUploader from "../ui/avatar-uploader";
 import { Label } from "../ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "../ui/command";
+
 const OfferCkEditor = dynamic(
   () => import("../ui/ckeditor").then((mod) => mod.OfferCkEditor),
   { ssr: false }
 );
 
-const editOfferSchema = UpdateOfferSchema.omit({ _id: true })
+const editOfferSchema = UpdateOfferSchema.omit({ _id: true, technologies: true })
   .extend({
     logo: z.array(z.instanceof(File)).optional().nullable(),
-    technologies: z.array(z.string()).optional(),
   })
   .refine(
     (data) => {
@@ -101,6 +92,8 @@ export default function EditOffer({
 }: EditOfferPropsTypes) {
   const { toast } = useToast();
   const [selectedLogo, setSelectedLogo] = useState<File[] | null>(null);
+  const [technologies, setTechnologies] = useState<string[]>(offerData.technologies);
+  const [techOpen, setTechOpen] = useState(false);
 
   const form = useForm<z.infer<typeof editOfferSchema>>({
     resolver: zodResolver(editOfferSchema),
@@ -115,7 +108,6 @@ export default function EditOffer({
       minSalary: offerData.minSalary,
       maxSalary: offerData.maxSalary,
       currency: offerData.currency,
-      technologies: offerData.technologies,
     },
   });
 
@@ -157,27 +149,36 @@ export default function EditOffer({
 
     const formData = new FormData();
 
-    Object.entries(updatedFieldsValues).forEach(([key, value]) => {
-      if (key === "technologies") {
-        formData.append(key, JSON.stringify(value));
-      } else {
-        formData.append(key, value as string);
-      }
+    Object.entries(updatedFieldsValues).forEach(([key, value]) => {       
+      formData.append(key, value as string);
     });
+
+    const arrayAreEqual = (arr1:string[], arr2:string[]) => {
+      if(arr1.length === arr2.length) return true;
+      return arr1.every((tech) => arr2.includes(tech));
+    };
+
+    const techChanged = !arrayAreEqual(technologies, offerData.technologies);
+
+    if (techChanged) {
+      formData.append('technologies', JSON.stringify(technologies));
+    }
+
     if (selectedLogo) {
       formData.append("logo", selectedLogo[0]);
     }
+
     formData.append("_id", offerData._id);
     updateOffer({ body: formData });
   }
 
   function handleTechnologies(technology: string) {
-    const currentTechnologies = form.getValues("technologies") || [];
-    const updatedTechnologies = currentTechnologies.includes(technology)
-      ? currentTechnologies.filter((tech) => tech !== technology)
-      : [...currentTechnologies, technology];
-
-    form.setValue("technologies", updatedTechnologies, { shouldDirty: true });
+    setTechnologies((prevState) => {
+      if (prevState.includes(technology)) {
+        return prevState.filter((tech)=> tech !== technology);
+      }
+      return [...prevState, technology];
+    });
   }
 
   useEffect(() => {
@@ -193,7 +194,6 @@ export default function EditOffer({
         minSalary: offerData.minSalary,
         maxSalary: offerData.maxSalary,
         currency: offerData.currency,
-        technologies: offerData.technologies,
       });
     }
   }, [form, offerData]);
@@ -209,7 +209,6 @@ export default function EditOffer({
     setSelectedLogo(newLogo);
   }
 
-  console.log(form.getValues("technologies"));
 
   return (
     <Form {...form}>
@@ -461,61 +460,67 @@ export default function EditOffer({
           />
         </div>
 
-        <FormField
-          control={form.control}
-          name="technologies"
-          render={({ field }) => (
-            <FormItem className="flex flex-col items-start mt-2">
-              <DropdownMenu>
-                <FormLabel>Technologies</FormLabel>
-                <FormControl>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant={"outline"} className="gap-2">
-                      <span>Add tech stack</span>
-                      {field.value && field.value.length > 0 && (
-                        <Badge variant={"secondary"}>
-                          {field.value.length}
-                        </Badge>
-                      )}
-                    </Button>
-                  </DropdownMenuTrigger>
-                </FormControl>
-                <FormMessage />
-                <DropdownMenuContent>
-                  {avTechnologies &&
-                    avTechnologies.body.technologies.map((technology) => (
-                      <DropdownMenuCheckboxItem
-                        key={technology._id}
-                        checked={
-                          field.value && field.value.includes(technology.name)
-                        }
-                        onCheckedChange={() =>
-                          handleTechnologies(technology.name)
-                        }
-                        preventCloseOnSelect
-                      >
-                        {technology.name}
-                      </DropdownMenuCheckboxItem>
-                    ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-              {field.value && field.value.length > 0 && (
-                <ul className="flex gap-2">
-                  {field.value.map((tech: string) => (
+        <div className="space-y-3">
+              <Popover open={techOpen} onOpenChange={setTechOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={techOpen}
+                    className="w-[200px] justify-between"
+                  >
+                    Technology
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[200px] p-0">
+                  <Command>
+                    <CommandInput placeholder="Search technology..." />
+                    <CommandList>
+                      <CommandEmpty>No technology found.</CommandEmpty>
+                      <CommandGroup>
+                        {avTechnologies &&
+                          avTechnologies.body.technologies.map((tech) => (
+                            <CommandItem
+                              key={tech._id}
+                              value={tech.name}
+                              onSelect={(currentValue) => {
+                                handleTechnologies(currentValue);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  technologies.includes(tech.name)
+                                    ? "opacity-100"
+                                    : "opacity-0"
+                                )}
+                              />
+                              {tech.name}
+                            </CommandItem>
+                          ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+              {technologies.length > 0 && (
+                <ul className="flex gap-3">
+                  {technologies.map((tech: string) => (
                     <li key={tech}>
                       <button
                         type="button"
                         onClick={() => handleTechnologies(tech)}
                       >
-                        <Badge variant={"outline"}>{tech}</Badge>
+                        <Badge variant={"outline"} className="py-1 px-3">
+                          {tech}
+                        </Badge>
                       </button>
                     </li>
                   ))}
                 </ul>
               )}
-            </FormItem>
-          )}
-        />
+            </div>
         <div className="flex mt-4 gap-4">
           <Button
             type="submit"
