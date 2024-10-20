@@ -281,7 +281,7 @@ const Filters = ({
             </DropdownMenuContent>
           </DropdownMenu>
           <Popover open={techOpen} onOpenChange={setTechOpen}>
-              <PopoverTrigger asChild>
+              <PopoverTrigger asChild className="hidden lg:flex">
                 <Button
                   variant="outline"
                   role="combobox"

@@ -53,7 +53,6 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import Technologies from "@/components/filters/parts/Technologies";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 const OfferCkEditor = dynamic(

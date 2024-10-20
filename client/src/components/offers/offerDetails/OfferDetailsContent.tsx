@@ -42,6 +42,7 @@ import {
 } from "@/components/ui/extension/file-upload";
 import { useEffect } from "react";
 import { useUser } from "@/context/UserContext";
+import Link from "next/link";
 
 interface OfferDetailsContentProps {
   offer: OfferType;
@@ -265,107 +266,114 @@ export default function OfferDetailsContent({
           </div>
           <div className="px-4 lg:px-0">
             <h3 className="text-2xl font-medium mb-2">Apply for this job</h3>
-            <div className="space-y-4">
-              <div className="flex gap-8 w-full justify-between">
-                <FormField
-                  name="name"
-                  control={form.control}
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormLabel htmlFor="">
-                        First and last name{" "}
-                        <span className="text-red-400">*</span>
-                      </FormLabel>
-                      <FormControl {...field}>
-                        <Input className="rounded-md" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  name="email"
-                  control={form.control}
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormLabel htmlFor="">
-                        Email <span className="text-red-400">*</span>
-                      </FormLabel>
-                      <FormControl {...field}>
-                        <Input />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+            {offer.redirectLink ? (
+              <div>
+                <Link href={"#"}>Apply</Link>
+                <span>Apply via company&apos;s website</span>
               </div>
-              <FormField
-                name="description"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem className="w-full">
-                    <FormLabel htmlFor="">
-                      Introduce yourself (Github/Linkedin link){" "}
-                    </FormLabel>
-                    <FormControl {...field}>
-                      <Textarea className="rounded-md" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                name="cv"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem className="w-full">
-                    <FormLabel htmlFor="">
-                      Attach your CV <span className="text-red-400">*</span>
-                    </FormLabel>
-                    <FileUploader
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      dropzoneOptions={dropzone}
-                      reSelect
-                    >
-                      <FileInput>
-                        <div className="p-5 border-2 border-dashed rounded-md flex items-center gap-3">
-                          {field.value && field.value.length > 0 ? (
-                            <>
-                              <FilePenIcon className="h-8 w-8" />
-                              <span>{field.value[0].name}</span>
-                            </>
-                          ) : (
-                            <>
-                              <FileIcon className="h-8 w-8" />
-                              <span>Add CV</span>
-                            </>
-                          )}
-                        </div>
-                      </FileInput>
-                      {field.value && field.value.length > 0 && (
-                        <FileUploaderContent>
-                          {field.value.map((file, i) => (
-                            <FileUploaderItem
-                              key={i}
-                              index={i}
-                              className="p-4 flex items-center justify-between"
-                              aria-roledescription={`file ${i + 1} containing ${
-                                file.name
-                              }`}
-                            >
-                              <div>{file.name}</div>
-                            </FileUploaderItem>
-                          ))}
-                        </FileUploaderContent>
-                      )}
-                    </FileUploader>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormRootError />
-            </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex gap-8 w-full justify-between">
+                  <FormField
+                    name="name"
+                    control={form.control}
+                    render={({ field }) => (
+                      <FormItem className="w-full">
+                        <FormLabel htmlFor="">
+                          First and last name{" "}
+                          <span className="text-red-400">*</span>
+                        </FormLabel>
+                        <FormControl {...field}>
+                          <Input className="rounded-md" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    name="email"
+                    control={form.control}
+                    render={({ field }) => (
+                      <FormItem className="w-full">
+                        <FormLabel htmlFor="">
+                          Email <span className="text-red-400">*</span>
+                        </FormLabel>
+                        <FormControl {...field}>
+                          <Input />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <FormField
+                  name="description"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormLabel htmlFor="">
+                        Introduce yourself (Github/Linkedin link){" "}
+                      </FormLabel>
+                      <FormControl {...field}>
+                        <Textarea className="rounded-md" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  name="cv"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormLabel htmlFor="">
+                        Attach your CV <span className="text-red-400">*</span>
+                      </FormLabel>
+                      <FileUploader
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        dropzoneOptions={dropzone}
+                        reSelect
+                      >
+                        <FileInput>
+                          <div className="p-5 border-2 border-dashed rounded-md flex items-center gap-3">
+                            {field.value && field.value.length > 0 ? (
+                              <>
+                                <FilePenIcon className="h-8 w-8" />
+                                <span>{field.value[0].name}</span>
+                              </>
+                            ) : (
+                              <>
+                                <FileIcon className="h-8 w-8" />
+                                <span>Add CV</span>
+                              </>
+                            )}
+                          </div>
+                        </FileInput>
+                        {field.value && field.value.length > 0 && (
+                          <FileUploaderContent>
+                            {field.value.map((file, i) => (
+                              <FileUploaderItem
+                                key={i}
+                                index={i}
+                                className="p-4 flex items-center justify-between"
+                                aria-roledescription={`file ${
+                                  i + 1
+                                } containing ${file.name}`}
+                              >
+                                <div>{file.name}</div>
+                              </FileUploaderItem>
+                            ))}
+                          </FileUploaderContent>
+                        )}
+                      </FileUploader>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormRootError />
+              </div>
+            )}
           </div>
         </div>
 

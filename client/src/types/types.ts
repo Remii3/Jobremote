@@ -19,6 +19,7 @@ export type OfferType = {
   companyName: string;
   createdAt: string;
   updatedAt: string;
+  redirectLink: string;
 };
 
 export type AdminOfferType = OfferType & {
