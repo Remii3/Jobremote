@@ -18,12 +18,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 
@@ -439,7 +433,31 @@ const OfferForm = ({
                 </ul>
               )}
             </div>
-
+            <div>
+              <FormField
+                control={form.control}
+                name="redirectLink"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Redirect link{" "}
+                      <span className="text-xs text-muted-foreground">
+                        (optional)
+                      </span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      If you want to redirect the user to a specific page in
+                      order to fill your company application form, you can
+                      provide a link here.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             <div className="flex mt-4 gap-4">
               <Button
                 type="submit"

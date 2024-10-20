@@ -215,7 +215,7 @@ export const offersRouter = tsServer.router(offersContract, {
     handler: async ({ body, files }) => {
       const { _id, ...updatedData } = body;
       const offerData = await OfferModel.findById(_id).lean();
-      
+
       if (!offerData) {
         return {
           status: 404,
@@ -224,11 +224,11 @@ export const offersRouter = tsServer.router(offersContract, {
           },
         };
       }
-console.log("updatedData", updatedData);
+      console.log("updatedData", updatedData);
       if (updatedData.technologies) {
         updatedData.technologies = JSON.parse(updatedData.technologies);
       }
-console.log("updatedData 2", updatedData);
+      console.log("updatedData 2", updatedData);
       if (files && Array.isArray(files) && files.length > 0) {
         const uploadedImg = await updateFiles(
           offerData.logo ? offerData.logo.key : "",
@@ -649,6 +649,7 @@ console.log("updatedData 2", updatedData);
             },
           };
         }
+
         const session = await stripe.checkout.sessions.create({
           payment_method_types: ["card"],
           line_items: [
@@ -665,14 +666,16 @@ console.log("updatedData 2", updatedData);
           ],
           metadata: {
             offerId: offerId.toString(),
-            activeUntil: offer.activeUntil,
+            activeUntil: new Date(offer.activeUntil!).toISOString(),
             activeMonths,
             type: "extend",
           },
+
           mode: "payment",
           success_url: `${process.env.CORS_URI}/account`,
           cancel_url: `${process.env.CORS_URI}/account`,
         });
+
         return {
           status: 200,
           body: {
@@ -730,15 +733,18 @@ console.log("updatedData 2", updatedData);
               });
             }
             if (session.metadata.type === "extend") {
-              const extendedUntil = new Date(
-                new Date(session.metadata.activeUntil).setMonth(
-                  new Date(session.metadata.activeUntil).getMonth() +
-                    Number(session.metadata.activeMonths)
+              const activeUntilDate = new Date(session.metadata.activeUntil);
+              const activeMonths = Number(session.metadata.activeMonths);
+
+              const activeUntil = new Date(
+                activeUntilDate.setMonth(
+                  activeUntilDate.getMonth() + activeMonths
                 )
               );
+
               await OfferModel.findByIdAndUpdate(session.metadata.offerId, {
                 $set: {
-                  activeUntil: extendedUntil,
+                  activeUntil,
                 },
               });
             }

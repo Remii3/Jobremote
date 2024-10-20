@@ -69,6 +69,10 @@ const offerSchema = new Schema<OfferType>(
       type: Date,
       default: null,
     },
+    redirectLink: {
+      type: String,
+      default: null,
+    },
     pricing: {
       type: String,
       required: true,

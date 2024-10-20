@@ -17,7 +17,7 @@ import {
   Loader2,
   FilePenIcon,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -267,9 +267,23 @@ export default function OfferDetailsContent({
           <div className="px-4 lg:px-0">
             <h3 className="text-2xl font-medium mb-2">Apply for this job</h3>
             {offer.redirectLink ? (
-              <div>
-                <Link href={"#"}>Apply</Link>
-                <span>Apply via company&apos;s website</span>
+              <div className="flex flex-col gap-4 items-center">
+                <span>
+                  If you are interested in this offer, click the button below to
+                  apply via the company&apos;s website.
+                </span>
+
+                <Link
+                  href={offer.redirectLink}
+                  className={`${buttonVariants({
+                    variant: "default",
+                    size: "lg",
+                  })}`}
+                  target="_blank"
+                  rel="noopener"
+                >
+                  Apply
+                </Link>
               </div>
             ) : (
               <div className="space-y-4">
@@ -386,28 +400,39 @@ export default function OfferDetailsContent({
             </div>
             <span className="text-slate-500">{offer.companyName}</span>
           </div>
-          <Button
-            variant={"default"}
-            className="relative"
-            aria-live="polite"
-            disabled={isPending}
-            type="submit"
-          >
-            <Loader2
-              className={`absolute w-6 h-6 animate-spin transition-opacity ${
-                isPending ? "opacity-100" : "opacity-0"
-              }`}
-              aria-hidden={isPending ? "false" : "true"}
-            />
-            <span
-              className={`transition-opacity ${
-                isPending ? "opacity-0" : "opacity-100"
-              }`}
-              aria-hidden={isPending ? "true" : "false"}
+          {offer.redirectLink ? (
+            <Link
+              href={offer.redirectLink}
+              className={`${buttonVariants({ variant: "default" })} relative`}
+              target="_blank"
+              rel="noopener"
             >
               Apply
-            </span>
-          </Button>
+            </Link>
+          ) : (
+            <Button
+              variant={"default"}
+              className="relative"
+              aria-live="polite"
+              disabled={isPending}
+              type="submit"
+            >
+              <Loader2
+                className={`absolute w-6 h-6 animate-spin transition-opacity ${
+                  isPending ? "opacity-100" : "opacity-0"
+                }`}
+                aria-hidden={isPending ? "false" : "true"}
+              />
+              <span
+                className={`transition-opacity ${
+                  isPending ? "opacity-0" : "opacity-100"
+                }`}
+                aria-hidden={isPending ? "true" : "false"}
+              >
+                Apply
+              </span>
+            </Button>
+          )}
         </div>
       </form>
     </Form>

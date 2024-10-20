@@ -31,6 +31,16 @@ import {
 } from "../ui/alert-dialog";
 import { useToast } from "../ui/use-toast";
 import { TOAST_TITLES } from "@/data/constant";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
 
 type YourOffersProps = {
   user: UserType;
@@ -43,6 +53,9 @@ const stripePromise = loadStripe(
 
 export default function YourOffers({ user, fetchUserData }: YourOffersProps) {
   const [editOfferDataId, setEditOfferDataId] = useState<string | null>(null);
+  const [selectedExtendOfferPricing, setSelectedExtendOfferPricing] = useState<
+    string | null
+  >(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -62,6 +75,35 @@ export default function YourOffers({ user, fetchUserData }: YourOffersProps) {
       refetchInterval: false,
     }
   );
+  const {
+    mutate: extendOfferDuration,
+    isPending: extendOfferDurationIsPending,
+  } = client.offers.extendActiveOffer.useMutation({
+    onSuccess: async (param) => {
+      await fetchUserData();
+      const stripe = await stripePromise;
+      if (!stripe) return;
+      const { error } = await stripe.redirectToCheckout({
+        sessionId: param.body.sessionId,
+      });
+      if (error) {
+        console.error("Stripe error:", error);
+        toast({
+          title: TOAST_TITLES.ERROR,
+          description: "An error occurred while redirecting to the payment.",
+          variant: "destructive",
+        });
+      }
+    },
+    onError: (error) => {
+      console.error("Error extending offer: ", error);
+      toast({
+        title: TOAST_TITLES.ERROR,
+        description: "An error occurred while extending the offer.",
+        variant: "destructive",
+      });
+    },
+  });
 
   const { mutate: payForOffer, isPending: payForOfferIsPending } =
     client.offers.payForOffer.useMutation({
@@ -81,12 +123,6 @@ export default function YourOffers({ user, fetchUserData }: YourOffersProps) {
             variant: "destructive",
           });
         }
-        queryClient.invalidateQueries({ queryKey: ["offersList"] });
-        queryClient.invalidateQueries({ queryKey: ["userOffersList"] });
-        toast({
-          title: TOAST_TITLES.SUCCESS,
-          description: "Payment successful.",
-        });
       },
       onError: (error) => {
         console.error("Error paying for offer: ", error);
@@ -118,7 +154,9 @@ export default function YourOffers({ user, fetchUserData }: YourOffersProps) {
         });
       },
     });
-
+  const { data: paymentTypes } = client.offers.getPaymentTypes.useQuery([
+    "payment-types",
+  ]);
   function handleDeleteOffer(offerId: string) {
     deleteOffer({ body: { _id: offerId } });
   }
@@ -126,6 +164,27 @@ export default function YourOffers({ user, fetchUserData }: YourOffersProps) {
   function handleChangeCurrentEditOffer(offerId: string | null) {
     setEditOfferDataId(offerId);
   }
+
+  const handleExtendOfferDuration = async ({
+    offerId,
+    currency,
+    pricing,
+    title,
+  }: {
+    offerId: string;
+    currency: string;
+    pricing: string;
+    title: string;
+  }) => {
+    extendOfferDuration({
+      body: {
+        offerId,
+        currency,
+        pricing,
+        title,
+      },
+    });
+  };
 
   const currentOffer = useMemo(
     () =>
@@ -234,23 +293,89 @@ export default function YourOffers({ user, fetchUserData }: YourOffersProps) {
                           >
                             <SquarePen className="h-5 w-5" />
                           </Button>
-                          <Button
-                            variant={"outline"}
-                            size={"icon"}
-                            disabled={offer.isPaid || payForOfferIsPending}
-                            onClick={() =>
-                              payForOffer({
-                                body: {
-                                  offerId: offer._id,
-                                  title: offer.title,
-                                  currency: offer.currency,
-                                  pricing: offer.pricing,
-                                },
-                              })
-                            }
-                          >
-                            <Wallet className="h-5 w-5" />
-                          </Button>
+                          {offer.isPaid ? (
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button variant={"outline"} size={"icon"}>
+                                  <Wallet className="h-5 w-5" />
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>Extend offer</DialogTitle>
+                                  <DialogDescription>
+                                    Are you sure you want to extend this offer?
+                                  </DialogDescription>
+                                </DialogHeader>
+                                <form
+                                  onSubmit={(e) => {
+                                    e.preventDefault();
+                                    if (!selectedExtendOfferPricing) return;
+
+                                    handleExtendOfferDuration({
+                                      currency: offer.currency,
+                                      offerId: offer._id,
+                                      title: offer.title,
+                                      pricing: selectedExtendOfferPricing,
+                                    });
+                                  }}
+                                >
+                                  <select
+                                    name="pricing"
+                                    onChange={(value) => {
+                                      console.log(value.target.value);
+                                      setSelectedExtendOfferPricing(
+                                        value.target.value
+                                      );
+                                    }}
+                                    defaultValue={""}
+                                  >
+                                    <option value={""} disabled>
+                                      Select payment type
+                                    </option>
+                                    {paymentTypes &&
+                                      paymentTypes.body.paymentTypes.map(
+                                        (paymentType) => (
+                                          <option
+                                            key={paymentType.code}
+                                            value={paymentType.code}
+                                          >
+                                            {paymentType.name}
+                                          </option>
+                                        )
+                                      )}
+                                  </select>
+                                  <DialogFooter>
+                                    <DialogClose>Cancel</DialogClose>
+                                    <Button
+                                      type="submit"
+                                      disabled={!selectedExtendOfferPricing}
+                                    >
+                                      Extend
+                                    </Button>
+                                  </DialogFooter>
+                                </form>
+                              </DialogContent>
+                            </Dialog>
+                          ) : (
+                            <Button
+                              variant={"outline"}
+                              size={"icon"}
+                              disabled={payForOfferIsPending}
+                              onClick={() =>
+                                payForOffer({
+                                  body: {
+                                    offerId: offer._id,
+                                    title: offer.title,
+                                    currency: offer.currency,
+                                    pricing: offer.pricing,
+                                  },
+                                })
+                              }
+                            >
+                              <Wallet className="h-5 w-5" />
+                            </Button>
+                          )}
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
                               <Button variant={"outline"} size={"icon"}>

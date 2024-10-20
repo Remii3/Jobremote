@@ -4,6 +4,7 @@ import { Button } from "../ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -18,12 +19,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
 import { Badge } from "../ui/badge";
 import useGetAvailableLocalizations from "@/hooks/useGetAvailableLocalizations";
 import useGetAvailableTechnologies from "@/hooks/useGetAvailableTechnologies";
@@ -47,16 +42,28 @@ import AvatarUploader from "../ui/avatar-uploader";
 import { Label } from "../ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "../ui/command";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "../ui/command";
 
 const OfferCkEditor = dynamic(
   () => import("../ui/ckeditor").then((mod) => mod.OfferCkEditor),
   { ssr: false }
 );
 
-const editOfferSchema = UpdateOfferSchema.omit({ _id: true, technologies: true })
+const editOfferSchema = UpdateOfferSchema.omit({
+  _id: true,
+  technologies: true,
+  redirectLink: true,
+})
   .extend({
     logo: z.array(z.instanceof(File)).optional().nullable(),
+    redirectLink: z.string().url().optional(),
   })
   .refine(
     (data) => {
@@ -92,7 +99,9 @@ export default function EditOffer({
 }: EditOfferPropsTypes) {
   const { toast } = useToast();
   const [selectedLogo, setSelectedLogo] = useState<File[] | null>(null);
-  const [technologies, setTechnologies] = useState<string[]>(offerData.technologies);
+  const [technologies, setTechnologies] = useState<string[]>(
+    offerData.technologies
+  );
   const [techOpen, setTechOpen] = useState(false);
 
   const form = useForm<z.infer<typeof editOfferSchema>>({
@@ -108,6 +117,7 @@ export default function EditOffer({
       minSalary: offerData.minSalary,
       maxSalary: offerData.maxSalary,
       currency: offerData.currency,
+      redirectLink: "",
     },
   });
 
@@ -149,19 +159,19 @@ export default function EditOffer({
 
     const formData = new FormData();
 
-    Object.entries(updatedFieldsValues).forEach(([key, value]) => {       
+    Object.entries(updatedFieldsValues).forEach(([key, value]) => {
       formData.append(key, value as string);
     });
 
-    const arrayAreEqual = (arr1:string[], arr2:string[]) => {
-      if(arr1.length === arr2.length) return true;
+    const arrayAreEqual = (arr1: string[], arr2: string[]) => {
+      if (arr1.length === arr2.length) return true;
       return arr1.every((tech) => arr2.includes(tech));
     };
 
     const techChanged = !arrayAreEqual(technologies, offerData.technologies);
 
     if (techChanged) {
-      formData.append('technologies', JSON.stringify(technologies));
+      formData.append("technologies", JSON.stringify(technologies));
     }
 
     if (selectedLogo) {
@@ -175,7 +185,7 @@ export default function EditOffer({
   function handleTechnologies(technology: string) {
     setTechnologies((prevState) => {
       if (prevState.includes(technology)) {
-        return prevState.filter((tech)=> tech !== technology);
+        return prevState.filter((tech) => tech !== technology);
       }
       return [...prevState, technology];
     });
@@ -208,7 +218,6 @@ export default function EditOffer({
   function handleChangeLogo(newLogo: File[] | null) {
     setSelectedLogo(newLogo);
   }
-
 
   return (
     <Form {...form}>
@@ -459,68 +468,87 @@ export default function EditOffer({
             )}
           />
         </div>
-
         <div className="space-y-3">
-              <Popover open={techOpen} onOpenChange={setTechOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={techOpen}
-                    className="w-[200px] justify-between"
+          <Popover open={techOpen} onOpenChange={setTechOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={techOpen}
+                className="w-[200px] justify-between"
+              >
+                Technology
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[200px] p-0">
+              <Command>
+                <CommandInput placeholder="Search technology..." />
+                <CommandList>
+                  <CommandEmpty>No technology found.</CommandEmpty>
+                  <CommandGroup>
+                    {avTechnologies &&
+                      avTechnologies.body.technologies.map((tech) => (
+                        <CommandItem
+                          key={tech._id}
+                          value={tech.name}
+                          onSelect={(currentValue) => {
+                            handleTechnologies(currentValue);
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              technologies.includes(tech.name)
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                          {tech.name}
+                        </CommandItem>
+                      ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+          {technologies.length > 0 && (
+            <ul className="flex gap-3">
+              {technologies.map((tech: string) => (
+                <li key={tech}>
+                  <button
+                    type="button"
+                    onClick={() => handleTechnologies(tech)}
                   >
-                    Technology
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[200px] p-0">
-                  <Command>
-                    <CommandInput placeholder="Search technology..." />
-                    <CommandList>
-                      <CommandEmpty>No technology found.</CommandEmpty>
-                      <CommandGroup>
-                        {avTechnologies &&
-                          avTechnologies.body.technologies.map((tech) => (
-                            <CommandItem
-                              key={tech._id}
-                              value={tech.name}
-                              onSelect={(currentValue) => {
-                                handleTechnologies(currentValue);
-                              }}
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  technologies.includes(tech.name)
-                                    ? "opacity-100"
-                                    : "opacity-0"
-                                )}
-                              />
-                              {tech.name}
-                            </CommandItem>
-                          ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-              {technologies.length > 0 && (
-                <ul className="flex gap-3">
-                  {technologies.map((tech: string) => (
-                    <li key={tech}>
-                      <button
-                        type="button"
-                        onClick={() => handleTechnologies(tech)}
-                      >
-                        <Badge variant={"outline"} className="py-1 px-3">
-                          {tech}
-                        </Badge>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
+                    <Badge variant={"outline"} className="py-1 px-3">
+                      {tech}
+                    </Badge>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        <div>
+          <FormField
+            control={form.control}
+            name="redirectLink"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Redirect link</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+                <FormDescription>
+                  If you want to redirect the user to a specific page in order
+                  to fill your company application form, you can provide a link
+                  here.
+                </FormDescription>
+              </FormItem>
+            )}
+          />
+        </div>
         <div className="flex mt-4 gap-4">
           <Button
             type="submit"

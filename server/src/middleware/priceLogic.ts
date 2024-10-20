@@ -12,6 +12,7 @@ export async function priceLogic(
     })
       .select({ price: 1, activeMonths: 1 })
       .lean();
+
     if (!payment) {
       next(new Error("Pricing code not found."));
     } else {

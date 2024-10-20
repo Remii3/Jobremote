@@ -40,6 +40,7 @@ function HireRemotely() {
       minSalary: 0,
       contractType: "",
       companyName: "",
+      redirectLink: "",
     },
   });
 

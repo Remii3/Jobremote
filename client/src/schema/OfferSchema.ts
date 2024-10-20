@@ -6,7 +6,11 @@ export const ClientOfferFormSchema = CreateOfferSchema.omit({
   logo: true,
   pricing: true,
   technologies: true,
+  redirectLink: true,
 })
+  .extend({
+    redirectLink: z.string().optional(),
+  })
   .refine((data) => data.minSalary < data.maxSalary, {
     message: "Min salary must be lower than max salary",
     path: ["minSalary"],
