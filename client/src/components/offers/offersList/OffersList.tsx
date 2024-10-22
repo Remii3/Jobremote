@@ -26,14 +26,13 @@ export default function OffersList({
   const observerRef = useRef<null | HTMLDivElement>(null);
 
   const {
-    data: offers,
-    error,
-    isLoading,
-    isError,
-    refetch,
-    isFetchingNextPage,
-    hasNextPage,
-    fetchNextPage,
+    data: offersResponse,
+    error: offersError,
+    isPending: offersIsPending,
+    refetch: offersRefetch,
+    isFetchingNextPage: offersIsFetchingNextPage,
+    hasNextPage: offersHasNextPage,
+    fetchNextPage: offersFetchNextPage,
   } = client.offers.getOffers.useInfiniteQuery(
     [`offersList`],
     ({ pageParam = 1 }: { pageParam?: unknown }) => ({
@@ -45,66 +44,66 @@ export default function OffersList({
       },
     }),
     {
-      queryKey: ["offersList"],
+      queryKey: ["offers-list"],
       getNextPageParam: (lastPage) => {
         return lastPage.body.offers.length >= 10
           ? lastPage.body.pagination.page + 1
           : undefined;
       },
-      initialPageParam: 1, // Start at page 1
+      initialPageParam: 1,
     }
   );
 
-  const debouncedSearch = useRef(
+  const refetchOffersList = useRef(
     debounce(async () => {
-      refetch();
+      offersRefetch();
     }, 400)
   ).current;
 
   useEffect(() => {
-    debouncedSearch();
-  }, [filters, sortOption, debouncedSearch]);
+    refetchOffersList();
+  }, [filters, sortOption, refetchOffersList]);
 
-  const handleObserver = useCallback(
+  const handleOffersListObserver = useCallback(
     (entries: IntersectionObserverEntry[]) => {
       const target = entries[0];
-      if (target.isIntersecting && hasNextPage && !isFetchingNextPage) {
-        fetchNextPage();
+      if (target.isIntersecting && offersHasNextPage && !offersIsFetchingNextPage) {
+        offersFetchNextPage();
       }
     },
-    [fetchNextPage, hasNextPage, isFetchingNextPage]
+    [offersFetchNextPage, offersHasNextPage, offersIsFetchingNextPage]
   );
   
   useEffect(() => {
-    const option = {
+    const observerOptions = {
       root: null, 
       rootMargin: "20px",
       threshold: 1.0,
     };
-    const observer = new IntersectionObserver(handleObserver, option);
+    const observer = new IntersectionObserver(handleOffersListObserver, observerOptions);
     if (observerRef.current) observer.observe(observerRef.current);
     return () => {
       if (observerRef.current) observer.unobserve(observerRef.current);
     };
-  }, [handleObserver]);
+  }, [handleOffersListObserver]);
 
-  const offersData = offers?.pages.flatMap((page) =>
+  const offersList = offersResponse?.pages.flatMap((page) =>
     page.status === 200 ? page.body.offers : []
   );
-
+console.log(offersResponse);
   return (
     <>
-      {isLoading && (
+      {offersIsPending && (
         <div className="space-y-2">
           <Skeleton className="w-full h-[88px] bg-slate-100" />
           <Skeleton className="w-full h-[88px] bg-slate-100" />
           <Skeleton className="w-full h-[88px] bg-slate-100" />
         </div>
       )}
-      {isError && <p>Error: {error.status}</p>}
-      {offersData && offersData.length > 0 && (
+      {offersError && <p>Error: {offersError.status}</p>}
+      {offersList && offersList.length > 0 && (
         <ul className="space-y-3">
-          {offersData.map((offer) => (
+          {offersList.map((offer) => (
             <OfferItem
               key={offer._id}
               offerData={offer}
@@ -115,12 +114,12 @@ export default function OffersList({
           <div ref={observerRef} />
         </ul>
       )}
-      {isFetchingNextPage && (
+      {offersIsFetchingNextPage && (
         <div className="flex items-center justify-center w-full">
           <Loader2 className="h-6 w-6 animate-spin" />
         </div>
       )}
-      {offersData && offersData.length <= 0 && (
+      {offersList && offersList.length <= 0 && (
         <div className="text-center">
           <span className="text-muted-foreground">No offers</span>
         </div>

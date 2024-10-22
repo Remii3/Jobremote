@@ -125,7 +125,7 @@ export default function EditOffer({
     client.offers.updateOffer.useMutation({
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["userOffersList"] });
-        queryClient.invalidateQueries({ queryKey: ["offersList"] });
+        queryClient.invalidateQueries({ queryKey: ["offers-list"] });
         toast({
           title: TOAST_TITLES.SUCCESS,
           description: "Offer information has been updated successfully.",

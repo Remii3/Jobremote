@@ -138,7 +138,7 @@ export default function YourOffers({ user, fetchUserData }: YourOffersProps) {
     client.offers.deleteOffer.useMutation({
       onSuccess: async () => {
         await fetchUserData();
-        queryClient.invalidateQueries({ queryKey: ["offersList"] });
+        queryClient.invalidateQueries({ queryKey: ["offers-list"] });
         queryClient.invalidateQueries({ queryKey: ["userOffersList"] });
         toast({
           title: TOAST_TITLES.SUCCESS,

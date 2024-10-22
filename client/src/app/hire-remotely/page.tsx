@@ -64,7 +64,7 @@ function HireRemotely() {
         if (error) {
           console.error("Stripe error:", error);
         }
-        queryClient.invalidateQueries({ queryKey: ["offersList"] });
+        queryClient.invalidateQueries({ queryKey: ["offers-list"] });
         offerForm.reset();
       },
     });
