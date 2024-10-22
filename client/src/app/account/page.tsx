@@ -39,7 +39,6 @@ function AccountPage({ user, fetchUserData, logOut }: AccountPageProps) {
   function changeTab(tab: string) {
     if (tab === currentTab) return;
 
-    setCurrentTab(tab);
     const tabFromParams = new URLSearchParams(searchParams);
     tabFromParams.set("tab", tab);
     router.replace(`/account?${tabFromParams.toString()}`);
