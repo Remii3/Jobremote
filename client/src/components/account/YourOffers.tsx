@@ -2,8 +2,8 @@
 
 import { client } from "@/lib/utils";
 import { UserType } from "@/types/types";
-import { ArrowLeft, Loader2, SquarePen, Trash2, Wallet } from "lucide-react";
-import React, { useEffect, useMemo, useState } from "react";
+import { ArrowLeft, SquarePen, Trash2, Wallet } from "lucide-react";
+import React, { useMemo, useState } from "react";
 import { Button } from "../ui/button";
 import EditOffer from "./EditOffer";
 import {
@@ -61,20 +61,18 @@ export default function YourOffers({ user, fetchUserData }: YourOffersProps) {
 
   const {
     data: userOffers,
-    isLoading: userOffersIsLoading,
+    isPending: isPendingUserOffers,
     error: userOffersError,
-  } = client.users.getUserOffers.useQuery(
-    ["userOffersList"],
-    {
+  } = client.users.getUserOffers.useQuery({
+    queryKey: ["userOffersList"],
+    queryData: {
       query: { _id: user._id, limit: "3", page: "1", sort: "createdAt" },
     },
-    {
-      queryKey: ["userOffersList"],
-      refetchOnReconnect: false,
-      refetchOnWindowFocus: false,
-      refetchInterval: false,
-    }
-  );
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
+    refetchInterval: false,
+  });
+
   const {
     mutate: extendOfferDuration,
     isPending: extendOfferDurationIsPending,
@@ -134,7 +132,7 @@ export default function YourOffers({ user, fetchUserData }: YourOffersProps) {
       },
     });
 
-  const { mutate: deleteOffer, isPending: deleteOfferIsPending } =
+  const { mutate: handleDeleteOffer, isPending: deleteOfferIsPending } =
     client.offers.deleteOffer.useMutation({
       onSuccess: async () => {
         await fetchUserData();
@@ -154,11 +152,13 @@ export default function YourOffers({ user, fetchUserData }: YourOffersProps) {
         });
       },
     });
-  const { data: paymentTypes } = client.offers.getPaymentTypes.useQuery([
-    "payment-types",
-  ]);
-  function handleDeleteOffer(offerId: string) {
-    deleteOffer({ body: { _id: offerId } });
+
+  const { data: paymentTypes } = client.offers.getPaymentTypes.useQuery({
+    queryKey: ["payment-types"],
+  });
+
+  function handlerDeleteOffer(offerId: string) {
+    handleDeleteOffer({ body: { _id: offerId } });
   }
 
   function handleChangeCurrentEditOffer(offerId: string | null) {
@@ -191,6 +191,15 @@ export default function YourOffers({ user, fetchUserData }: YourOffersProps) {
       userOffers?.body.offers.find((offer) => offer._id === editOfferDataId),
     [editOfferDataId, userOffers]
   );
+
+  if (userOffersError) {
+    console.error("Error fetching user offers: ", userOffersError);
+    toast({
+      title: TOAST_TITLES.ERROR,
+      description: "An error occurred while fetching your offers.",
+      variant: "destructive",
+    });
+  }
 
   return (
     <>
@@ -229,7 +238,7 @@ export default function YourOffers({ user, fetchUserData }: YourOffersProps) {
             </span>
             <Separator className="my-4" />
           </div>
-          {!userOffersIsLoading && (
+          {!isPendingUserOffers && (
             <section className="md:col-span-4 md:col-start-2 px-2 overflow-y-auto">
               <Table>
                 <TableHeader>
@@ -323,7 +332,6 @@ export default function YourOffers({ user, fetchUserData }: YourOffersProps) {
                                   <select
                                     name="pricing"
                                     onChange={(value) => {
-                                      console.log(value.target.value);
                                       setSelectedExtendOfferPricing(
                                         value.target.value
                                       );
@@ -349,7 +357,10 @@ export default function YourOffers({ user, fetchUserData }: YourOffersProps) {
                                     <DialogClose>Cancel</DialogClose>
                                     <Button
                                       type="submit"
-                                      disabled={!selectedExtendOfferPricing}
+                                      disabled={
+                                        !selectedExtendOfferPricing ||
+                                        extendOfferDurationIsPending
+                                      }
                                     >
                                       Extend
                                     </Button>
@@ -394,7 +405,8 @@ export default function YourOffers({ user, fetchUserData }: YourOffersProps) {
                               <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                                 <AlertDialogAction
-                                  onClick={() => handleDeleteOffer(offer._id)}
+                                  onClick={() => handlerDeleteOffer(offer._id)}
+                                  disabled={deleteOfferIsPending}
                                 >
                                   Delete
                                 </AlertDialogAction>

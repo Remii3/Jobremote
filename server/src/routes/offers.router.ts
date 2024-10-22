@@ -117,7 +117,7 @@ export const offersRouter = tsServer.router(offersContract, {
       if (query.filters?.experience && query.filters.experience.length > 0) {
         filters.experience = { $in: query.filters.experience };
       }
-      console.log("query.filters", query);
+
       if (
         query.filters?.technologies &&
         query.filters.technologies.length > 0
@@ -158,7 +158,7 @@ export const offersRouter = tsServer.router(offersContract, {
           sortValue = { createdAt: -1 };
           break;
       }
-      console.log("filters", filters);
+
       const [fetchedOffers, total]: [fetchedOffers: OfferType[], number] =
         await Promise.all([
           OfferModel.find(filters)
@@ -224,11 +224,11 @@ export const offersRouter = tsServer.router(offersContract, {
           },
         };
       }
-      console.log("updatedData", updatedData);
+
       if (updatedData.technologies) {
         updatedData.technologies = JSON.parse(updatedData.technologies);
       }
-      console.log("updatedData 2", updatedData);
+      
       if (files && Array.isArray(files) && files.length > 0) {
         const uploadedImg = await updateFiles(
           offerData.logo ? offerData.logo.key : "",

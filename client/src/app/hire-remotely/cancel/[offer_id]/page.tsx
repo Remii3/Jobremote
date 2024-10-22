@@ -2,10 +2,13 @@
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import { MultiStepProgressBar } from "@/components/ui/multi-step-progress";
+import { useToast } from "@/components/ui/use-toast";
 import { useUser } from "@/context/UserContext";
 import { client } from "@/lib/utils";
+import { isFetchError } from "@ts-rest/react-query/v5";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React from "react";
 
 export default function CancelOrderPage({
@@ -13,12 +16,34 @@ export default function CancelOrderPage({
 }: {
   params: { offer_id: string };
 }) {
+  const router = useRouter();
+  const { toast } = useToast();
   const { fetchUserData } = useUser();
+
   const { mutate: deleteOffer } = client.offers.deleteOffer.useMutation({
     onSuccess: async () => {
       fetchUserData();
+      router.push("/");
+    },
+    onError: (error) => {
+      if (isFetchError(error)) {
+        toast({
+          title: "Error",
+          description:
+            "Failed to change the password. Please check your internet connection.",
+          variant: "destructive",
+        });
+      } else if (error.status === 404 || error.status === 500) {
+        toast({
+          title: "Error",
+          description: error.body.msg,
+          variant: "destructive",
+        });
+      }
+      console.error(error);
     },
   });
+
   function handleDeleteOffer(offerId: string) {
     deleteOffer({ body: { _id: offerId } });
   }

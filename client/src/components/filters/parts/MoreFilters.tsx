@@ -56,7 +56,7 @@ const MoreFilters = ({
         <Separator />
         <div className="space-y-2">
           {avExperiences &&
-            avExperiences.body.experiences.map((experience) => {
+            avExperiences.experiences.map((experience) => {
               return (
                 <div key={experience._id} className="flex items-center">
                   <Checkbox
@@ -84,7 +84,7 @@ const MoreFilters = ({
         <Separator />
         <div className="space-y-2">
           {avContractTypes &&
-            avContractTypes.body.contractTypes.map((type) => {
+            avContractTypes.contractTypes.map((type) => {
               return (
                 <div key={type._id} className="flex items-center">
                   <Checkbox
@@ -109,7 +109,7 @@ const MoreFilters = ({
         <Separator />
         <div className="space-y-2">
           {avLocalizations &&
-            avLocalizations.body.localizations.map((type) => {
+            avLocalizations.localizations.map((type) => {
               return (
                 <div key={type._id} className="flex items-center">
                   <Checkbox
@@ -134,7 +134,7 @@ const MoreFilters = ({
         <Separator />
         <div className="space-y-2">
           {avEmploymentTypes &&
-            avEmploymentTypes.body.employmentTypes.map((type) => {
+            avEmploymentTypes.employmentTypes.map((type) => {
               return (
                 <div key={type._id} className="flex items-center">
                   <Checkbox
@@ -161,7 +161,7 @@ const MoreFilters = ({
         <Separator />
         <div className="space-y-2">
           {avTechnologies &&
-            avTechnologies.body.technologies.map((type) => {
+            avTechnologies.technologies.map((type) => {
               return (
                 <div key={type._id} className="flex items-center">
                   <Checkbox

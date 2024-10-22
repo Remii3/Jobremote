@@ -14,7 +14,6 @@ import {
   Wallet,
   X,
   FilePlus as FileIcon,
-  Loader2,
   FilePenIcon,
 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -43,6 +42,8 @@ import {
 import { useEffect } from "react";
 import { useUser } from "@/context/UserContext";
 import Link from "next/link";
+import { isFetchError } from "@ts-rest/react-query/v5";
+import { useToast } from "@/components/ui/use-toast";
 
 interface OfferDetailsContentProps {
   offer: OfferType;
@@ -93,6 +94,7 @@ export default function OfferDetailsContent({
 }: OfferDetailsContentProps) {
   const { user, fetchUserData } = useUser();
   const { formatCurrency, currency } = useCurrency();
+  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof applicationSchema>>({
     resolver: zodResolver(applicationSchema),
@@ -104,7 +106,7 @@ export default function OfferDetailsContent({
     },
   });
 
-  const { mutate: applyForOffer, isPending } =
+  const { mutate: handleOfferApply, isPending: isPendingApplyForOffer } =
     client.offers.offerApply.useMutation({
       onSuccess: () => {
         fetchUserData();
@@ -112,12 +114,40 @@ export default function OfferDetailsContent({
         toggleSuccessApplied();
       },
       onError: (error) => {
-        if (error.status === 404 || error.status === 500) {
+        if (isFetchError(error)) {
+          form.setError("root", {
+            type: "manual",
+            message: "Unable to apply for the offer. Please try again.",
+          });
+          return toast({
+            title: "Error",
+            description:
+              "Unable to apply for the offer. Please check your internet connection.",
+            variant: "destructive",
+          });
+        } else if (error.status === 404 || error.status === 500) {
           form.setError("root", {
             type: "manual",
             message: error.body.msg,
           });
+
+          return toast({
+            title: "Error",
+            description: error.body.msg,
+            variant: "destructive",
+          });
         }
+
+        form.setError("root", {
+          type: "manual",
+          message: "An error occurred while applying for the offer.",
+        });
+        return toast({
+          title: "Error",
+          description:
+            "An error occurred while applying for the offer. Please try again later.",
+          variant: "destructive",
+        });
       },
     });
 
@@ -132,7 +162,7 @@ export default function OfferDetailsContent({
     if (user) {
       applyFormData.append("userId", user._id);
     }
-    applyForOffer({
+    handleOfferApply({
       body: applyFormData,
     });
   }
@@ -412,25 +442,12 @@ export default function OfferDetailsContent({
           ) : (
             <Button
               variant={"default"}
-              className="relative"
-              aria-live="polite"
-              disabled={isPending}
               type="submit"
+              showLoader
+              isLoading={isPendingApplyForOffer}
+              disabled={isPendingApplyForOffer}
             >
-              <Loader2
-                className={`absolute w-6 h-6 animate-spin transition-opacity ${
-                  isPending ? "opacity-100" : "opacity-0"
-                }`}
-                aria-hidden={isPending ? "false" : "true"}
-              />
-              <span
-                className={`transition-opacity ${
-                  isPending ? "opacity-0" : "opacity-100"
-                }`}
-                aria-hidden={isPending ? "true" : "false"}
-              >
-                Apply
-              </span>
+              Apply
             </Button>
           )}
         </div>

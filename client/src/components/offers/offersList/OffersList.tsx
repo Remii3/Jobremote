@@ -33,26 +33,23 @@ export default function OffersList({
     isFetchingNextPage: offersIsFetchingNextPage,
     hasNextPage: offersHasNextPage,
     fetchNextPage: offersFetchNextPage,
-  } = client.offers.getOffers.useInfiniteQuery(
-    [`offersList`],
-    ({ pageParam = 1 }: { pageParam?: unknown }) => ({
+  } = client.offers.getOffers.useInfiniteQuery({
+    queryKey: ["offers-list"],
+    queryData: ({ pageParam }) => ({
       query: {
-        filters: cleanEmptyData(filters), 
+        filters: cleanEmptyData(filters),
         sort: sortOption,
         limit: "10",
         page: (pageParam as number).toString(),
       },
     }),
-    {
-      queryKey: ["offers-list"],
-      getNextPageParam: (lastPage) => {
-        return lastPage.body.offers.length >= 10
-          ? lastPage.body.pagination.page + 1
-          : undefined;
-      },
-      initialPageParam: 1,
-    }
-  );
+    getNextPageParam: (lastPage) => {
+      return lastPage.body.offers.length >= 10
+        ? lastPage.body.pagination.page + 1
+        : undefined;
+    },
+    initialPageParam: 1,
+  });
 
   const refetchOffersList = useRef(
     debounce(async () => {
@@ -67,20 +64,27 @@ export default function OffersList({
   const handleOffersListObserver = useCallback(
     (entries: IntersectionObserverEntry[]) => {
       const target = entries[0];
-      if (target.isIntersecting && offersHasNextPage && !offersIsFetchingNextPage) {
+      if (
+        target.isIntersecting &&
+        offersHasNextPage &&
+        !offersIsFetchingNextPage
+      ) {
         offersFetchNextPage();
       }
     },
     [offersFetchNextPage, offersHasNextPage, offersIsFetchingNextPage]
   );
-  
+
   useEffect(() => {
     const observerOptions = {
-      root: null, 
+      root: null,
       rootMargin: "20px",
       threshold: 1.0,
     };
-    const observer = new IntersectionObserver(handleOffersListObserver, observerOptions);
+    const observer = new IntersectionObserver(
+      handleOffersListObserver,
+      observerOptions
+    );
     if (observerRef.current) observer.observe(observerRef.current);
     return () => {
       if (observerRef.current) observer.unobserve(observerRef.current);
@@ -90,7 +94,7 @@ export default function OffersList({
   const offersList = offersResponse?.pages.flatMap((page) =>
     page.status === 200 ? page.body.offers : []
   );
-console.log(offersResponse);
+
   return (
     <>
       {offersIsPending && (
@@ -100,7 +104,7 @@ console.log(offersResponse);
           <Skeleton className="w-full h-[88px] bg-slate-100" />
         </div>
       )}
-      {offersError && <p>Error: {offersError.status}</p>}
+      {offersError && <p>Error</p>}
       {offersList && offersList.length > 0 && (
         <ul className="space-y-3">
           {offersList.map((offer) => (

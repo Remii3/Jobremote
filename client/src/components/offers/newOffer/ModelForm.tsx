@@ -21,10 +21,13 @@ import { client } from "@/lib/utils";
 import { ClientModelFormSchema } from "@/schema/OfferSchema";
 import { z } from "zod";
 import { UseFormReturn } from "react-hook-form";
+import { isFetchError } from "@ts-rest/react-query/v5";
+import { useToast } from "@/components/ui/use-toast";
 
 type ModelFormPropsTypes = {
   form: UseFormReturn<z.infer<typeof ClientModelFormSchema>>;
   handleSubmit: () => void;
+  isPendingCreateOffer: boolean;
   changeStepPrev: (step: number) => void;
 };
 
@@ -32,12 +35,45 @@ export default function ModelForm({
   form,
   handleSubmit,
   changeStepPrev,
+  isPendingCreateOffer,
 }: ModelFormPropsTypes) {
   const {
     data: paymentTypes,
-    isPending,
-    error,
-  } = client.offers.getPaymentTypes.useQuery(["paymentTypes"]);
+    isPending: isPendingPaymentTypes,
+    error: errorPaymentTypes,
+    isError: isErrorPaymentTypes,
+  } = client.offers.getPaymentTypes.useQuery({ queryKey: ["payment-types"] });
+  const { toast } = useToast();
+
+  if (isErrorPaymentTypes) {
+    if (isFetchError(errorPaymentTypes)) {
+      console.error(errorPaymentTypes.message);
+      toast({
+        title: "Error",
+        description:
+          "Unable to retrieve the available payment types. Please check your internet connection.",
+        variant: "destructive",
+      });
+    } else if (
+      errorPaymentTypes.status === 404 ||
+      errorPaymentTypes.status === 500
+    ) {
+      console.error(errorPaymentTypes.body.msg);
+      toast({
+        title: "Error",
+        description: errorPaymentTypes.body.msg,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Error",
+        description:
+          "An error occurred while fetching the payment types. Please try again later.",
+        variant: "destructive",
+      });
+    }
+  }
+
   return (
     <div>
       <h2 className="text-3xl font-semibold mb-8">
@@ -51,7 +87,7 @@ export default function ModelForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="sr-only">Model</FormLabel>
-                {!isPending && paymentTypes && (
+                {!isPendingPaymentTypes && paymentTypes && (
                   <FormControl>
                     <RadioGroup
                       onValueChange={field.onChange}
@@ -118,8 +154,10 @@ export default function ModelForm({
             </Button>
             <Button
               type="submit"
-              disabled={isPending || !form.getValues("pricing")}
+              disabled={isPendingCreateOffer || !form.getValues("pricing")}
               size={"lg"}
+              isLoading={isPendingCreateOffer}
+              showLoader
             >
               Pay for new offer
             </Button>

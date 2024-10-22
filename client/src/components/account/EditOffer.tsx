@@ -50,6 +50,7 @@ import {
   CommandItem,
   CommandList,
 } from "../ui/command";
+import { isFetchError } from "@ts-rest/react-query/v5";
 
 const OfferCkEditor = dynamic(
   () => import("../ui/ckeditor").then((mod) => mod.OfferCkEditor),
@@ -133,24 +134,45 @@ export default function EditOffer({
         handleChangeCurrentEditOffer(null);
       },
       onError: (error) => {
-        if (error.status === 404 || error.status === 500) {
+        if (isFetchError(error)) {
+          form.setError("root", {
+            type: "manual",
+            message:
+              "Failed to change the password. Please check your internet connection.",
+          });
+
+          toast({
+            title: TOAST_TITLES.ERROR,
+            description:
+              "Failed to change the password. Please check your internet connection.",
+            variant: "destructive",
+          });
+        } else if (error.status === 404 || error.status === 500) {
           form.setError("root", {
             type: "manual",
             message: error.body.msg,
           });
+
+          toast({
+            title: TOAST_TITLES.ERROR,
+            description: error.body.msg,
+            variant: "destructive",
+          });
         } else {
-          console.log("error", error);
+          console.error("error", error);
+
           form.setError("root", {
             type: "manual",
             message: "Something went wrong. Please try again later.",
           });
+
+          toast({
+            title: TOAST_TITLES.ERROR,
+            description:
+              "An error occurred while updating the offer information.",
+            variant: "destructive",
+          });
         }
-        toast({
-          title: TOAST_TITLES.ERROR,
-          description:
-            "An error occurred while updating the offer information.",
-          variant: "destructive",
-        });
       },
     });
 
@@ -287,7 +309,7 @@ export default function EditOffer({
                   <FormMessage />
                   <SelectContent>
                     {avContractTypes &&
-                      avContractTypes.body.contractTypes.map((workType) => (
+                      avContractTypes.contractTypes.map((workType) => (
                         <SelectItem key={workType._id} value={workType.name}>
                           {workType.name}
                         </SelectItem>
@@ -316,7 +338,7 @@ export default function EditOffer({
                   <FormMessage />
                   <SelectContent>
                     {avLocalizations &&
-                      avLocalizations.body.localizations.map((localization) => (
+                      avLocalizations.localizations.map((localization) => (
                         <SelectItem
                           key={localization._id}
                           value={localization.name}
@@ -350,7 +372,7 @@ export default function EditOffer({
                   <FormMessage />
                   <SelectContent>
                     {avExperiences &&
-                      avExperiences.body.experiences.map((exp) => (
+                      avExperiences.experiences.map((exp) => (
                         <SelectItem key={exp._id} value={exp.name}>
                           {exp.name}
                         </SelectItem>
@@ -379,7 +401,7 @@ export default function EditOffer({
                   <FormMessage />
                   <SelectContent>
                     {avEmploymentTypes &&
-                      avEmploymentTypes.body.employmentTypes.map(
+                      avEmploymentTypes.employmentTypes.map(
                         (employmentType) => (
                           <SelectItem
                             key={employmentType._id}
@@ -488,7 +510,7 @@ export default function EditOffer({
                   <CommandEmpty>No technology found.</CommandEmpty>
                   <CommandGroup>
                     {avTechnologies &&
-                      avTechnologies.body.technologies.map((tech) => (
+                      avTechnologies.technologies.map((tech) => (
                         <CommandItem
                           key={tech._id}
                           value={tech.name}

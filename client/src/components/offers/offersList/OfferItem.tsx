@@ -1,12 +1,10 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useCurrency } from "@/context/CurrencyContext";
 import { OfferType } from "@/types/types";
 import { Mail, MailOpen } from "lucide-react";
 import Image from "next/image";
-import { MouseEvent } from "react";
 
 type OfferItemTypes = {
   changeCurrentOffer: (newData: OfferType) => void;
@@ -21,7 +19,6 @@ export default function OfferItem({
 }: OfferItemTypes) {
   const { formatCurrency } = useCurrency();
   const {
-    _id,
     title,
     logo,
     localization,
@@ -34,9 +31,7 @@ export default function OfferItem({
     currency,
     createdAt,
   } = offerData;
-  function showOfferHandler(
-    e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>
-  ) {
+  function showOfferHandler() {
     changeCurrentOffer(offerData);
   }
   const daysOld = Math.floor(
@@ -48,7 +43,7 @@ export default function OfferItem({
     <li>
       <button
         type="button"
-        onClick={(e) => showOfferHandler(e)}
+        onClick={showOfferHandler}
         className="bg-background shadow p-3 hover:shadow-md transition-shadow rounded-md flex justify-between items-center gap-2 w-full border border-input"
       >
         {logo?.url ? (

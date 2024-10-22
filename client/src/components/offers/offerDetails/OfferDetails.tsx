@@ -1,6 +1,5 @@
 "use client";
 
-import { client } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -8,7 +7,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../../ui/dialog";
-import { Loader2 } from "lucide-react";
 import OfferDetailsContent from "./OfferDetailsContent";
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -43,28 +41,6 @@ const OfferDetails = ({
   }, [selectedOffer]);
 
   const renderContent = () => {
-    // if (isLoading) {
-    //   return (
-    //     <div className="w-full h-full flex items-center justify-center">
-    //       <Loader2 className="w-7 h-7 animate-spin" />
-    //     </div>
-    //   );
-    // }
-
-    // if (error && (error.status === 404 || error.status === 500)) {
-    //   return (
-    //     <div className="w-full h-full flex items-center justify-center">
-    //       <div>
-    //         <h2>Error: {error.status || "Unknown error"}</h2>
-    //         <p>
-    //           {(error && error.body.msg) ||
-    //             "An error occurred while fetching the offer."}
-    //         </p>
-    //       </div>
-    //     </div>
-    //   );
-    // }
-
     if (selectedOffer) {
       return (
         <OfferDetailsContent

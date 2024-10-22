@@ -3,7 +3,6 @@ import { client } from "@/lib/utils";
 import { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { UserType } from "@/types/types";
-import { set } from "lodash";
 
 interface UserContextTypes {
   user: UserType | null;
@@ -30,29 +29,24 @@ function UserContextProvider({ children }: UserContextProviderTypes) {
     },
   });
 
-  const { data: sessionState, isLoading: sessionLoading } =
-    client.users.checkUserSession.useQuery(
-      ["userSession"],
-      {},
-      { queryKey: ["userSession"], retry: false }
-    );
+  const { data: sessionState, isPending: sessionLoading } =
+    client.users.checkUserSession.useQuery({
+      queryKey: ["userSession"],
+      retry: false,
+    });
 
   const {
     data: userData,
     refetch,
     isError,
-  } = client.users.getUser.useQuery(
-    ["userData"],
-    {},
-    {
-      queryKey: ["userData"],
-      enabled: false,
-      retry: false,
-      refetchOnReconnect: false,
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-    }
-  );
+  } = client.users.getUser.useQuery({
+    queryKey: ["userData"],
+    enabled: false,
+    retry: false,
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
 
   useEffect(() => {
     if (!sessionLoading) {

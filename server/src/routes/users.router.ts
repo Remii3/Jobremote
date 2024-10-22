@@ -77,7 +77,6 @@ export const usersRouter = tsServer.router(userContract, {
       .select("_id")
       .populate({ path: "createdOffers", match: { isDeleted: false } })
       .lean();
-
     if (!offers) {
       return {
         status: 200,

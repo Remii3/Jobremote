@@ -3,7 +3,9 @@ import AuthGuard from "@/components/AuthGuard";
 import ModelForm from "@/components/offers/newOffer/ModelForm";
 import OfferForm from "@/components/offers/newOffer/OfferForm";
 import { MultiStepProgressBar } from "@/components/ui/multi-step-progress";
+import { useToast } from "@/components/ui/use-toast";
 import { useUser } from "@/context/UserContext";
+import { TOAST_TITLES } from "@/data/constant";
 import { client } from "@/lib/utils";
 import {
   ClientModelFormSchema,
@@ -12,6 +14,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loadStripe } from "@stripe/stripe-js";
 import { useQueryClient } from "@ts-rest/react-query/tanstack";
+import { isFetchError } from "@ts-rest/react-query/v5";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -26,6 +29,7 @@ function HireRemotely() {
   const queryClient = useQueryClient();
   const [selectedLogo, setSelectedLogo] = useState<File[] | null>(null);
   const [technologies, setTechnologies] = useState<string[]>([]);
+  const { toast } = useToast();
 
   const offerForm = useForm<z.infer<typeof ClientOfferFormSchema>>({
     resolver: zodResolver(ClientOfferFormSchema),
@@ -51,7 +55,7 @@ function HireRemotely() {
     },
   });
 
-  const { mutate: createOffer, isPending } =
+  const { mutate: handleCreateOffer, isPending: isPendingCreateOffer } =
     client.offers.createOffer.useMutation({
       onSuccess: async (param) => {
         fetchUserData();
@@ -66,6 +70,44 @@ function HireRemotely() {
         }
         queryClient.invalidateQueries({ queryKey: ["offers-list"] });
         offerForm.reset();
+      },
+      onError: (error) => {
+        if (isFetchError(error)) {
+          offerForm.setError("root", {
+            type: "manual",
+            message: error.message,
+          });
+
+          toast({
+            title: TOAST_TITLES.ERROR,
+            description: error.message,
+            variant: "destructive",
+          });
+        } else if (error.status === 404 || error.status === 500) {
+          offerForm.setError("root", {
+            type: "manual",
+            message: error.body.msg,
+          });
+
+          toast({
+            title: TOAST_TITLES.ERROR,
+            description: error.body.msg,
+            variant: "destructive",
+          });
+        } else {
+          console.error("error", error);
+
+          offerForm.setError("root", {
+            type: "manual",
+            message: "Something went wrong. Please try again later.",
+          });
+
+          toast({
+            title: TOAST_TITLES.ERROR,
+            description: "An error occurred while creating offer.",
+            variant: "destructive",
+          });
+        }
       },
     });
 
@@ -99,7 +141,7 @@ function HireRemotely() {
     newOfferFormData.append("companyName", offerValues.companyName);
     newOfferFormData.append("pricing", modelValues.pricing);
 
-    createOffer({
+    handleCreateOffer({
       body: newOfferFormData,
     });
   }
@@ -142,6 +184,7 @@ function HireRemotely() {
           <ModelForm
             form={modelForm}
             handleSubmit={handlePaymentFormSubmit}
+            isPendingCreateOffer={isPendingCreateOffer}
             changeStepPrev={changeStepPrev}
           />
         </div>

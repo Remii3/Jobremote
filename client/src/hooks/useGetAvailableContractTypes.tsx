@@ -2,35 +2,36 @@ import { useToast } from "@/components/ui/use-toast";
 import { client } from "@/lib/utils";
 import { isFetchError } from "@ts-rest/react-query/v5";
 
-function useGetAvailableEmploymentTypes() {
+function useGetAvailableContractTypes() {
   const {
-    data: avEmploymentTypes,
-    isPending: avEmploymentTypesIsLoading,
+    data: avContractTypes,
+    isPending: avContractTypesIsLoading,
     error,
     isError,
-  } = client.offers.getEmploymentTypes.useQuery({
-    queryKey: ["employment-types"],
+  } = client.offers.getContractTypes.useQuery({
+    queryKey: ["contract-types"],
     refetchOnMount: false,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
+    retry: false,
   });
   const { toast } = useToast();
-
   if (isError) {
     let errorText;
     if (isFetchError(error)) {
       console.error(error.message);
-      errorText = "Error: Failed to fetch employment types.";
+      errorText = "Error: Failed to fetch contract types.";
 
       toast({
         title: "Error",
         description:
-          "Unable to retrieve the available employment types. Please check your internet connection.",
+          "Unable to retrieve the available contract types. Please check your internet connection.",
         variant: "destructive",
       });
     } else if (error.status === 404 || error.status === 500) {
       console.error(error.body.msg);
       errorText = error.body.msg;
+
       toast({
         title: "Error",
         description: error.body.msg,
@@ -39,25 +40,25 @@ function useGetAvailableEmploymentTypes() {
     }
 
     return {
-      avEmploymentTypes: null,
-      avEmploymentTypesIsLoading,
+      avContractTypes: null,
+      avContractTypesIsLoading,
       avContractTypesError: errorText,
     };
   }
 
-  if (!avEmploymentTypes || avEmploymentTypesIsLoading) {
+  if (!avContractTypes || avContractTypesIsLoading) {
     return {
-      avEmploymentTypes: null,
-      avEmploymentTypesIsLoading,
-      avEmploymentTypesError: null,
+      avContractTypes: null,
+      avContractTypesIsLoading,
+      avContractTypesError: null,
     };
   }
 
   return {
-    avEmploymentTypes: avEmploymentTypes.body,
-    avEmploymentTypesIsLoading,
-    avEmploymentTypesError: error,
+    avContractTypes: avContractTypes.body,
+    avContractTypesIsLoading,
+    avContractTypesError: error,
   };
 }
 
-export default useGetAvailableEmploymentTypes;
+export default useGetAvailableContractTypes;

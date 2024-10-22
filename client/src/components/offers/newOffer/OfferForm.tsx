@@ -170,7 +170,7 @@ const OfferForm = ({
                       <FormMessage />
                       <SelectContent>
                         {avContractTypes &&
-                          avContractTypes.body.contractTypes.map((workType) => (
+                          avContractTypes.contractTypes.map((workType) => (
                             <SelectItem
                               key={workType._id}
                               value={workType.name}
@@ -204,16 +204,14 @@ const OfferForm = ({
                       <FormMessage />
                       <SelectContent>
                         {avLocalizations &&
-                          avLocalizations.body.localizations.map(
-                            (localization) => (
-                              <SelectItem
-                                key={localization._id}
-                                value={localization.name}
-                              >
-                                {localization.name}
-                              </SelectItem>
-                            )
-                          )}
+                          avLocalizations.localizations.map((localization) => (
+                            <SelectItem
+                              key={localization._id}
+                              value={localization.name}
+                            >
+                              {localization.name}
+                            </SelectItem>
+                          ))}
                       </SelectContent>
                     </Select>
                   </FormItem>
@@ -242,7 +240,7 @@ const OfferForm = ({
                       <FormMessage />
                       <SelectContent>
                         {avExperiences &&
-                          avExperiences.body.experiences.map((exp) => (
+                          avExperiences.experiences.map((exp) => (
                             <SelectItem key={exp._id} value={exp.name}>
                               {exp.name}
                             </SelectItem>
@@ -273,7 +271,7 @@ const OfferForm = ({
                       <FormMessage />
                       <SelectContent>
                         {avEmploymentTypes &&
-                          avEmploymentTypes.body.employmentTypes.map(
+                          avEmploymentTypes.employmentTypes.map(
                             (employmentType) => (
                               <SelectItem
                                 key={employmentType._id}
@@ -392,7 +390,7 @@ const OfferForm = ({
                       <CommandEmpty>No technology found.</CommandEmpty>
                       <CommandGroup>
                         {avTechnologies &&
-                          avTechnologies.body.technologies.map((tech) => (
+                          avTechnologies.technologies.map((tech) => (
                             <CommandItem
                               key={tech._id}
                               value={tech.name}

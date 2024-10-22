@@ -22,6 +22,7 @@ import { UserType } from "@/types/types";
 import { useEffect } from "react";
 import { useToast } from "../ui/use-toast";
 import { TOAST_TITLES } from "@/data/constant";
+import { isFetchError } from "@ts-rest/react-query/v5";
 
 const UserSettingsSchema = UpdateUserSettingsSchema.omit({ _id: true });
 
@@ -48,13 +49,27 @@ export default function Settings({ user, fetchUserData }: SettingsType) {
         });
       },
       onError: (error) => {
-        if (error.status === 404 || error.status === 500) {
+        if (isFetchError(error)) {
+          form.setError("root", {
+            type: "manual",
+            message: error.message,
+          });
+          toast({
+            title: TOAST_TITLES.ERROR,
+            description:
+              "An error occurred while updating settings. Please check your internet connection.",
+          });
+        } else if (error.status === 404 || error.status === 500) {
           form.setError("root", {
             type: "manual",
             message: error.body.msg,
           });
+          toast({
+            title: TOAST_TITLES.ERROR,
+            description: error.body.msg,
+          });
         } else {
-          console.log("error", error);
+          console.error("error", error);
           form.setError("root", {
             type: "manual",
             message: "Something went wrong. Please try again later.",

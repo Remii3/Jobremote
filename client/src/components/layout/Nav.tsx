@@ -1,4 +1,4 @@
-import { FilePlus2, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Button, buttonVariants } from "../ui/button";
 import {
   Sheet,

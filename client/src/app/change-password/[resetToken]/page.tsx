@@ -17,10 +17,12 @@ import {
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { ChangeUserPasswordSchema } from "jobremotecontracts/dist/schemas/userSchemas";
 import Link from "next/link";
+import { isFetchError } from "@ts-rest/react-query/v5";
+import { useToast } from "@/components/ui/use-toast";
 
 const ClientChangeUserPasswordSchema = ChangeUserPasswordSchema.omit({
   resetToken: true,
@@ -45,6 +47,7 @@ export default function ChangePasswordPage({
   params: { resetToken },
 }: ChangePasswordPageProps) {
   const router = useRouter();
+  const { toast } = useToast();
 
   const [showPassword, setShowPassword] = useState(false);
   const [showRepeatPassword, setShowRepeatPassword] = useState(false);
@@ -62,12 +65,32 @@ export default function ChangePasswordPage({
       router.push("/login");
     },
     onError: (error) => {
-      if (error.status === 404 || error.status === 500) {
+      if (isFetchError(error)) {
+        form.setError("root", {
+          type: "manual",
+          message:
+            "Failed to change the password. Please check your internet connection.",
+        });
+
+        toast({
+          title: "Error",
+          description:
+            "Failed to change the password. Please check your internet connection.",
+          variant: "destructive",
+        });
+      } else if (error.status === 404 || error.status === 500) {
         form.setError("root", {
           type: "manual",
           message: error.body.msg,
         });
+
+        toast({
+          title: "Error",
+          description: error.body.msg,
+          variant: "destructive",
+        });
       }
+      console.error(error);
     },
   });
 
@@ -177,9 +200,6 @@ export default function ChangePasswordPage({
                 isLoading={isPending}
               >
                 Change password
-              </Button>
-              <Button onClick={() => console.log(form.formState.errors)}>
-                Show errors
               </Button>
               <Link
                 className={buttonVariants({ variant: "link" })}

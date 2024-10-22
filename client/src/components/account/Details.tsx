@@ -21,6 +21,7 @@ import { UserType } from "@/types/types";
 import { useToast } from "../ui/use-toast";
 import { TOAST_TITLES } from "@/data/constant";
 import { useEffect } from "react";
+import { isFetchError } from "@ts-rest/react-query/v5";
 
 const UserDataSchema = UpdateUserSchema.omit({ _id: true });
 
@@ -49,23 +50,36 @@ export default function Details({ user, fetchUserData }: DetailsType) {
         });
       },
       onError: (error) => {
-        if (error.status == 404 || error.status == 500) {
+        if (isFetchError(error)) {
+          toast({
+            title: TOAST_TITLES.ERROR,
+            description:
+              "Failed to change the password. Please check your internet connection.",
+            variant: "destructive",
+          });
+        } else if (error.status == 404 || error.status == 500) {
           form.setError("root", {
             type: "manual",
             message: error.body.msg,
           });
+          toast({
+            title: TOAST_TITLES.ERROR,
+            description: error.body.msg,
+            variant: "destructive",
+          });
         } else {
-          console.log("error", error);
+          console.error("error", error);
           form.setError("root", {
             type: "manual",
             message: "Something went wrong. Please try again later.",
           });
+          toast({
+            title: TOAST_TITLES.ERROR,
+            description:
+              "An error occurred while updating the account details.",
+            variant: "destructive",
+          });
         }
-        toast({
-          title: TOAST_TITLES.ERROR,
-          description: "An error occurred while updating the account details.",
-          variant: "destructive",
-        });
       },
     }
   );

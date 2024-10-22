@@ -24,11 +24,10 @@ import {
   Search,
   Settings2,
 } from "lucide-react";
-import { Badge, badgeVariants } from "../ui/badge";
+import { Badge } from "../ui/badge";
 import { FormEvent, useState } from "react";
 import { Slider } from "../ui/slider";
 import { useCurrency } from "@/context/CurrencyContext";
-import { checkIsFilterChanged } from "@/lib/utils";
 import Technologies from "./parts/Technologies";
 import EmploymentType from "./parts/EmploymentType";
 import Localizations from "./parts/Localizations";
@@ -47,6 +46,7 @@ import {
   CommandInput,
   CommandList,
 } from "../ui/command";
+import TagList from "./parts/TagList";
 
 interface FiltersPropsType {
   filters: Required<OfferFiltersType>;
@@ -66,18 +66,13 @@ const SORT_OPTIONS_ARRAY = Object.keys(SORT_OPTIONS).map((key) => ({
   value: SORT_OPTIONS[key as OfferSortOptionsTypes],
 }));
 
-const ServerErrorMessage = ({
-  message,
-  status,
-}: {
-  message: string;
-  status: number;
-}) => (
-  <div className="flex p-2 items-center justify-center">
-    <span className="text-xs text-slate-500">{status === 500 && message}</span>
-  </div>
-);
-
+const ServerErrorMessage = ({ message }: { message: string }) => {
+  return (
+    <div className="flex p-2 items-center justify-center">
+      <span className="text-xs text-slate-500">{message}</span>
+    </div>
+  );
+};
 const LoadingComponent = () => (
   <div className="flex p-2 items-center justify-center">
     <Loader2 className="w-4 h-4 animate-spin" />
@@ -100,17 +95,22 @@ const Filters = ({
   const { formatCurrency, currency } = useCurrency();
   const [techOpen, setTechOpen] = useState(false);
   const [showMoreFilters, setShowMoreFilters] = useState(false);
+
   const { avContractTypes, avContractTypesError, avContractTypesIsLoading } =
     useGetAvailableContractTypes();
+
   const { avLocalizations, avLocalizationsError, avLocalizationsIsLoading } =
     useGetAvailableLocalizations();
+
   const {
     avEmploymentTypes,
     avEmploymentTypesError,
     avEmploymentTypesIsLoading,
   } = useGetAvailableEmploymentTypes();
+
   const { avExperiences, avExperiencesError, avExperiencesIsLoading } =
     useGetAvailableExperiences();
+
   const { avTechnologies, avTechnologiesError, avTechnologiesIsLoading } =
     useGetAvailableTechnologies();
 
@@ -125,6 +125,25 @@ const Filters = ({
   function searchOffers(e: FormEvent) {
     e.preventDefault();
   }
+  const checkIsFilterChanged = (filter: any) => {
+    for (const key in filter) {
+      if (filter.hasOwnProperty(key)) {
+        const value = filter[key];
+
+        // Check based on expected default values
+        if (Array.isArray(value) && value.length > 0) {
+          return true; // Array is not empty, so filter is changed
+        }
+        if (typeof value === "string" && value !== "") {
+          return true; // String is not empty, so filter is changed
+        }
+        if (typeof value === "number" && value !== 0) {
+          return true; // Number is not 0, so filter is changed
+        }
+      }
+    }
+    return false; // No changes detected
+  };
 
   return (
     <>
@@ -160,24 +179,19 @@ const Filters = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              {avLocalizations &&
-                avLocalizations.body.localizations.length > 0 && (
-                  <Localizations
-                    localizations={filters.localization}
-                    changeTextsHandler={changeTextsHandler}
-                    avLocalizations={avLocalizations.body.localizations}
-                  />
-                )}
-              {avLocalizations &&
-                avLocalizations.body.localizations.length <= 0 && (
-                  <EmptyFilterComponent message="No localizations" />
-                )}
-              {avLocalizationsIsLoading && <LoadingComponent />}
-              {avLocalizationsError && avLocalizationsError.status === 500 && (
-                <ServerErrorMessage
-                  message={avLocalizationsError.body.msg}
-                  status={avLocalizationsError.status}
+              {avLocalizations && avLocalizations.localizations.length > 0 && (
+                <Localizations
+                  localizations={filters.localization}
+                  changeTextsHandler={changeTextsHandler}
+                  avLocalizations={avLocalizations.localizations}
                 />
+              )}
+              {avLocalizations && avLocalizations.localizations.length <= 0 && (
+                <EmptyFilterComponent message={avLocalizations.msg} />
+              )}
+              {avLocalizationsIsLoading && <LoadingComponent />}
+              {avLocalizationsError && (
+                <ServerErrorMessage message={avLocalizationsError} />
               )}
             </DropdownMenuContent>
           </DropdownMenu>
@@ -193,22 +207,19 @@ const Filters = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              {avExperiences && avExperiences.body.experiences.length > 0 && (
+              {avExperiences && avExperiences.experiences.length > 0 && (
                 <Experience
                   experiences={filters.experience}
                   changeTextsHandler={changeTextsHandler}
-                  avExperiences={avExperiences.body.experiences}
+                  avExperiences={avExperiences.experiences}
                 />
               )}
-              {avExperiences && avExperiences.body.experiences.length <= 0 && (
-                <EmptyFilterComponent message="No experiences" />
+              {avExperiences && avExperiences.experiences.length <= 0 && (
+                <EmptyFilterComponent message={avExperiences.msg} />
               )}
               {avExperiencesIsLoading && <LoadingComponent />}
-              {avExperiencesError && avExperiencesError.status === 500 && (
-                <ServerErrorMessage
-                  message={avExperiencesError.body.msg}
-                  status={avExperiencesError.status}
-                />
+              {avExperiencesError && (
+                <ServerErrorMessage message={avExperiencesError} />
               )}
             </DropdownMenuContent>
           </DropdownMenu>
@@ -226,25 +237,21 @@ const Filters = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               {avEmploymentTypes &&
-                avEmploymentTypes.body.employmentTypes.length > 0 && (
+                avEmploymentTypes.employmentTypes.length > 0 && (
                   <EmploymentType
                     changeTextsHandler={changeTextsHandler}
                     employments={filters.employmentType}
-                    avEmploymentTypes={avEmploymentTypes.body.employmentTypes}
+                    avEmploymentTypes={avEmploymentTypes.employmentTypes}
                   />
                 )}
               {avEmploymentTypes &&
-                avEmploymentTypes.body.employmentTypes.length <= 0 && (
-                  <EmptyFilterComponent message="No employments" />
+                avEmploymentTypes.employmentTypes.length <= 0 && (
+                  <EmptyFilterComponent message={avEmploymentTypes.msg} />
                 )}
               {avEmploymentTypesIsLoading && <LoadingComponent />}
-              {avEmploymentTypesError &&
-                avEmploymentTypesError.status === 500 && (
-                  <ServerErrorMessage
-                    message={avEmploymentTypesError.body.msg}
-                    status={avEmploymentTypesError.status}
-                  />
-                )}
+              {avEmploymentTypesError && (
+                <ServerErrorMessage message={avEmploymentTypesError} />
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
           <DropdownMenu>
@@ -259,69 +266,60 @@ const Filters = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              {avContractTypes &&
-                avContractTypes.body.contractTypes.length > 0 && (
-                  <ContractType
-                    changeTextsHandler={changeTextsHandler}
-                    contractTypes={filters.contractType}
-                    avContractTypes={avContractTypes?.body.contractTypes}
-                  />
-                )}
-              {avContractTypes &&
-                avContractTypes.body.contractTypes.length <= 0 && (
-                  <EmptyFilterComponent message="No contracts" />
-                )}
-              {avContractTypesIsLoading && <LoadingComponent />}
-              {avContractTypesError && avContractTypesError.status === 500 && (
-                <ServerErrorMessage
-                  message={avContractTypesError.body.msg}
-                  status={avContractTypesError.status}
+              {avContractTypes && avContractTypes.contractTypes.length > 0 && (
+                <ContractType
+                  changeTextsHandler={changeTextsHandler}
+                  contractTypes={filters.contractType}
+                  avContractTypes={avContractTypes?.contractTypes}
                 />
+              )}
+              {avContractTypes && avContractTypes.contractTypes.length <= 0 && (
+                <EmptyFilterComponent message={avContractTypes.msg} />
+              )}
+              {avContractTypesIsLoading && <LoadingComponent />}
+              {avContractTypesError && (
+                <ServerErrorMessage message={avContractTypesError} />
               )}
             </DropdownMenuContent>
           </DropdownMenu>
           <Popover open={techOpen} onOpenChange={setTechOpen}>
-              <PopoverTrigger asChild className="hidden lg:flex">
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={techOpen}
-                  className="w-[200px] justify-between"
-                >
-                  Technology
-                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-[200px] p-0">
-                <Command>
-                  <CommandInput placeholder="Search technology..." />
-                  <CommandList>
-                    <CommandEmpty>No technology found.</CommandEmpty>
-                    <CommandGroup>
-                      {avTechnologies &&
-                        avTechnologies.body.technologies.length > 0 && (
-                          <Technologies
-                            technologies={filters.technologies}
-                            changeTextsHandler={changeTextsHandler}
-                            avTechnologies={avTechnologies.body.technologies}
-                          />
-                        )}
-                      {avTechnologies &&
-                        avTechnologies.body.technologies.length <= 0 && (
-                          <EmptyFilterComponent message="No technologies" />
-                        )}
-                      {avTechnologiesIsLoading && <LoadingComponent />}
-                      {avTechnologiesError &&
-                        avTechnologiesError.status === 500 && (
-                          <ServerErrorMessage
-                            message={avTechnologiesError.body.msg}
-                            status={avTechnologiesError.status}
-                          />
-                        )}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
+            <PopoverTrigger asChild className="hidden lg:flex">
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={techOpen}
+                className="w-[200px] justify-between"
+              >
+                Technology
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[200px] p-0">
+              <Command>
+                <CommandInput placeholder="Search technology..." />
+                <CommandList>
+                  <CommandEmpty>No technology found.</CommandEmpty>
+                  <CommandGroup>
+                    {avTechnologies &&
+                      avTechnologies.technologies.length > 0 && (
+                        <Technologies
+                          technologies={filters.technologies}
+                          changeTextsHandler={changeTextsHandler}
+                          avTechnologies={avTechnologies.technologies}
+                        />
+                      )}
+                    {avTechnologies &&
+                      avTechnologies.technologies.length <= 0 && (
+                        <EmptyFilterComponent message={avTechnologies.msg} />
+                      )}
+                    {avTechnologiesIsLoading && <LoadingComponent />}
+                    {avTechnologiesError && (
+                      <ServerErrorMessage message={avTechnologiesError} />
+                    )}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
           </Popover>
           <DropdownMenu>
             <DropdownMenuTrigger asChild className="hidden lg:block">
@@ -402,98 +400,14 @@ const Filters = ({
         </DropdownMenu>
       </div>
       {checkIsFilterChanged(filters) && (
-        <ul className="flex gap-2 flex-wrap lg:flex-nowrap lg:overflow-x-auto">
-          {filters.keyword.trim() !== "" && (
-            <li className={badgeVariants({ variant: "outline" })}>
-              <button
-                type="button"
-                onClick={() => changeTextsHandler("keyword", "")}
-                className="text-nowrap"
-              >
-                {filters.keyword}
-              </button>
-            </li>
-          )}
-          {filters.localization?.map((item) => (
-            <li key={item} className={badgeVariants({ variant: "outline" })}>
-              <button
-                type="button"
-                onClick={() => changeTextsHandler("localization", item)}
-                className="text-nowrap"
-              >
-                {item}
-              </button>
-            </li>
-          ))}
-          {filters.experience?.map((item) => (
-            <li key={item} className={badgeVariants({ variant: "outline" })}>
-              <button
-                type="button"
-                onClick={() => changeTextsHandler("experience", item)}
-                className="text-nowrap"
-              >
-                {item}
-              </button>
-            </li>
-          ))}
-          {filters.employmentType?.map((item) => (
-            <li key={item} className={badgeVariants({ variant: "outline" })}>
-              <button
-                type="button"
-                onClick={() => changeTextsHandler("employmentType", item)}
-                className="text-nowrap"
-              >
-                {item}
-              </button>
-            </li>
-          ))}
-          {filters.contractType?.map((item) => (
-            <li key={item} className={badgeVariants({ variant: "outline" })}>
-              <button
-                type="button"
-                onClick={() => changeTextsHandler("contractType", item)}
-                className="text-nowrap"
-              >
-                {item}
-              </button>
-            </li>
-          ))}
-          {filters.technologies?.map((item) => (
-            <li key={item} className={badgeVariants({ variant: "outline" })}>
-              <button
-                type="button"
-                onClick={() => changeTextsHandler("technologies", item)}
-                className="text-nowrap"
-              >
-                {item}
-              </button>
-            </li>
-          ))}
-          {filters.minSalary !== 0 && (
-            <li className={badgeVariants({ variant: "outline" })}>
-              <button type="button" onClick={() => changeSalaryHandler(0)}>
-                &gt;{formatCurrency(filters.minSalary / 1000, currency)}
-                k/y
-              </button>
-            </li>
-          )}
-          {checkIsFilterChanged(filters) && (
-            <li
-              className={`${badgeVariants({
-                variant: "destructive",
-              })} bg-red-200/80 border-red-500 text-red-500 hover:text-white`}
-            >
-              <button
-                className="text-nowrap"
-                onClick={() => {
-                  resetFilters();
-                }}
-              >
-                Clear filters x
-              </button>
-            </li>
-          )}
-        </ul>
+        <TagList
+          filters={filters}
+          changeTextsHandler={changeTextsHandler}
+          resetFilters={resetFilters}
+          formatCurrency={formatCurrency}
+          currency={currency}
+          changeSalaryHandler={changeSalaryHandler}
+        />
       )}
     </>
   );

@@ -6,6 +6,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormRootError,
 } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,28 +21,54 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { client } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { CreateUserSchemaRefined } from "@/schema/UserSchemas";
+import { isFetchError } from "@ts-rest/react-query/v5";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { toast } = useToast();
+
   const {
     mutate: register,
     isPending,
     isError,
     error,
   } = client.users.createUser.useMutation({
-    onSuccess: () => router.push("/login"),
+    onSuccess: () => {
+      router.push("/login");
+    },
     onError: (error) => {
-      if (error.status === 400 || error.status === 409) {
+      if (isFetchError(error)) {
+        toast({
+          title: "Error",
+          description:
+            "Failed to change the password. Please check your internet connection.",
+          variant: "destructive",
+        });
+      } else if (error.status === 400 || error.status === 409) {
         form.setError(error.body.field, {
           type: "manual",
           message: error.body.msg,
+        });
+
+        toast({
+          title: "Error",
+          description: error.body.msg,
+          variant: "destructive",
         });
       } else if (error.status === 500) {
         form.setError("root", {
           type: "manual",
           message: error.body.msg,
         });
+
+        toast({
+          title: "Error",
+          description: error.body.msg,
+          variant: "destructive",
+        });
       }
+      console.error(error);
     },
   });
 
@@ -228,11 +255,7 @@ export default function RegisterPage() {
                 Already have an account?
               </Link>
             </div>
-            {isError && error.status === 500 && (
-              <p className="text-sm font-medium text-destructive">
-                {error.body.msg}
-              </p>
-            )}
+            <FormRootError />
           </form>
         </Form>
       </div>
