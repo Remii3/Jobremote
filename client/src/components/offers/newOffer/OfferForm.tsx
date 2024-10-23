@@ -8,6 +8,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormRootError,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
@@ -456,6 +457,7 @@ const OfferForm = ({
                 )}
               />
             </div>
+            <FormRootError />
             <div className="flex mt-4 gap-4">
               <Button
                 type="submit"

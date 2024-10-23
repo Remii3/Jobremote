@@ -15,6 +15,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormRootError,
 } from "@/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { client } from "@/lib/utils";
@@ -144,6 +145,7 @@ export default function ModelForm({
               </FormItem>
             )}
           />
+          <FormRootError />
           <div className="flex mt-8 gap-4 justify-end lg:justify-start">
             <Button
               onClick={() => changeStepPrev(1)}
