@@ -4,7 +4,7 @@ import { client } from "@/lib/utils";
 import { UserType } from "@/types/types";
 import { ArrowLeft, SquarePen, Trash2, Wallet } from "lucide-react";
 import React, { useMemo, useState } from "react";
-import { Button } from "../ui/button";
+import { Button } from "../../ui/button";
 import EditOffer from "./EditOffer";
 import {
   Table,
@@ -13,10 +13,10 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../ui/table";
-import { Separator } from "../ui/separator";
+} from "../../ui/table";
+import { Separator } from "../../ui/separator";
 import { useQueryClient } from "@ts-rest/react-query/tanstack";
-import { Badge } from "../ui/badge";
+import { Badge } from "../../ui/badge";
 import { loadStripe } from "@stripe/stripe-js";
 import {
   AlertDialog,
@@ -28,8 +28,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "../ui/alert-dialog";
-import { useToast } from "../ui/use-toast";
+} from "../../ui/alert-dialog";
+import { useToast } from "../../ui/use-toast";
 import { TOAST_TITLES } from "@/data/constant";
 import {
   Dialog,
@@ -40,11 +40,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "../ui/dialog";
+} from "../../ui/dialog";
 
 type YourOffersProps = {
   user: UserType;
-  fetchUserData: () => Promise<void>;
+  fetchUserData: () => void;
 };
 
 const stripePromise = loadStripe(
@@ -134,8 +134,8 @@ export default function YourOffers({ user, fetchUserData }: YourOffersProps) {
 
   const { mutate: handleDeleteOffer, isPending: deleteOfferIsPending } =
     client.offers.deleteOffer.useMutation({
-      onSuccess: async () => {
-        await fetchUserData();
+      onSuccess: () => {
+        fetchUserData();
         queryClient.invalidateQueries({ queryKey: ["offers-list"] });
         queryClient.invalidateQueries({ queryKey: ["userOffersList"] });
         toast({

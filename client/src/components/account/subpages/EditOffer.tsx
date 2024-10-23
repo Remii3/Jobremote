@@ -1,6 +1,6 @@
 "use clinet";
 
-import { Button } from "../ui/button";
+import { Button } from "../../ui/button";
 import {
   Form,
   FormControl,
@@ -10,16 +10,16 @@ import {
   FormLabel,
   FormMessage,
   FormRootError,
-} from "../ui/form";
-import { Input } from "../ui/input";
+} from "../../ui/form";
+import { Input } from "../../ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../ui/select";
-import { Badge } from "../ui/badge";
+} from "../../ui/select";
+import { Badge } from "../../ui/badge";
 import useGetAvailableLocalizations from "@/hooks/useGetAvailableLocalizations";
 import useGetAvailableTechnologies from "@/hooks/useGetAvailableTechnologies";
 import useGetAvailableEmploymentTypes from "@/hooks/useGetAvailableEmploymentTypes";
@@ -34,13 +34,13 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { client, cn, getOnlyDirtyFormFields } from "@/lib/utils";
 import { UpdateOfferSchema } from "jobremotecontracts/dist/schemas/offerSchemas";
-import { useToast } from "../ui/use-toast";
+import { useToast } from "../../ui/use-toast";
 import { TOAST_TITLES } from "@/data/constant";
 import { useEffect, useState } from "react";
 import { QueryClient } from "@ts-rest/react-query/tanstack";
-import AvatarUploader from "../ui/avatar-uploader";
-import { Label } from "../ui/label";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import AvatarUploader from "../../ui/avatar-uploader";
+import { Label } from "../../ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
 import { Check, ChevronsUpDown } from "lucide-react";
 import {
   Command,
@@ -49,11 +49,11 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "../ui/command";
+} from "../../ui/command";
 import { isFetchError } from "@ts-rest/react-query/v5";
 
 const OfferCkEditor = dynamic(
-  () => import("../ui/ckeditor").then((mod) => mod.OfferCkEditor),
+  () => import("../../ui/ckeditor").then((mod) => mod.OfferCkEditor),
   { ssr: false }
 );
 

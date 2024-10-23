@@ -1,6 +1,6 @@
 "use client";
 
-import { Separator } from "../ui/separator";
+import { Separator } from "../../ui/separator";
 import {
   Form,
   FormControl,
@@ -10,17 +10,17 @@ import {
   FormLabel,
   FormMessage,
   FormRootError,
-} from "../ui/form";
+} from "../../ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Switch } from "../ui/switch";
-import { Button } from "../ui/button";
+import { Switch } from "../../ui/switch";
+import { Button } from "../../ui/button";
 import { client, getOnlyDirtyFormFields } from "@/lib/utils";
 import { UpdateUserSettingsSchema } from "jobremotecontracts/dist/schemas/userSchemas";
 import { UserType } from "@/types/types";
 import { useEffect } from "react";
-import { useToast } from "../ui/use-toast";
+import { useToast } from "../../ui/use-toast";
 import { TOAST_TITLES } from "@/data/constant";
 import { isFetchError } from "@ts-rest/react-query/v5";
 
@@ -28,7 +28,7 @@ const UserSettingsSchema = UpdateUserSettingsSchema.omit({ _id: true });
 
 type SettingsType = {
   user: UserType;
-  fetchUserData: () => Promise<void>;
+  fetchUserData: () => void;
 };
 
 export default function Settings({ user, fetchUserData }: SettingsType) {
@@ -41,8 +41,8 @@ export default function Settings({ user, fetchUserData }: SettingsType) {
 
   const { mutate: updateSettings, isPending } =
     client.users.updateUserSettings.useMutation({
-      onSuccess: async () => {
-        await fetchUserData();
+      onSuccess: () => {
+        fetchUserData();
         toast({
           title: TOAST_TITLES.SUCCESS,
           description: "Settings have been updated successfully.",

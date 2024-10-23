@@ -1,6 +1,6 @@
 "use client";
 
-import { Separator } from "../ui/separator";
+import { Separator } from "../../ui/separator";
 import {
   Form,
   FormField,
@@ -8,17 +8,17 @@ import {
   FormLabel,
   FormMessage,
   FormRootError,
-} from "../ui/form";
-import { Input } from "../ui/input";
+} from "../../ui/form";
+import { Input } from "../../ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Button } from "../ui/button";
-import { Textarea } from "../ui/textarea";
+import { Button } from "../../ui/button";
+import { Textarea } from "../../ui/textarea";
 import { client, getOnlyDirtyFormFields } from "@/lib/utils";
 import { UpdateUserSchema } from "jobremotecontracts/dist/schemas/userSchemas";
 import { UserType } from "@/types/types";
-import { useToast } from "../ui/use-toast";
+import { useToast } from "../../ui/use-toast";
 import { TOAST_TITLES } from "@/data/constant";
 import { useEffect } from "react";
 import { isFetchError } from "@ts-rest/react-query/v5";
@@ -27,7 +27,7 @@ const UserDataSchema = UpdateUserSchema.omit({ _id: true });
 
 type DetailsType = {
   user: UserType;
-  fetchUserData: () => Promise<void>;
+  fetchUserData: () => void;
 };
 
 export default function Details({ user, fetchUserData }: DetailsType) {
@@ -42,8 +42,8 @@ export default function Details({ user, fetchUserData }: DetailsType) {
 
   const { mutate: updateUser, isPending } = client.users.updateUser.useMutation(
     {
-      onSuccess: async () => {
-        await fetchUserData();
+      onSuccess: () => {
+        fetchUserData();
         toast({
           title: TOAST_TITLES.SUCCESS,
           description: "Account details have been updated successfully.",
