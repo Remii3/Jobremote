@@ -14,21 +14,18 @@ const TabContent = ({
   fetchUserData,
   user,
 }: TabContentPropsType) => {
-  {
-    currentTab === "details" && (
-      <Details user={user} fetchUserData={fetchUserData} />
-    );
+  if (currentTab === "details") {
+    return <Details user={user} fetchUserData={fetchUserData} />;
   }
-  {
-    currentTab === "settings" && (
-      <Settings user={user} fetchUserData={fetchUserData} />
-    );
+
+  if (currentTab === "settings") {
+    return <Settings user={user} fetchUserData={fetchUserData} />;
   }
-  {
-    currentTab === "your-offers" && (
-      <YourOffers user={user} fetchUserData={fetchUserData} />
-    );
+
+  if (currentTab === "your-offers") {
+    return <YourOffers user={user} fetchUserData={fetchUserData} />;
   }
+
   return null;
 };
 
