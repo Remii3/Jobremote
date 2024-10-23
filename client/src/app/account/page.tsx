@@ -53,13 +53,7 @@ function AccountPage({ user, fetchUserData, logOut }: AccountPageProps) {
   }, [searchParams, router, currentTab]);
 
   return (
-    <div
-      className="h-full w-full max-w-screen-2xl mx-auto content-start grid px-4 py-6 md:p-8 grid-cols-1 md:grid-cols-sideNav_1 md:gap-8 md:grid-rows-2"
-      style={{
-        gridTemplateRows: "auto 1fr",
-        rowGap: 0,
-      }}
-    >
+    <div className="h-full w-full max-w-screen-2xl mx-auto content-start grid px-4 py-6 md:p-8 grid-cols-1 md:grid-cols-sideNav_1 md:gap-x-8 gap-y-0 grid-rows-[auto,auto,1fr] md:grid-rows-[auto,1fr]">
       <Select onValueChange={(e: string) => changeTab(e)}>
         <SelectTrigger className="md:hidden mb-6">
           {tabs.find((tab) => tab.code === currentTab)?.name}
