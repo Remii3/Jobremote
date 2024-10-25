@@ -101,6 +101,11 @@ export const offersRouter = tsServer.router(offersContract, {
     const limit = query.limit ? parseInt(query.limit) : 10;
     const skip = (page - 1) * limit;
     try {
+      // TODO remove this after testing
+      const countrySpecs = await stripe.countrySpecs.list({
+        limit: 3,
+      });
+      console.log("countries: ", countrySpecs);
       const filters: any = {};
       if (
         query.filters?.employmentType &&
@@ -228,7 +233,7 @@ export const offersRouter = tsServer.router(offersContract, {
       if (updatedData.technologies) {
         updatedData.technologies = JSON.parse(updatedData.technologies);
       }
-      
+
       if (files && Array.isArray(files) && files.length > 0) {
         const uploadedImg = await updateFiles(
           offerData.logo ? offerData.logo.key : "",
