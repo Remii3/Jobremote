@@ -95,6 +95,7 @@ const Filters = ({
   const { formatCurrency, currency } = useCurrency();
   const [techOpen, setTechOpen] = useState(false);
   const [showMoreFilters, setShowMoreFilters] = useState(false);
+  const [localizationOpen, setLocalizationOpen] = useState(false);
 
   const { avContractTypes, avContractTypesError, avContractTypesIsLoading } =
     useGetAvailableContractTypes();
@@ -167,34 +168,36 @@ const Filters = ({
               <Search className="h-5 w-5" />
             </button>
           </form>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild className="hidden sm:block">
-              <Button variant={"outline"} className="space-x-1">
-                <span>Localization</span>
-                {filters.localization && filters.localization.length > 0 && (
-                  <Badge variant={"secondary"}>
-                    {filters.localization.length}
-                  </Badge>
-                )}
+          <Popover open={localizationOpen} onOpenChange={setLocalizationOpen}>
+            <PopoverTrigger asChild className="hidden lg:flex">
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={localizationOpen}
+                className="w-[200px] justify-between"
+              >
+                Localizations
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              {avLocalizations && avLocalizations.localizations.length > 0 && (
-                <Localizations
-                  localizations={filters.localization}
-                  changeTextsHandler={changeTextsHandler}
-                  avLocalizations={avLocalizations.localizations}
-                />
-              )}
-              {avLocalizations && avLocalizations.localizations.length <= 0 && (
-                <EmptyFilterComponent message={avLocalizations.msg} />
-              )}
-              {avLocalizationsIsLoading && <LoadingComponent />}
-              {avLocalizationsError && (
-                <ServerErrorMessage message={avLocalizationsError} />
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </PopoverTrigger>
+            <PopoverContent className="w-[200px] p-0">
+              <Command>
+                <CommandInput placeholder="Search localization..." />
+                <CommandList>
+                  <CommandEmpty>No localization found.</CommandEmpty>
+                  <CommandGroup>
+                    {avLocalizations && (
+                      <Localizations
+                        localizations={filters.localization}
+                        changeTextsHandler={changeTextsHandler}
+                        avLocalizations={avLocalizations}
+                      />
+                    )}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
           <DropdownMenu>
             <DropdownMenuTrigger asChild className="hidden md:block">
               <Button variant={"outline"} className="space-x-1">

@@ -101,11 +101,6 @@ export const offersRouter = tsServer.router(offersContract, {
     const limit = query.limit ? parseInt(query.limit) : 10;
     const skip = (page - 1) * limit;
     try {
-      // TODO remove this after testing
-      const countrySpecs = await stripe.countrySpecs.list({
-        limit: 3,
-      });
-      console.log("countries: ", countrySpecs);
       const filters: any = {};
       if (
         query.filters?.employmentType &&
@@ -483,39 +478,6 @@ export const offersRouter = tsServer.router(offersContract, {
         status: 500,
         body: {
           msg: "We failed to get you available employment types.",
-        },
-      };
-    }
-  },
-  getLocalizations: async () => {
-    try {
-      const localizations = await LocalizationModel.find()
-        .select({
-          code: 0,
-          createdAt: 0,
-        })
-        .sort({ name: 1 });
-      if (!localizations.length) {
-        return {
-          status: 200,
-          body: {
-            localizations: [],
-            msg: "No localizations found",
-          },
-        };
-      }
-      return {
-        status: 200,
-        body: {
-          localizations,
-          msg: "Localizations fetched successfully",
-        },
-      };
-    } catch (err) {
-      return {
-        status: 500,
-        body: {
-          msg: "We failed to get you available localizations.",
         },
       };
     }
