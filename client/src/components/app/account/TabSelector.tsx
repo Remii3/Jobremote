@@ -4,7 +4,7 @@ import {
   SelectGroup,
   SelectItem,
   SelectTrigger,
-} from "../ui/select";
+} from "../../ui/select";
 
 type TabSelectorPropsType = {
   tabs: { code: string; name: string }[];

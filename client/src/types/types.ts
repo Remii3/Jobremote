@@ -26,7 +26,6 @@ export type AdminOfferType = OfferType & {
   pricing: string;
   isPaid: boolean;
   activeUntil: string | null;
-  userId: string;
 };
 
 export type OfferFiltersType = {

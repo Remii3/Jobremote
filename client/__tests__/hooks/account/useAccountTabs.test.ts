@@ -1,5 +1,5 @@
 import { renderHook } from "@testing-library/react";
-import { useAccountTabs } from "@/hooks/account/useAccountTabs";
+import { useAccountTabs } from "@/app/account/useAccountTabs";
 import "@testing-library/jest-dom";
 import { useSearchParams, useRouter } from "next/navigation";
 

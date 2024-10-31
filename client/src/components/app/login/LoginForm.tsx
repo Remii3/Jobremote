@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { LoginUserSchema } from "jobremotecontracts/dist/schemas/userSchemas";
 import { UseFormReturn } from "react-hook-form";
 import { z } from "zod";
-import PasswordField from "@/components/login/PasswordField";
+import PasswordField from "@/components/app/login/PasswordField";
 
 type LoginFormProps = {
   submitHandler: (data: z.infer<typeof LoginUserSchema>) => void;

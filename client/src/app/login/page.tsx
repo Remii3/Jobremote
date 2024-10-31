@@ -1,7 +1,7 @@
 "use client";
 
 import { Separator } from "@/components/ui/separator";
-import LoginForm from "./LoginForm";
+import LoginForm from "../../components/app/login/LoginForm";
 import { useLoginPageHooks } from "./LoginPage.hooks";
 
 export default function LoginPage() {

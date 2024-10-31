@@ -1,37 +1,22 @@
-"use client";
-
-import { Separator } from "../../ui/separator";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  FormRootError,
-} from "../../ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Switch } from "../../ui/switch";
-import { Button } from "../../ui/button";
 import { client, getOnlyDirtyFormFields } from "@/lib/utils";
 import { UpdateUserSettingsSchema } from "jobremotecontracts/dist/schemas/userSchemas";
-import { UserType } from "@/types/types";
 import { useEffect } from "react";
-import { useToast } from "../../ui/use-toast";
+import { useToast } from "../../../../ui/use-toast";
 import { TOAST_TITLES } from "@/data/constant";
 import { isFetchError } from "@ts-rest/react-query/v5";
+import { UserType } from "@/types/types";
 
 const UserSettingsSchema = UpdateUserSettingsSchema.omit({ _id: true });
 
-type SettingsType = {
+type UseSettingsProps = {
   user: UserType;
   fetchUserData: () => void;
 };
 
-export default function Settings({ user, fetchUserData }: SettingsType) {
+export function useSettings({ fetchUserData, user }: UseSettingsProps) {
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof UserSettingsSchema>>({
@@ -93,52 +78,9 @@ export default function Settings({ user, fetchUserData }: SettingsType) {
       form.reset({ commercialConsent: user.commercialConsent });
     }
   }, [user.commercialConsent, form]);
-
-  return (
-    <div className="px-2 md:col-span-4">
-      <h2 className="text-3xl font-semibold">Settings</h2>
-      <span className="text-muted-foreground text-sm">
-        Manage your account settings
-      </span>
-      <Separator className="my-4" />
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="commercialConsent"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-md border p-4 max-w-screen-sm">
-                <div className="space-y-0.5">
-                  <FormLabel className="text-base">
-                    Commercial consent
-                  </FormLabel>
-                  <FormDescription>
-                    Receive commercial offers from our partners
-                  </FormDescription>
-                </div>
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <div>
-            <Button
-              type="submit"
-              disabled={!form.formState.isDirty || isPending}
-              showLoader
-              isLoading={isPending}
-            >
-              Save changes
-            </Button>
-          </div>
-          <FormRootError />
-        </form>
-      </Form>
-    </div>
-  );
+  return {
+    form,
+    isPending,
+    handleSubmit,
+  };
 }

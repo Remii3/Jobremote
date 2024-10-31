@@ -6,8 +6,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "../ui/form";
-import { Input } from "../ui/input";
+} from "../../ui/form";
+import { Input } from "../../ui/input";
 import { UseFormReturn } from "react-hook-form";
 import { z } from "zod";
 import { LoginUserSchema } from "jobremotecontracts/dist/schemas/userSchemas";

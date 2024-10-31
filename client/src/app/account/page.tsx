@@ -1,10 +1,10 @@
 "use client";
 
-import SidebarMenu from "@/components/account/SidebarMenu";
-import TabContent from "@/components/account/TabContent";
-import TabSelector from "@/components/account/TabSelector";
+import SidebarMenu from "@/components/app/account/SidebarMenu";
+import TabContent from "@/components/app/account/TabContent";
+import TabSelector from "@/components/app/account/TabSelector";
 import withAuth from "@/components/AuthGuard";
-import { useAccountTabs } from "@/hooks/account/useAccountTabs";
+import { useAccountTabs } from "@/app/account/useAccountTabs";
 
 import { WithAuthProps } from "@/types/types";
 

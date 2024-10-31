@@ -1,7 +1,7 @@
 import { UserType } from "@/types/types";
-import Details from "./subpages/Details";
-import Settings from "./subpages/Settings";
-import YourOffers from "./subpages/YourOffers";
+import Details from "./subpages/details/Details";
+import Settings from "./subpages/settings/Settings";
+import YourOffers from "./subpages/your-offers/YourOffers";
 
 type TabContentPropsType = {
   currentTab: string;
