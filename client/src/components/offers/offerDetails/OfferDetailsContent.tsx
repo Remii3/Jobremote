@@ -44,6 +44,7 @@ import { useUser } from "@/context/UserContext";
 import Link from "next/link";
 import { isFetchError } from "@ts-rest/react-query/v5";
 import { useToast } from "@/components/ui/use-toast";
+import { DialogClose } from "@/components/ui/dialog";
 
 interface OfferDetailsContentProps {
   offer: OfferType;
@@ -219,14 +220,6 @@ export default function OfferDetailsContent({
                 <span className="px-1">-</span>
                 <span>{formatCurrency(offer.maxSalary, currency)}</span>
               </p>
-              {isMobile && (
-                <div className="flex items-center justify-end absolute top-2 right-2">
-                  <DialogPrimitive.Close className="bg-white rounded-md opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground text-[hsl(224,71.4%,4.1%)]">
-                    <X className="h-6 w-6" />
-                    <span className="sr-only">Close</span>
-                  </DialogPrimitive.Close>
-                </div>
-              )}
             </div>
           </div>
           <div className="px-4 lg:px-0 grid gap-4 grid-rows-2 grid-cols-2 sm:grid-rows-1 sm:grid-cols-4 lg:grid-rows-2 lg:grid-cols-2 xl:grid-rows-1 xl:grid-cols-4">

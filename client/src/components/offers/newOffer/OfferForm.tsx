@@ -205,7 +205,7 @@ const OfferForm = ({
                       <FormMessage />
                       <SelectContent>
                         {avLocalizations &&
-                          avLocalizations.localizations.map((localization) => (
+                          avLocalizations.map((localization) => (
                             <SelectItem
                               key={localization._id}
                               value={localization.name}
