@@ -79,8 +79,7 @@ const OfferDetails = ({
     return <>{renderContent()}</>;
   }
   return (
-    <div className="h-full w-full flex items-center justify-center">
-      <div className="text-center">
+    <div className="h-full w-full flex items-center flex-col justify-center text-center">
         <Image
           src="/marketing_man.webp"
           alt="No offer selected"
@@ -90,7 +89,6 @@ const OfferDetails = ({
           priority
         />
         <span className="text-muted-foreground">Choose an offer</span>
-      </div>
     </div>
   );
 };

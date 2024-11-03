@@ -130,7 +130,7 @@ const Offers = () => {
       <div className="flex flex-grow overflow-hidden">
         <section
           className={`lg:w-1/2 w-full 
-          overflow-y-auto px-3 py-3 bg-violet-50 dark:bg-violet-950/50 lg:rounded-tr-lg`}
+          overflow-y-auto px-4 py-4 bg-violet-50 dark:bg-violet-950/50 lg:rounded-tr-lg`}
           ref={offersListRef as React.RefObject<HTMLUListElement>}
         >
           <OffersList

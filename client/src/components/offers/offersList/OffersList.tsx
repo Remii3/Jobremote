@@ -106,7 +106,7 @@ export default function OffersList({
       )}
       {offersError && <p>Error</p>}
       {offersList && offersList.length > 0 && (
-        <ul className="space-y-3">
+        <ul className="space-y-4">
           {offersList.map((offer) => (
             <OfferItem
               key={offer._id}

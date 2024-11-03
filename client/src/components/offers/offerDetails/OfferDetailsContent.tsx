@@ -181,11 +181,13 @@ export default function OfferDetailsContent({
   return (
     <Form {...form}>
       <form
-        className="space-y-3 flex flex-col h-full pt-3"
+        className="space-y-4 flex flex-col h-full pt-4"
         onSubmit={form.handleSubmit(submitApplicationHandler)}
         encType="multipart/form-data"
       >
-        <div className="px-3 space-y-3">
+        <section className="space-y-6">
+
+        <div className="px-4 space-y-6">
           <div className="lg:p-[25px] p-4 bg-gradient-to-br shadow from-indigo-500  to-violet-400  dark:from-indigo-800 dark:to-violet-700 lg:rounded-lg w-full space-y-4">
             <div className="flex gap-2 justify-between flex-wrap ">
               <div className="flex gap-4">
@@ -222,7 +224,7 @@ export default function OfferDetailsContent({
               </p>
             </div>
           </div>
-          <div className="px-4 lg:px-0 grid gap-4 grid-rows-2 grid-cols-2 sm:grid-rows-1 sm:grid-cols-4 lg:grid-rows-2 lg:grid-cols-2 xl:grid-rows-1 xl:grid-cols-4">
+          <div className="px-4 lg:px-0 grid gap-6 grid-rows-2 grid-cols-2 sm:grid-rows-1 sm:grid-cols-4 lg:grid-rows-2 lg:grid-cols-2 xl:grid-rows-1 xl:grid-cols-4">
             <div className="flex bg-green-50 dark:bg-green-700/50 rounded-md p-3 items-center justify-start h-20 shadow">
               <FileText className="h-full w-10 text-teal-400/90 mr-2" />
               <p className="flex flex-col">
@@ -261,7 +263,7 @@ export default function OfferDetailsContent({
             </div>
           </div>
         </div>
-        <div className="space-y-6 px-3 flex-grow">
+        <div className="space-y-10 px-4 flex-grow">
           <div className="px-4 lg:px-0">
             <h3 className="text-2xl font-medium mb-2">Tech stack</h3>
             <div className="flex gap-2 flex-wrap">
@@ -413,8 +415,9 @@ export default function OfferDetailsContent({
             )}
           </div>
         </div>
+        </section>
 
-        <div className="sticky bottom-0 right-0 border-t border-t-input bg-background flex justify-between px-4 lg:px-3 py-3 h-[72px] w-full">
+        <div className="sticky bottom-0 right-0 border-t border-t-input bg-background flex justify-between px-4 lg:px-4 py-4 h-[72px] w-full">
           <div>
             <div className="flex font-medium text-green-500">
               <span>{formatCurrency(offer.minSalary, currency)}</span>
