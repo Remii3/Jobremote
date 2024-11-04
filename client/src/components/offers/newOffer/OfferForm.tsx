@@ -23,11 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 
 import { DropzoneOptions } from "react-dropzone";
-import useGetAvailableLocalizations from "@/hooks/useGetAvailableLocalizations";
 import useGetAvailableTechnologies from "@/hooks/useGetAvailableTechnologies";
-import useGetAvailableEmploymentTypes from "@/hooks/useGetAvailableEmploymentTypes";
-import useGetAvailableExperiences from "@/hooks/useGetAvailableExperiences";
-import useGetAvailableContractTypes from "@/hooks/useGetAvailableContractTypes";
 import { useCurrency } from "@/context/CurrencyContext";
 import { UseFormReturn } from "react-hook-form";
 import { z } from "zod";
@@ -50,6 +46,10 @@ import {
 } from "@/components/ui/command";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { EXPERIENCES } from "@/constants/experiences";
+import { EMPLOYMENTS } from "@/constants/employments";
+import { CONTRACTS } from "@/constants/contracts";
+import { LOCALIZATIONS } from "@/constants/localizations";
 const OfferCkEditor = dynamic(
   () => import("../../ui/ckeditor").then((mod) => mod.OfferCkEditor),
   { ssr: false }
@@ -83,11 +83,7 @@ const OfferForm = ({
 }: OfferFormPropsTypes) => {
   const [techOpen, setTechOpen] = useState<boolean>(false);
 
-  const { avLocalizations } = useGetAvailableLocalizations();
   const { avTechnologies } = useGetAvailableTechnologies();
-  const { avEmploymentTypes } = useGetAvailableEmploymentTypes();
-  const { avExperiences } = useGetAvailableExperiences();
-  const { avContractTypes } = useGetAvailableContractTypes();
   const { allowedCurrencies } = useCurrency();
 
   return (
@@ -170,15 +166,11 @@ const OfferForm = ({
                       </FormControl>
                       <FormMessage />
                       <SelectContent>
-                        {avContractTypes &&
-                          avContractTypes.contractTypes.map((workType) => (
-                            <SelectItem
-                              key={workType._id}
-                              value={workType.name}
-                            >
-                              {workType.name}
-                            </SelectItem>
-                          ))}
+                        {CONTRACTS.map((workType) => (
+                          <SelectItem key={workType._id} value={workType.name}>
+                            {workType.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </FormItem>
@@ -204,15 +196,14 @@ const OfferForm = ({
                       </FormControl>
                       <FormMessage />
                       <SelectContent>
-                        {avLocalizations &&
-                          avLocalizations.map((localization) => (
-                            <SelectItem
-                              key={localization._id}
-                              value={localization.name}
-                            >
-                              {localization.name}
-                            </SelectItem>
-                          ))}
+                        {LOCALIZATIONS.map((localization) => (
+                          <SelectItem
+                            key={localization._id}
+                            value={localization.name}
+                          >
+                            {localization.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </FormItem>
@@ -240,12 +231,11 @@ const OfferForm = ({
                       </FormControl>
                       <FormMessage />
                       <SelectContent>
-                        {avExperiences &&
-                          avExperiences.experiences.map((exp) => (
-                            <SelectItem key={exp._id} value={exp.name}>
-                              {exp.name}
-                            </SelectItem>
-                          ))}
+                        {EXPERIENCES.map((exp) => (
+                          <SelectItem key={exp._id} value={exp.name}>
+                            {exp.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </FormItem>
@@ -271,17 +261,14 @@ const OfferForm = ({
                       </FormControl>
                       <FormMessage />
                       <SelectContent>
-                        {avEmploymentTypes &&
-                          avEmploymentTypes.employmentTypes.map(
-                            (employmentType) => (
-                              <SelectItem
-                                key={employmentType._id}
-                                value={employmentType.name}
-                              >
-                                {employmentType.name}
-                              </SelectItem>
-                            )
-                          )}
+                        {EMPLOYMENTS.map((employmentType) => (
+                          <SelectItem
+                            key={employmentType._id}
+                            value={employmentType.name}
+                          >
+                            {employmentType.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </FormItem>

@@ -13,7 +13,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import useGetAvailableLocalizations from "@/hooks/useGetAvailableLocalizations";
+import { LOCALIZATIONS } from "@/constants/localizations";
 import { cn } from "@/lib/utils";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { Control } from "react-hook-form";
@@ -25,8 +25,6 @@ type LocalizationPopoverProps = {
 export default function LocalizationPopover({
   control,
 }: LocalizationPopoverProps) {
-  const { avLocalizations } = useGetAvailableLocalizations();
-
   return (
     <FormField
       name="localization"
@@ -49,7 +47,7 @@ export default function LocalizationPopover({
               <CommandList>
                 <CommandEmpty>No localization found.</CommandEmpty>
                 <CommandGroup>
-                  {avLocalizations.map((localization) => (
+                  {LOCALIZATIONS.map((localization) => (
                     <CommandItem
                       key={localization._id}
                       onSelect={() => field.onChange(localization.name)}

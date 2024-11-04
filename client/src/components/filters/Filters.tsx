@@ -4,6 +4,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -17,36 +18,16 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import {
-  ArrowUpDown,
-  ChevronsUpDown,
-  Loader2,
-  Search,
-  Settings2,
-} from "lucide-react";
-import { Badge } from "../ui/badge";
+import { ArrowUpDown, Search, Settings2 } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { Slider } from "../ui/slider";
 import { useCurrency } from "@/context/CurrencyContext";
 import Technologies from "./parts/Technologies";
-import EmploymentType from "./parts/EmploymentType";
 import Localizations from "./parts/Localizations";
-import Experience from "./parts/Experience";
-import useGetAvailableContractTypes from "@/hooks/useGetAvailableContractTypes";
-import ContractType from "./parts/ContractType";
-import useGetAvailableEmploymentTypes from "@/hooks/useGetAvailableEmploymentTypes";
-import useGetAvailableLocalizations from "@/hooks/useGetAvailableLocalizations";
-import useGetAvailableExperiences from "@/hooks/useGetAvailableExperiences";
 import useGetAvailableTechnologies from "@/hooks/useGetAvailableTechnologies";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandList,
-} from "../ui/command";
+
 import TagList from "./parts/TagList";
+import { LOCALIZATIONS } from "@/constants/localizations";
 
 interface FiltersPropsType {
   filters: Required<OfferFiltersType>;
@@ -66,25 +47,6 @@ const SORT_OPTIONS_ARRAY = Object.keys(SORT_OPTIONS).map((key) => ({
   value: SORT_OPTIONS[key as OfferSortOptionsTypes],
 }));
 
-const ServerErrorMessage = ({ message }: { message: string }) => {
-  return (
-    <div className="flex p-2 items-center justify-center">
-      <span className="text-xs text-slate-500">{message}</span>
-    </div>
-  );
-};
-const LoadingComponent = () => (
-  <div className="flex p-2 items-center justify-center">
-    <Loader2 className="w-4 h-4 animate-spin" />
-  </div>
-);
-
-const EmptyFilterComponent = ({ message }: { message: string }) => (
-  <div className="flex p-2 items-center justify-center">
-    <span className="text-xs text-slate-500">{message}</span>
-  </div>
-);
-
 const Filters = ({
   filters,
   changeFilters,
@@ -93,24 +55,7 @@ const Filters = ({
   sortOption,
 }: FiltersPropsType) => {
   const { formatCurrency, currency } = useCurrency();
-  const [techOpen, setTechOpen] = useState(false);
   const [showMoreFilters, setShowMoreFilters] = useState(false);
-  const [localizationOpen, setLocalizationOpen] = useState(false);
-
-  const { avContractTypes, avContractTypesError, avContractTypesIsLoading } =
-    useGetAvailableContractTypes();
-
-  const { avLocalizations, avLocalizationsError, avLocalizationsIsLoading } =
-    useGetAvailableLocalizations();
-
-  const {
-    avEmploymentTypes,
-    avEmploymentTypesError,
-    avEmploymentTypesIsLoading,
-  } = useGetAvailableEmploymentTypes();
-
-  const { avExperiences, avExperiencesError, avExperiencesIsLoading } =
-    useGetAvailableExperiences();
 
   const { avTechnologies, avTechnologiesError, avTechnologiesIsLoading } =
     useGetAvailableTechnologies();
@@ -126,25 +71,6 @@ const Filters = ({
   function searchOffers(e: FormEvent) {
     e.preventDefault();
   }
-  const checkIsFilterChanged = (filter: any) => {
-    for (const key in filter) {
-      if (filter.hasOwnProperty(key)) {
-        const value = filter[key];
-
-        // Check based on expected default values
-        if (Array.isArray(value) && value.length > 0) {
-          return true; // Array is not empty, so filter is changed
-        }
-        if (typeof value === "string" && value !== "") {
-          return true; // String is not empty, so filter is changed
-        }
-        if (typeof value === "number" && value !== 0) {
-          return true; // Number is not 0, so filter is changed
-        }
-      }
-    }
-    return false; // No changes detected
-  };
 
   return (
     <>
@@ -152,7 +78,7 @@ const Filters = ({
         <div className="flex gap-4 flex-grow">
           <form
             onSubmit={searchOffers}
-            className="relative flex-grow md:flex-grow-0"
+            className="relative w-full focus-within:w-full max-w-[600px] md:w-64 transition-[width] ease-in-out duration-500"
           >
             <Input
               name="keyword"
@@ -168,162 +94,23 @@ const Filters = ({
               <Search className="h-5 w-5" />
             </button>
           </form>
-          <Popover open={localizationOpen} onOpenChange={setLocalizationOpen}>
-            <PopoverTrigger asChild className="hidden lg:flex">
-              <Button
-                variant="outline"
-                role="combobox"
-                aria-expanded={localizationOpen}
-                className="w-[200px] justify-between"
-              >
-                Localizations
-                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-[200px] p-0">
-              <Command>
-                <CommandInput placeholder="Search localization..." />
-                <CommandList>
-                  <CommandEmpty>No localization found.</CommandEmpty>
-                  <CommandGroup>
-                    {avLocalizations && (
-                      <Localizations
-                        localizations={filters.localization}
-                        changeTextsHandler={changeTextsHandler}
-                        avLocalizations={avLocalizations}
-                      />
-                    )}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild className="hidden md:block">
-              <Button variant={"outline"} className="space-x-1">
-                <span>Experience</span>
-                {filters.experience && filters.experience.length > 0 && (
-                  <Badge variant={"secondary"}>
-                    {filters.experience.length}
-                  </Badge>
-                )}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              {avExperiences && avExperiences.experiences.length > 0 && (
-                <Experience
-                  experiences={filters.experience}
-                  changeTextsHandler={changeTextsHandler}
-                  avExperiences={avExperiences.experiences}
-                />
-              )}
-              {avExperiences && avExperiences.experiences.length <= 0 && (
-                <EmptyFilterComponent message={avExperiences.msg} />
-              )}
-              {avExperiencesIsLoading && <LoadingComponent />}
-              {avExperiencesError && (
-                <ServerErrorMessage message={avExperiencesError} />
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild className="hidden lg:block">
-              <Button variant={"outline"} className="space-x-1">
-                <span>Employmnet type</span>
-                {filters.employmentType &&
-                  filters.employmentType.length > 0 && (
-                    <Badge variant={"secondary"}>
-                      {filters.employmentType.length}
-                    </Badge>
-                  )}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              {avEmploymentTypes &&
-                avEmploymentTypes.employmentTypes.length > 0 && (
-                  <EmploymentType
-                    changeTextsHandler={changeTextsHandler}
-                    employments={filters.employmentType}
-                    avEmploymentTypes={avEmploymentTypes.employmentTypes}
-                  />
-                )}
-              {avEmploymentTypes &&
-                avEmploymentTypes.employmentTypes.length <= 0 && (
-                  <EmptyFilterComponent message={avEmploymentTypes.msg} />
-                )}
-              {avEmploymentTypesIsLoading && <LoadingComponent />}
-              {avEmploymentTypesError && (
-                <ServerErrorMessage message={avEmploymentTypesError} />
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild className="hidden lg:block">
-              <Button variant={"outline"} className="space-x-1">
-                <span>Contract type</span>
-                {filters.contractType && filters.contractType.length > 0 && (
-                  <Badge variant={"secondary"}>
-                    {filters.contractType.length}
-                  </Badge>
-                )}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              {avContractTypes && avContractTypes.contractTypes.length > 0 && (
-                <ContractType
-                  changeTextsHandler={changeTextsHandler}
-                  contractTypes={filters.contractType}
-                  avContractTypes={avContractTypes?.contractTypes}
-                />
-              )}
-              {avContractTypes && avContractTypes.contractTypes.length <= 0 && (
-                <EmptyFilterComponent message={avContractTypes.msg} />
-              )}
-              {avContractTypesIsLoading && <LoadingComponent />}
-              {avContractTypesError && (
-                <ServerErrorMessage message={avContractTypesError} />
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <Popover open={techOpen} onOpenChange={setTechOpen}>
-            <PopoverTrigger asChild className="hidden lg:flex">
-              <Button
-                variant="outline"
-                role="combobox"
-                aria-expanded={techOpen}
-                className="w-[200px] justify-between"
-              >
-                Technology
-                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-[200px] p-0">
-              <Command>
-                <CommandInput placeholder="Search technology..." />
-                <CommandList>
-                  <CommandEmpty>No technology found.</CommandEmpty>
-                  <CommandGroup>
-                    {avTechnologies &&
-                      avTechnologies.technologies.length > 0 && (
-                        <Technologies
-                          technologies={filters.technologies}
-                          changeTextsHandler={changeTextsHandler}
-                          avTechnologies={avTechnologies.technologies}
-                        />
-                      )}
-                    {avTechnologies &&
-                      avTechnologies.technologies.length <= 0 && (
-                        <EmptyFilterComponent message={avTechnologies.msg} />
-                      )}
-                    {avTechnologiesIsLoading && <LoadingComponent />}
-                    {avTechnologiesError && (
-                      <ServerErrorMessage message={avTechnologiesError} />
-                    )}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
+          <div className="hidden md:block">
+            <Localizations
+              avLocalizations={LOCALIZATIONS}
+              changeTextsHandler={changeTextsHandler}
+              localizations={filters.localization}
+            />
+          </div>
+
+          {avTechnologies && (
+            <div className="hidden lg:block">
+              <Technologies
+                technologies={filters.technologies}
+                changeTextsHandler={changeTextsHandler}
+                avTechnologies={avTechnologies.technologies}
+              />
+            </div>
+          )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild className="hidden lg:block">
               <Button variant={"outline"} className="space-x-1">
@@ -353,13 +140,13 @@ const Filters = ({
             </DropdownMenuContent>
           </DropdownMenu>
           <Dialog open={showMoreFilters} onOpenChange={setShowMoreFilters}>
-            <DialogTrigger asChild className="block lg:hidden">
+            <DialogTrigger asChild className="block">
               <Button variant={"outline"} className="flex ">
                 <span className="hidden sm:inline mr-1">More filters</span>
                 <Settings2 className="h-5 w-5" />
               </Button>
             </DialogTrigger>
-            <DialogContent className="h-full overflow-hidden p-0">
+            <DialogContent className="overflow-hidden p-0">
               <DialogHeader className="px-4 pt-4">
                 <DialogTitle>Fitlers</DialogTitle>
                 <DialogDescription className="sr-only">
@@ -371,11 +158,13 @@ const Filters = ({
                 changeSalaryHandler={changeSalaryHandler}
                 changeTextHandler={changeTextsHandler}
               />
-              <div className="px-4 pb-4">
-                <Button onClick={() => setShowMoreFilters(false)}>
-                  Show results
-                </Button>
-              </div>
+              <DialogFooter>
+                <div className="px-4 pb-4">
+                  <Button onClick={() => setShowMoreFilters(false)}>
+                    Show results
+                  </Button>
+                </div>
+              </DialogFooter>
             </DialogContent>
           </Dialog>
         </div>
@@ -402,16 +191,14 @@ const Filters = ({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      {checkIsFilterChanged(filters) && (
-        <TagList
-          filters={filters}
-          changeTextsHandler={changeTextsHandler}
-          resetFilters={resetFilters}
-          formatCurrency={formatCurrency}
-          currency={currency}
-          changeSalaryHandler={changeSalaryHandler}
-        />
-      )}
+      <TagList
+        filters={filters}
+        changeTextsHandler={changeTextsHandler}
+        resetFilters={resetFilters}
+        formatCurrency={formatCurrency}
+        currency={currency}
+        changeSalaryHandler={changeSalaryHandler}
+      />
     </>
   );
 };

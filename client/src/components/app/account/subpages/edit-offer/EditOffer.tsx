@@ -1,6 +1,5 @@
 "use clinet";
 
-import { Button } from "../../../../ui/button";
 import {
   Form,
   FormControl,
@@ -12,42 +11,14 @@ import {
   FormRootError,
 } from "../../../../ui/form";
 import { Input } from "../../../../ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../../../ui/select";
-import { Badge } from "../../../../ui/badge";
+
 import useGetAvailableTechnologies from "@/hooks/useGetAvailableTechnologies";
-import useGetAvailableEmploymentTypes from "@/hooks/useGetAvailableEmploymentTypes";
-import useGetAvailableExperiences from "@/hooks/useGetAvailableExperiences";
-import useGetAvailableContractTypes from "@/hooks/useGetAvailableContractTypes";
 import { useCurrency } from "@/context/CurrencyContext";
-import { DropzoneOptions } from "react-dropzone";
 import dynamic from "next/dynamic";
 import { OfferType } from "@/types/types";
 import { QueryClient } from "@ts-rest/react-query/tanstack";
-import AvatarUploader from "../../../../ui/avatar-uploader";
-import { Label } from "../../../../ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "../../../../ui/popover";
-import { Check, ChevronsUpDown } from "lucide-react";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "../../../../ui/command";
+
 import { useEditOffer } from "./EditOffer.hooks";
-import { cn } from "@/lib/utils";
-import useGetAvailableLocalizations from "@/hooks/useGetAvailableLocalizations";
 import TextField from "./TextField";
 import AvatarSection from "./AvatarSection";
 import SelectField from "./SelectField";
@@ -55,6 +26,9 @@ import LocalizationPopover from "./LocalizationPopover";
 import TechnologySelection from "./TechnologySelection";
 import FormActions from "./FormActions";
 import SelectCurrencyField from "./SelectCurrencyField";
+import { EXPERIENCES } from "@/constants/experiences";
+import { EMPLOYMENTS } from "@/constants/employments";
+import { CONTRACTS } from "@/constants/contracts";
 
 const OfferCkEditor = dynamic(
   () => import("../../../../ui/ckeditor").then((mod) => mod.OfferCkEditor),
@@ -73,9 +47,6 @@ export default function EditOffer({
   handleChangeCurrentEditOffer,
 }: EditOfferPropsTypes) {
   const { avTechnologies } = useGetAvailableTechnologies();
-  const { avEmploymentTypes } = useGetAvailableEmploymentTypes();
-  const { avExperiences } = useGetAvailableExperiences();
-  const { avContractTypes } = useGetAvailableContractTypes();
   const { allowedCurrencies } = useCurrency();
   const {
     form,
@@ -124,33 +95,27 @@ export default function EditOffer({
           </div>
         </div>
         <div className="flex gap-8 flex-col md:flex-row">
-          {avContractTypes && (
-            <SelectField
-              control={form.control}
-              label="Contract type"
-              name="contractType"
-              options={avContractTypes.contractTypes}
-            />
-          )}
+          <SelectField
+            control={form.control}
+            label="Contract type"
+            name="contractType"
+            options={CONTRACTS}
+          />
           <LocalizationPopover control={form.control} />
         </div>
         <div className="flex gap-8 flex-col md:flex-row">
-          {avExperiences && (
-            <SelectField
-              control={form.control}
-              label="Experience"
-              name="experience"
-              options={avExperiences.experiences}
-            />
-          )}
-          {avEmploymentTypes && (
-            <SelectField
-              control={form.control}
-              label="Employment type"
-              name="employmentType"
-              options={avEmploymentTypes.employmentTypes}
-            />
-          )}
+          <SelectField
+            control={form.control}
+            label="Experience"
+            name="experience"
+            options={EXPERIENCES}
+          />
+          <SelectField
+            control={form.control}
+            label="Employment type"
+            name="employmentType"
+            options={EMPLOYMENTS}
+          />
         </div>
         <FormField
           control={form.control}

@@ -17,96 +17,119 @@ export default function TagList({
   formatCurrency,
   changeSalaryHandler,
 }: TagListProps) {
+  const checkIsFilterChanged = (filter: any) => {
+    for (const key in filter) {
+      if (filter.hasOwnProperty(key)) {
+        const value = filter[key];
+
+        // Check based on expected default values
+        if (Array.isArray(value) && value.length > 0) {
+          return true; // Array is not empty, so filter is changed
+        }
+        if (typeof value === "string" && value !== "") {
+          return true; // String is not empty, so filter is changed
+        }
+        if (typeof value === "number" && value !== 0) {
+          return true; // Number is not 0, so filter is changed
+        }
+      }
+    }
+    return false; // No changes detected
+  };
   return (
-    <ul className="flex gap-2 flex-wrap lg:flex-nowrap lg:overflow-x-auto">
-      {filters.keyword.trim() !== "" && (
-        <li className={badgeVariants({ variant: "outline" })}>
-          <button
-            type="button"
-            onClick={() => changeTextsHandler("keyword", "")}
-            className="text-nowrap"
+    <>
+      {checkIsFilterChanged(filters) && (
+        <ul className="flex gap-2 flex-wrap lg:flex-nowrap lg:overflow-x-auto">
+          {filters.keyword.trim() !== "" && (
+            <li className={badgeVariants({ variant: "outline" })}>
+              <button
+                type="button"
+                onClick={() => changeTextsHandler("keyword", "")}
+                className="text-nowrap"
+              >
+                {filters.keyword}
+              </button>
+            </li>
+          )}
+          {filters.localization?.map((item) => (
+            <li key={item} className={badgeVariants({ variant: "outline" })}>
+              <button
+                type="button"
+                onClick={() => changeTextsHandler("localization", item)}
+                className="text-nowrap"
+              >
+                {item}
+              </button>
+            </li>
+          ))}
+          {filters.experience?.map((item) => (
+            <li key={item} className={badgeVariants({ variant: "outline" })}>
+              <button
+                type="button"
+                onClick={() => changeTextsHandler("experience", item)}
+                className="text-nowrap"
+              >
+                {item}
+              </button>
+            </li>
+          ))}
+          {filters.employmentType?.map((item) => (
+            <li key={item} className={badgeVariants({ variant: "outline" })}>
+              <button
+                type="button"
+                onClick={() => changeTextsHandler("employmentType", item)}
+                className="text-nowrap"
+              >
+                {item}
+              </button>
+            </li>
+          ))}
+          {filters.contractType?.map((item) => (
+            <li key={item} className={badgeVariants({ variant: "outline" })}>
+              <button
+                type="button"
+                onClick={() => changeTextsHandler("contractType", item)}
+                className="text-nowrap"
+              >
+                {item}
+              </button>
+            </li>
+          ))}
+          {filters.technologies?.map((item) => (
+            <li key={item} className={badgeVariants({ variant: "outline" })}>
+              <button
+                type="button"
+                onClick={() => changeTextsHandler("technologies", item)}
+                className="text-nowrap"
+              >
+                {item}
+              </button>
+            </li>
+          ))}
+          {filters.minSalary !== 0 && (
+            <li className={badgeVariants({ variant: "outline" })}>
+              <button type="button" onClick={() => changeSalaryHandler(0)}>
+                &gt;{formatCurrency(filters.minSalary / 1000, currency)}
+                k/y
+              </button>
+            </li>
+          )}
+          <li
+            className={`${badgeVariants({
+              variant: "destructive",
+            })} bg-red-200/80 border-red-500 text-red-500 hover:text-white`}
           >
-            {filters.keyword}
-          </button>
-        </li>
+            <button
+              className="text-nowrap"
+              onClick={() => {
+                resetFilters();
+              }}
+            >
+              Clear filters x
+            </button>
+          </li>
+        </ul>
       )}
-      {filters.localization?.map((item) => (
-        <li key={item} className={badgeVariants({ variant: "outline" })}>
-          <button
-            type="button"
-            onClick={() => changeTextsHandler("localization", item)}
-            className="text-nowrap"
-          >
-            {item}
-          </button>
-        </li>
-      ))}
-      {filters.experience?.map((item) => (
-        <li key={item} className={badgeVariants({ variant: "outline" })}>
-          <button
-            type="button"
-            onClick={() => changeTextsHandler("experience", item)}
-            className="text-nowrap"
-          >
-            {item}
-          </button>
-        </li>
-      ))}
-      {filters.employmentType?.map((item) => (
-        <li key={item} className={badgeVariants({ variant: "outline" })}>
-          <button
-            type="button"
-            onClick={() => changeTextsHandler("employmentType", item)}
-            className="text-nowrap"
-          >
-            {item}
-          </button>
-        </li>
-      ))}
-      {filters.contractType?.map((item) => (
-        <li key={item} className={badgeVariants({ variant: "outline" })}>
-          <button
-            type="button"
-            onClick={() => changeTextsHandler("contractType", item)}
-            className="text-nowrap"
-          >
-            {item}
-          </button>
-        </li>
-      ))}
-      {filters.technologies?.map((item) => (
-        <li key={item} className={badgeVariants({ variant: "outline" })}>
-          <button
-            type="button"
-            onClick={() => changeTextsHandler("technologies", item)}
-            className="text-nowrap"
-          >
-            {item}
-          </button>
-        </li>
-      ))}
-      {filters.minSalary !== 0 && (
-        <li className={badgeVariants({ variant: "outline" })}>
-          <button type="button" onClick={() => changeSalaryHandler(0)}>
-            &gt;{formatCurrency(filters.minSalary / 1000, currency)}
-            k/y
-          </button>
-        </li>
-      )}
-      <li
-        className={`${badgeVariants({
-          variant: "destructive",
-        })} bg-red-200/80 border-red-500 text-red-500 hover:text-white`}
-      >
-        <button
-          className="text-nowrap"
-          onClick={() => {
-            resetFilters();
-          }}
-        >
-          Clear filters x
-        </button>
-      </li>
-    </ul>
+    </>
   );
 }

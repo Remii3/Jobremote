@@ -4,30 +4,49 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useCurrency } from "@/context/CurrencyContext";
 import { Slider } from "@/components/ui/slider";
-import useGetAvailableExperiences from "@/hooks/useGetAvailableExperiences";
-import useGetAvailableContractTypes from "@/hooks/useGetAvailableContractTypes";
-import useGetAvailableLocalizations from "@/hooks/useGetAvailableLocalizations";
-import useGetAvailableEmploymentTypes from "@/hooks/useGetAvailableEmploymentTypes";
 import useGetAvailableTechnologies from "@/hooks/useGetAvailableTechnologies";
+import { EXPERIENCES } from "@/constants/experiences";
+import { CONTRACTS } from "@/constants/contracts";
+import { EMPLOYMENTS } from "@/constants/employments";
+import React from "react";
+import Localizations from "./Localizations";
+import Technologies from "./Technologies";
+import { cn } from "@/lib/utils";
+import { LOCALIZATIONS } from "@/constants/localizations";
 
 interface MoreFiltersTypes {
   filters: OfferFiltersType;
   changeSalaryHandler: (salary: number) => void;
   changeTextHandler: (key: keyof OfferFiltersType, text: string) => void;
 }
+
+const FilterComponent = ({
+  children,
+  label,
+  className,
+}: {
+  children: React.ReactNode;
+  label: string;
+  className?: string;
+}) => {
+  return (
+    <div className={cn(`space-y-2`, className)}>
+      <h2>{label}</h2>
+      <Separator />
+      {children}
+    </div>
+  );
+};
+
 const MoreFilters = ({
   filters,
   changeSalaryHandler,
   changeTextHandler,
 }: MoreFiltersTypes) => {
   const { formatCurrency, currency } = useCurrency();
-  const { avExperiences } = useGetAvailableExperiences();
-  const { avContractTypes } = useGetAvailableContractTypes();
-  const { avLocalizations } = useGetAvailableLocalizations();
-  const { avEmploymentTypes } = useGetAvailableEmploymentTypes();
   const { avTechnologies } = useGetAvailableTechnologies();
   return (
-    <div className="space-y-4 overflow-y-auto px-4 py-2 border-t">
+    <div className="space-y-4 overflow-y-auto px-4 py-2 border-t flex flex-col">
       <div className="space-y-2">
         <h2>Salary</h2>
         <Separator />
@@ -51,136 +70,94 @@ const MoreFilters = ({
           />
         </div>
       </div>
-      <div className="space-y-2">
-        <h2>Experience</h2>
-        <Separator />
-        <div className="space-y-2">
-          {avExperiences &&
-            avExperiences.experiences.map((experience) => {
-              return (
-                <div key={experience._id} className="flex items-center">
-                  <Checkbox
-                    onClick={() =>
-                      changeTextHandler("experience", experience.name)
-                    }
-                    id={experience._id}
-                    checked={filters.experience?.includes(experience.name)}
-                    className="h-5 w-5"
-                  />
+      <FilterComponent
+        label="Localizations & Technologies"
+        className="block lg:hidden"
+      >
+        <div className="grid grid-cols-2 gap-2">
+          <Localizations
+            localizations={filters.localization}
+            changeTextsHandler={changeTextHandler}
+            avLocalizations={LOCALIZATIONS}
+          />
+          {avTechnologies && (
+            <Technologies
+              technologies={filters.technologies}
+              changeTextsHandler={changeTextHandler}
+              avTechnologies={avTechnologies.technologies}
+            />
+          )}
+        </div>
+      </FilterComponent>
+      <FilterComponent label="Experience">
+        <div className="space-y-2 grid grid-cols-2 gap-2">
+          {EXPERIENCES.map((experience) => {
+            return (
+              <div key={experience._id} className="flex items-center">
+                <Checkbox
+                  onClick={() =>
+                    changeTextHandler("experience", experience.name)
+                  }
+                  id={experience._id}
+                  checked={filters.experience?.includes(experience.name)}
+                  className="h-5 w-5"
+                />
 
-                  <Label
-                    htmlFor={experience.name}
-                    className="text-base cursor-pointer pl-2"
-                  >
-                    {experience.name}
-                  </Label>
-                </div>
-              );
-            })}
+                <Label
+                  htmlFor={experience._id}
+                  className="text-base cursor-pointer pl-2"
+                >
+                  {experience.name}
+                </Label>
+              </div>
+            );
+          })}
         </div>
-      </div>
-      <div className="space-y-2">
-        <h2>Contract types</h2>
-        <Separator />
-        <div className="space-y-2">
-          {avContractTypes &&
-            avContractTypes.contractTypes.map((type) => {
-              return (
-                <div key={type._id} className="flex items-center">
-                  <Checkbox
-                    onClick={() => changeTextHandler("contractType", type.name)}
-                    id={type._id}
-                    checked={filters.contractType.includes(type.name)}
-                    className="h-5 w-5"
-                  />
-                  <Label
-                    htmlFor={type._id}
-                    className="text-base cursor-pointer pl-2"
-                  >
-                    {type.name}
-                  </Label>
-                </div>
-              );
-            })}
+      </FilterComponent>
+      <FilterComponent label="Contracts">
+        <div className="space-y-2 grid grid-cols-2 gap-2">
+          {CONTRACTS.map((type) => {
+            return (
+              <div key={type._id} className="flex items-center">
+                <Checkbox
+                  onClick={() => changeTextHandler("contractType", type.name)}
+                  id={type._id}
+                  checked={filters.contractType.includes(type.name)}
+                  className="h-5 w-5"
+                />
+                <Label
+                  htmlFor={type._id}
+                  className="text-base cursor-pointer pl-2"
+                >
+                  {type.name}
+                </Label>
+              </div>
+            );
+          })}
         </div>
-      </div>
-      <div className="space-y-2">
-        <h2>Localizations</h2>
-        <Separator />
-        <div className="space-y-2">
-          {avLocalizations &&
-            avLocalizations.localizations.map((type) => {
-              return (
-                <div key={type._id} className="flex items-center">
-                  <Checkbox
-                    onClick={() => changeTextHandler("localization", type.name)}
-                    id={type._id}
-                    checked={filters.localization.includes(type.name)}
-                    className="h-5 w-5"
-                  />
-                  <Label
-                    htmlFor={type._id}
-                    className="text-base cursor-pointer pl-2"
-                  >
-                    {type.name}
-                  </Label>
-                </div>
-              );
-            })}
+      </FilterComponent>
+      <FilterComponent label="Employments">
+        <div className="space-y-2 grid grid-cols-2 gap-2">
+          {EMPLOYMENTS.map((type) => {
+            return (
+              <div key={type._id} className="flex items-center">
+                <Checkbox
+                  onClick={() => changeTextHandler("employmentType", type.name)}
+                  id={type._id}
+                  checked={filters.employmentType.includes(type.name)}
+                  className="h-5 w-5"
+                />
+                <Label
+                  htmlFor={type._id}
+                  className="text-base cursor-pointer pl-2"
+                >
+                  {type.name}
+                </Label>
+              </div>
+            );
+          })}
         </div>
-      </div>
-      <div className="space-y-2">
-        <h2>Emploment types</h2>
-        <Separator />
-        <div className="space-y-2">
-          {avEmploymentTypes &&
-            avEmploymentTypes.employmentTypes.map((type) => {
-              return (
-                <div key={type._id} className="flex items-center">
-                  <Checkbox
-                    onClick={() =>
-                      changeTextHandler("employmentType", type.name)
-                    }
-                    id={type._id}
-                    checked={filters.employmentType.includes(type.name)}
-                    className="h-5 w-5"
-                  />
-                  <Label
-                    htmlFor={type._id}
-                    className="text-base cursor-pointer pl-2"
-                  >
-                    {type.name}
-                  </Label>
-                </div>
-              );
-            })}
-        </div>
-      </div>
-      <div className="space-y-2">
-        <h2>Technologies</h2>
-        <Separator />
-        <div className="space-y-2">
-          {avTechnologies &&
-            avTechnologies.technologies.map((type) => {
-              return (
-                <div key={type._id} className="flex items-center">
-                  <Checkbox
-                    onClick={() => changeTextHandler("technologies", type.name)}
-                    id={type._id}
-                    checked={filters.technologies.includes(type.name)}
-                    className="h-5 w-5"
-                  />
-                  <Label
-                    htmlFor={type._id}
-                    className="text-base cursor-pointer pl-2"
-                  >
-                    {type.name}
-                  </Label>
-                </div>
-              );
-            })}
-        </div>
-      </div>
+      </FilterComponent>
     </div>
   );
 };
