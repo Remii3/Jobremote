@@ -47,9 +47,7 @@ const MoreFilters = ({
   const { avTechnologies } = useGetAvailableTechnologies();
   return (
     <div className="space-y-4 overflow-y-auto px-4 py-2 border-t flex flex-col">
-      <div className="space-y-2">
-        <h2>Salary</h2>
-        <Separator />
+      <FilterComponent label="Salary" className="block lg:hidden">
         <div className="space-y-2">
           <div className="flex justify-between gap-3 mb-3">
             <span className="text-sm">Minimum</span>
@@ -69,7 +67,7 @@ const MoreFilters = ({
             value={[filters.minSalary ? filters.minSalary / 1000 : 0]}
           />
         </div>
-      </div>
+      </FilterComponent>
       <FilterComponent
         label="Localizations & Technologies"
         className="block lg:hidden"
