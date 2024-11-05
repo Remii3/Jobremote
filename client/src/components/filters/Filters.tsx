@@ -102,15 +102,6 @@ const Filters = ({
             />
           </div>
 
-          {avTechnologies && (
-            <div className="hidden lg:block">
-              <Technologies
-                technologies={filters.technologies}
-                changeTextsHandler={changeTextsHandler}
-                avTechnologies={avTechnologies.technologies}
-              />
-            </div>
-          )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild className="hidden lg:block">
               <Button variant={"outline"} className="space-x-1">
@@ -139,6 +130,15 @@ const Filters = ({
               </div>
             </DropdownMenuContent>
           </DropdownMenu>
+          {avTechnologies && (
+            <div className="hidden lg:block">
+              <Technologies
+                technologies={filters.technologies}
+                changeTextsHandler={changeTextsHandler}
+                avTechnologies={avTechnologies.technologies}
+              />
+            </div>
+          )}
           <Dialog open={showMoreFilters} onOpenChange={setShowMoreFilters}>
             <DialogTrigger asChild className="block">
               <Button variant={"outline"} className="flex ">
