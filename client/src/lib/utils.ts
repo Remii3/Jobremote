@@ -1,5 +1,5 @@
 import { initTsrReactQuery } from "@ts-rest/react-query/v5";
-
+import axios from 'axios'
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { mainContract } from "jobremotecontracts";
@@ -13,6 +13,11 @@ export const client = initTsrReactQuery(mainContract, {
   baseUrl: process.env.NEXT_PUBLIC_SERVER_URI || "",
   baseHeaders: {},
   credentials: "include",
+});
+
+export const axiosInstance = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_SERVER_URI || "",
+  withCredentials: true,
 });
 
 export const cleanEmptyData = (data: Record<string, any>) => {

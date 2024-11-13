@@ -1,8 +1,10 @@
 "use client";
-import { client } from "@/lib/utils";
+// import { client } from "@/lib/utils";
 import { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { UserType } from "@/types/types";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { axiosInstance } from "@/lib/utils";
 
 interface UserContextTypes {
   user: UserType | null;
@@ -14,7 +16,49 @@ interface UserContextTypes {
 interface UserContextProviderTypes {
   children: React.ReactNode;
 }
+const logoutUser = async () => {
+  const response = await axiosInstance.post('/users/logout');
+  return response.data;  // Return only the data from the response
+};
+function useLogout(setUser) {
+  const router = useRouter();
 
+  return useMutation({
+    mutationFn: logoutUser,
+    onSuccess: () => {
+      setUser(null);       // Clear user data
+      router.push("/");     // Redirect to home page
+    },
+    onError: (error) => {
+      console.error("Logout failed:", error.message);
+    },
+  });
+}
+const getUser = async () => {
+  const response = await axiosInstance.get("/users/me");
+  return response.data;
+}
+function useGetUser() {
+  return useQuery({
+    queryKey: ["userData"],
+    queryFn: getUser,
+    enabled: false,
+    retry: false,
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+}
+async function checkSession  () {
+  return await axiosInstance.get("/users/check-session");
+}
+function useCheckSession() {
+  return useQuery({
+    queryKey: ["userSession"],
+    queryFn: checkSession,
+    retry: false,
+  });
+}
 const UserContext = createContext<UserContextTypes | undefined>(undefined);
 
 function UserContextProvider({ children }: UserContextProviderTypes) {
@@ -22,35 +66,20 @@ function UserContextProvider({ children }: UserContextProviderTypes) {
   const [userDataIsLoading, setUserDataIsLoading] = useState(true);
   const router = useRouter();
 
-  const { mutate: logout } = client.users.logoutUser.useMutation({
-    onSuccess: () => {
-      setUser(null);
-      router.push("/");
-    },
-  });
+  const { mutate: logout } = useLogout(setUser);
 
   const { data: sessionState, isPending: sessionLoading } =
-    client.users.checkUserSession.useQuery({
-      queryKey: ["userSession"],
-      retry: false,
-    });
+  useCheckSession();
 
   const {
     data: userData,
     refetch,
     isError,
-  } = client.users.getUser.useQuery({
-    queryKey: ["userData"],
-    enabled: false,
-    retry: false,
-    refetchOnReconnect: false,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-  });
+  } = useGetUser();
 
   useEffect(() => {
     if (!sessionLoading) {
-      if (sessionState?.body.state === true) {
+      if (sessionState?.data.state === true) {
         refetch();
       } else {
         setUser(null);
@@ -74,7 +103,7 @@ function UserContextProvider({ children }: UserContextProviderTypes) {
   };
 
   const logOut = () => {
-    logout({});
+    logout();
   };
   return (
     <UserContext.Provider

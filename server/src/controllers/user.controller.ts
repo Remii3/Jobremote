@@ -230,7 +230,7 @@ export const getUser = async (req: Request, res: Response) => {
   try {
     const userId = await getDataFromToken(req, res);
     if (!userId) {
-      return res.status(401).json({
+      return res.status(200).json({
         msg: "User not authenticated.",
       });
     }

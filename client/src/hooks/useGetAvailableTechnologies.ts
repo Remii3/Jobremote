@@ -1,6 +1,12 @@
 import { useToast } from "@/components/ui/use-toast";
-import { client } from "@/lib/utils";
+import { axiosInstance } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
 import { isFetchError } from "@ts-rest/react-query/v5";
+
+async function getAvailableTechnologies() {
+  const response = await axiosInstance.get("/offers/metadata/technologies");
+  return response.data;
+} 
 
 function useGetAvailableTechnologies() {
   const {
@@ -8,8 +14,9 @@ function useGetAvailableTechnologies() {
     isPending: avTechnologiesIsLoading,
     error,
     isError,
-  } = client.offers.getTechnologies.useQuery({
+  } = useQuery({
     queryKey: ["technologies"],
+    queryFn: getAvailableTechnologies,
     refetchOnMount: false,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
