@@ -5,9 +5,7 @@ import { connect } from "mongoose";
 import bodyParser from "body-parser";
 import cors from "cors";
 const port = process.env.PORT || 5000;
-import { createExpressEndpoints } from "@ts-rest/express";
 import { mainRouter } from "./routes/_app";
-import { mainContract } from "jobremotecontracts";
 import cookieParser from "cookie-parser";
 import OfferModel from "./models/Offer.model";
 import { schedule } from "node-cron";
@@ -31,7 +29,8 @@ app.use((req, res, next) => {
   bodyParser.json()(req, res, next);
 });
 app.use(cookieParser());
-createExpressEndpoints(mainContract, mainRouter, app);
+
+app.use(mainRouter);
 
 connect(process.env.MONGO_URI as string, {})
   .then(() => {

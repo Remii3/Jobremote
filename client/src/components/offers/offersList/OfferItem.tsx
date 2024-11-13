@@ -3,9 +3,8 @@
 import { Badge } from "@/components/ui/badge";
 import { useCurrency } from "@/context/CurrencyContext";
 import { OfferType } from "@/types/types";
-import { Mail, MailOpen } from "lucide-react";
+import { House, Mail, MailOpen, MapPin, Pin } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
 
 type OfferItemTypes = {
   changeCurrentOffer: (newData: OfferType) => void;
@@ -31,6 +30,7 @@ export default function OfferItem({
     maxSalary,
     currency,
     createdAt,
+    companyName,
   } = offerData;
   function showOfferHandler() {
     changeCurrentOffer(offerData);
@@ -40,36 +40,13 @@ export default function OfferItem({
       (1000 * 60 * 60 * 24)
   );
   const isYoungerThan2Days = daysOld < 3;
-  const containerRef = useRef<null | HTMLDivElement>(null);
-  const tagsRef = useRef<null | HTMLDivElement>(null);
-  const [isOverflowing, setIsOverflowing] = useState(false);
-
-  useEffect(() => {
-    const container = containerRef.current;
-    const tags = tagsRef.current;
-    // Check if the content overflows
-    if (container && tags) {
-      console.log(container.clientHeight, tags.clientHeight);
-      setIsOverflowing(tags.scrollHeight > tags.clientHeight);
-    }
-
-    // Optional: Add a resize listener to handle window resize or dynamic content
-    const handleResize = () => {
-      if (container && tags) {
-        setIsOverflowing(tags.scrollHeight > tags.clientHeight);
-      }
-    };
-    window.addEventListener("resize", handleResize);
-
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   return (
     <li>
       <button
         type="button"
         onClick={showOfferHandler}
-        className="bg-background shadow p-3 hover:shadow-md hover:scale-[1.01] transition-[box-shadow,transform] rounded-md grid grid-rows-2 sm:grid-rows-1 gap-x-2 gap-y-1 w-full border border-input"
+        className="bg-background relative shadow p-3 hover:shadow-md transition-[box-shadow] rounded-md grid grid-rows-2 sm:grid-rows-1 gap-x-2 gap-y-1 w-full border border-input"
         style={{
           gridTemplateColumns: "auto 1fr",
           gridTemplateRows: "auto auto",
@@ -105,9 +82,9 @@ export default function OfferItem({
                 )}
               </>
             )}
-            <h3 className="text-lg text-start">{title}</h3>
+            <h3 className="text-lg text-start line-clamp-1">{title}</h3>
           </div>
-          <div className="flex gap-2 col-start-2 col-span-1 justify-end">
+          <div className="flex gap-2 col-start-2 col-span-1 justify-end items-center">
             <span className="text-end font-medium text-green-500 hidden sm:inline">
               {minSalary === maxSalary ? (
                 <span>{formatCurrency(minSalary, currency)}</span>
@@ -119,38 +96,17 @@ export default function OfferItem({
               )}
             </span>
           </div>
-          <div
-            className="grid  grid-rows-1 col-span-2"
-            style={{ gridTemplateColumns: "auto 1fr" }}
-          >
+          <div className="flex justify-between items-center col-span-2">
             <div className="hidden sm:flex col-start-1 row-start-2 overflow-hidden">
-              <div className="flex gap-2 items-start max-h-[22px] max-w-full relative">
-                <div
-                  ref={tagsRef}
-                  className={`flex gap-2 flex-wrap text-nowrap overflow-hidden ${
-                    isOverflowing ? "max-w-[calc(100%-30px)]" : ""
-                  }`}
-                >
-                  <Badge variant={"outline"} className="text-xs">
-                    {localization}
-                  </Badge>
-                  <Badge variant={"outline"} className="md:inline-flex hidden">
-                    {experience}
-                  </Badge>
-                  <Badge variant={"outline"} className="md:inline-flex hidden">
-                    {contractType}
-                  </Badge>
-                  <Badge variant={"outline"} className="md:inline-flex hidden">
-                    {employmentType}
-                  </Badge>
+              <div className="flex gap-2 items-start">
+                <div className="flex items-center gap-1">
+                  <MapPin className="h-4 w-4" />
+                  <span className="text-sm">{localization}</span>
                 </div>
-                {isOverflowing && (
-                  <div className="absolute top-0 right-0 bg-background ">
-                    <Badge variant="outline" className="text-xs">
-                      ...
-                    </Badge>
-                  </div>
-                )}
+                <div className="flex items-center gap-1">
+                  <House className="h-4 w-4" />
+                  <span className="text-sm">{companyName}</span>
+                </div>
               </div>
             </div>
             <span className="text-start font-medium text-green-500 inline sm:hidden col-start-1 row-start-2">
@@ -163,7 +119,7 @@ export default function OfferItem({
                 </span>
               )}
             </span>
-            <div className="col-start-2 row-start-2 flex whitespace-nowrap flex-nowrap justify-end items-end gap-2 max-h-[22px]">
+            <div className="col-start-2 row-start-2 flex whitespace-nowrap flex-nowrap justify-end items-end gap-2 ">
               <div className="hidden sm:flex gap-2 ">
                 {technologies &&
                   technologies.slice(0, 2).map((technology) => (
@@ -172,11 +128,6 @@ export default function OfferItem({
                     </Badge>
                   ))}
               </div>
-              {isYoungerThan2Days ? (
-                <Badge variant={"outlinePrimary"}>New</Badge>
-              ) : (
-                <Badge variant={"secondary"}>{daysOld}d ago</Badge>
-              )}
             </div>
           </div>
         </div>
@@ -196,6 +147,21 @@ export default function OfferItem({
             </Badge>
           </div>
         </div>
+        {isYoungerThan2Days ? (
+          <Badge
+            variant={"outlinePrimary"}
+            className="absolute -top-2.5 -right-2.5"
+          >
+            New
+          </Badge>
+        ) : (
+          <Badge
+            variant={"outline"}
+            className="absolute bg-background -top-2.5 -right-2.5"
+          >
+            {daysOld}d ago
+          </Badge>
+        )}
       </button>
     </li>
   );
