@@ -1,62 +1,55 @@
 import { useToast } from "@/components/ui/use-toast";
-import { client } from "@/lib/utils";
-import { isFetchError } from "@ts-rest/react-query/v5";
+import { axiosInstance } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { isAxiosError } from "axios";
+import { useEffect } from "react";
+
+async function getAvailableTechnologies() {
+  try {
+    const response = await axiosInstance.get("/offers/metadata/technologies");
+    return response.data;
+  } catch (error) {
+    if (isAxiosError(error)) {
+      if (error.response) {
+        throw new Error("An error occurred while fetching technologies.");
+      }
+    } else {
+      throw new Error(
+        "An unexpected error occurred while fetching technologies."
+      );
+    }
+  }
+}
 
 function useGetAvailableTechnologies() {
   const {
     data: avTechnologies,
-    isPending: avTechnologiesIsLoading,
+    isPending,
     error,
     isError,
-  } = client.offers.getTechnologies.useQuery({
+  } = useQuery({
     queryKey: ["technologies"],
+    queryFn: getAvailableTechnologies,
     refetchOnMount: false,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
   });
   const { toast } = useToast();
 
-  if (isError) {
-    let errorText;
-    if (isFetchError(error)) {
-      console.error(error.message);
-      errorText = "Error: Failed to fetch technologies.";
-
+  useEffect(() => {
+    if (isError && error instanceof Error) {
       toast({
         title: "Error",
-        description:
-          "Unable to retrieve the available technologies. Please check your internet connection.",
-        variant: "destructive",
-      });
-    } else if (error.status === 404 || error.status === 500) {
-      console.error(error.body.msg);
-      errorText = error.body.msg;
-      toast({
-        title: "Error",
-        description: error.body.msg,
+        description: error.message,
         variant: "destructive",
       });
     }
-
-    return {
-      avTechnologies: null,
-      avTechnologiesIsLoading,
-      avContractTypesError: errorText,
-    };
-  }
-
-  if (!avTechnologies || avTechnologiesIsLoading) {
-    return {
-      avTechnologies: null,
-      avTechnologiesIsLoading,
-      avTechnologiesError: null,
-    };
-  }
+  }, [isError, error, toast]);
 
   return {
-    avTechnologies: avTechnologies.body,
-    avTechnologiesIsLoading,
-    avTechnologiesError: null,
+    avTechnologies,
+    avTechnologiesIsLoading: isPending,
+    avTechnologiesError: error,
   };
 }
 

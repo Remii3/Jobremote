@@ -1,16 +1,12 @@
-import { initServer } from "@ts-rest/express";
 import { compare, genSalt, hash } from "bcrypt";
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import { PaymentModel } from "../models/PaymentType.model";
 
 export function handleError(err: unknown, message?: string) {
   if (process.env.NODE_ENV !== "production") {
     console.error(err);
   }
 }
-
-export const tsServer = initServer();
 
 export const getDataFromToken = (req: Request, res: Response) => {
   try {

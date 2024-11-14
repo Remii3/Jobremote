@@ -16,7 +16,7 @@ import useGetAvailableTechnologies from "@/hooks/useGetAvailableTechnologies";
 import { useCurrency } from "@/context/CurrencyContext";
 import dynamic from "next/dynamic";
 import { OfferType } from "@/types/types";
-import { QueryClient } from "@ts-rest/react-query/tanstack";
+import { QueryClient } from "@tanstack/react-query";
 
 import { useEditOffer } from "./EditOffer.hooks";
 import TextField from "./TextField";
@@ -52,19 +52,14 @@ export default function EditOffer({
     form,
     handleChangeLogo,
     handleSubmit,
-    handleTechnologies,
     selectedLogo,
-    techOpen,
-    technologies,
     updateOfferIsLoading,
-    changeTechOpenHandler,
-    changeLocalizationOpenHandler,
-    localizationOpen,
   } = useEditOffer({
     offerData,
     handleChangeCurrentEditOffer,
     queryClient,
   });
+
   return (
     <Form {...form}>
       <form
@@ -183,7 +178,11 @@ export default function EditOffer({
         <FormActions
           isLoading={updateOfferIsLoading}
           handleCancel={() => handleChangeCurrentEditOffer(null)}
-          disabledSubmit={updateOfferIsLoading || !form.formState.isDirty}
+          disabledSubmit={
+            updateOfferIsLoading ||
+            (!form.formState.isDirty && !selectedLogo) ||
+            selectedLogo?.length === 0
+          }
         />
         <FormRootError />
       </form>

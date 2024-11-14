@@ -66,7 +66,7 @@ const dropzone = {
 
 type OfferFormPropsTypes = {
   form: UseFormReturn<z.infer<typeof ClientOfferFormSchema>>;
-  handleSubmit: (values: any) => void;
+  changeCurrentStep: (values: any) => void;
   selectedLogo: File[] | null;
   handleChangeLogo: (newLogo: File[] | null) => void;
   technologies: string[];
@@ -75,7 +75,7 @@ type OfferFormPropsTypes = {
 
 const OfferForm = ({
   form,
-  handleSubmit,
+  changeCurrentStep,
   handleTechnologies,
   selectedLogo,
   handleChangeLogo,
@@ -93,7 +93,7 @@ const OfferForm = ({
       <div className="flex gap-8">
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(handleSubmit)}
+            onSubmit={form.handleSubmit(() => changeCurrentStep(2))}
             className="px-4 py-8 w-full space-y-6"
           >
             <div className="flex gap-8 flex-col md:flex-row">
@@ -378,7 +378,7 @@ const OfferForm = ({
                       <CommandEmpty>No technology found.</CommandEmpty>
                       <CommandGroup>
                         {avTechnologies &&
-                          avTechnologies.technologies.map((tech) => (
+                          avTechnologies.technologies.map((tech: any) => (
                             <CommandItem
                               key={tech._id}
                               value={tech.name}

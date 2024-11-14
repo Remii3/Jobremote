@@ -1,9 +1,9 @@
-import { mainContract } from "jobremotecontracts";
-import { tsServer } from "../utils/utils";
-import { offersRouter } from "./offers.router";
-import { usersRouter } from "./users.router";
+import { Router } from "express";
+import { offerRouter } from "./offer.router";
+import { userRouter } from "./user.router";
+const router = Router();
 
-export const mainRouter = tsServer.router(mainContract, {
-  offers: offersRouter,
-  users: usersRouter,
-});
+router.use("/offers", offerRouter);
+router.use("/users", userRouter);
+
+export const mainRouter = router;

@@ -1,14 +1,14 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { client, cn, getOnlyDirtyFormFields } from "@/lib/utils";
+import { getOnlyDirtyFormFields, axiosInstance } from "@/lib/utils";
 import { useToast } from "../../../../ui/use-toast";
 import { TOAST_TITLES } from "@/data/constant";
 import { useEffect, useState } from "react";
 import { OfferType } from "@/types/types";
 import { z } from "zod";
 import { UpdateOfferSchema } from "jobremotecontracts/dist/schemas/offerSchemas";
-import { useQueryClient } from "@ts-rest/react-query/tanstack";
-import { isFetchError } from "@ts-rest/react-query/v5";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { isAxiosError } from "axios";
 
 const editOfferSchema = UpdateOfferSchema.omit({
   _id: true,
@@ -67,64 +67,55 @@ export function useEditOffer({
     },
   });
 
-  const { mutate: updateOffer, isPending: updateOfferIsLoading } =
-    client.offers.updateOffer.useMutation({
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["userOffersList"] });
-        queryClient.invalidateQueries({ queryKey: ["offers-list"] });
-        toast({
-          title: TOAST_TITLES.SUCCESS,
-          description: "Offer information has been updated successfully.",
+  const { mutate: updateOffer, isPending: updateOfferIsLoading } = useMutation({
+    mutationFn: async (data: any) => {
+      const res = await axiosInstance.patch(`/offers/${offerData._id}`, data);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["userOffersList"] });
+      queryClient.invalidateQueries({ queryKey: ["offers-list"] });
+      toast({
+        title: TOAST_TITLES.SUCCESS,
+        description: "Offer information has been updated successfully.",
+      });
+      handleChangeCurrentEditOffer(null);
+    },
+    onError: (error) => {
+      if (isAxiosError(error)) {
+        form.setError("root", {
+          type: "manual",
+          message:
+            "Failed to change the data. Please check your internet connection.",
         });
-        handleChangeCurrentEditOffer(null);
-      },
-      onError: (error) => {
-        if (isFetchError(error)) {
-          form.setError("root", {
-            type: "manual",
-            message:
-              "Failed to change the password. Please check your internet connection.",
-          });
 
-          toast({
-            title: TOAST_TITLES.ERROR,
-            description:
-              "Failed to change the password. Please check your internet connection.",
-            variant: "destructive",
-          });
-        } else if (error.status === 404 || error.status === 500) {
-          form.setError("root", {
-            type: "manual",
-            message: error.body.msg,
-          });
+        toast({
+          title: TOAST_TITLES.ERROR,
+          description:
+            "Failed to change the password. Please check your internet connection.",
+          variant: "destructive",
+        });
+      } else {
+        console.error("error", error);
 
-          toast({
-            title: TOAST_TITLES.ERROR,
-            description: error.body.msg,
-            variant: "destructive",
-          });
-        } else {
-          console.error("error", error);
+        form.setError("root", {
+          type: "manual",
+          message: "Something went wrong. Please try again later.",
+        });
 
-          form.setError("root", {
-            type: "manual",
-            message: "Something went wrong. Please try again later.",
-          });
-
-          toast({
-            title: TOAST_TITLES.ERROR,
-            description:
-              "An error occurred while updating the offer information.",
-            variant: "destructive",
-          });
-        }
-      },
-    });
+        toast({
+          title: TOAST_TITLES.ERROR,
+          description:
+            "An error occurred while updating the offer information.",
+          variant: "destructive",
+        });
+      }
+    },
+  });
 
   function handleSubmit(values: z.infer<typeof editOfferSchema>) {
     const updatedFieldsValues = getOnlyDirtyFormFields(values, form);
     const formData = new FormData();
-    console.log(updatedFieldsValues);
     Object.entries(updatedFieldsValues).forEach(([key, value]) => {
       formData.append(key, value as string);
     });
@@ -145,7 +136,7 @@ export function useEditOffer({
     }
 
     formData.append("_id", offerData._id);
-    updateOffer({ body: formData });
+    updateOffer(formData);
   }
   function handleChangeLogo(newLogo: File[] | null) {
     setSelectedLogo(newLogo);
@@ -180,9 +171,11 @@ export function useEditOffer({
   const changeTechOpenHandler = (newVal: boolean) => {
     setTechOpen(newVal);
   };
+
   const changeLocalizationOpenHandler = (newVal: boolean) => {
     setLocalizationOpen(newVal);
   };
+
   return {
     form,
     handleSubmit,

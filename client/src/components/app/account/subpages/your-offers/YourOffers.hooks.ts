@@ -1,9 +1,9 @@
 import { useToast } from "@/components/ui/use-toast";
 import { TOAST_TITLES } from "@/data/constant";
-import { client } from "@/lib/utils";
+import { axiosInstance } from "@/lib/utils";
 import { UserType } from "@/types/types";
 import { loadStripe } from "@stripe/stripe-js";
-import { useQueryClient } from "@ts-rest/react-query/tanstack";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY || ""
@@ -40,10 +40,18 @@ export function useUserOffers({ user }: UseUserOffersProps) {
     data: userOffersList,
     isPending: userOffersIsPending,
     error: userOffersError,
-  } = client.users.getUserOffers.useQuery({
+  } = useQuery({
     queryKey: ["userOffersList"],
-    queryData: {
-      query: { _id: user._id, limit: "3", page: "1", sort: "createdAt" },
+    queryFn: async () => {
+      const { data } = await axiosInstance.get(`/users/offers`, {
+        params: {
+          _id: user._id,
+          limit: "3",
+          page: "1",
+          sort: "createdAt",
+        },
+      });
+      return data;
     },
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
@@ -67,18 +75,29 @@ export function usePayments({ fetchUserData }: UsePaymentsProps) {
     data: paymentList,
     error: paymentListError,
     isPending: paymentListIsPending,
-  } = client.offers.getPaymentTypes.useQuery({
+  } = useQuery({
     queryKey: ["payment-list"],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get(`/offers/metadata/payments`);
+      return data;
+    },
   });
 
   const { mutate: payForOfferHandle, isPending: payForOfferIsPending } =
-    client.offers.payForOffer.useMutation({
+    useMutation({
+      mutationFn: async (data: any) => {
+        const res = await axiosInstance.post(
+          `/offers/${data.offerId}/payment`,
+          data
+        );
+        return res.data;
+      },
       onSuccess: async (param) => {
         fetchUserData();
         const stripe = await stripePromise;
         if (!stripe) return;
         const { error } = await stripe.redirectToCheckout({
-          sessionId: param.body.sessionId,
+          sessionId: param.sessionId,
         });
 
         if (error) {
@@ -111,7 +130,7 @@ export function usePayments({ fetchUserData }: UsePaymentsProps) {
     pricing: string;
     title: string;
   }) => {
-    payForOfferHandle({ body: { offerId, currency, pricing, title } });
+    payForOfferHandle({ offerId, currency, pricing, title });
   };
 
   return {
@@ -137,13 +156,20 @@ export function useOfferActions({
   const {
     mutate: extendOfferDurationHandle,
     isPending: extendOfferDurationIsPending,
-  } = client.offers.extendActiveOffer.useMutation({
+  } = useMutation({
+    mutationFn: async (data: any) => {
+      const res = await axiosInstance.post(
+        `/offers/${data.offerId}/extend`,
+        data
+      );
+      return res.data;
+    },
     onSuccess: async (param) => {
       fetchUserData();
       const stripe = await stripePromise;
       if (!stripe) return;
       const { error } = await stripe.redirectToCheckout({
-        sessionId: param.body.sessionId,
+        sessionId: param.sessionId,
       });
       if (error) {
         console.error("Stripe error:", error);
@@ -165,7 +191,14 @@ export function useOfferActions({
   });
 
   const { mutate: deleteOfferHandle, isPending: deleteOfferIsPending } =
-    client.offers.deleteOffer.useMutation({
+    useMutation({
+      mutationFn: async (data: any) => {
+        const res = await axiosInstance.patch(
+          `/offers/${data._id}/mark-deleted`,
+          data
+        );
+        return res.data;
+      },
       onSuccess: () => {
         fetchUserData();
         queryClient.invalidateQueries({ queryKey: ["offers-list"] });
@@ -197,17 +230,15 @@ export function useOfferActions({
     title: string;
   }) => {
     extendOfferDurationHandle({
-      body: {
-        offerId,
-        currency,
-        pricing,
-        title,
-      },
+      offerId,
+      currency,
+      pricing,
+      title,
     });
   };
 
   const deleteOfferHandler = (offerId: string) => {
-    deleteOfferHandle({ body: { _id: offerId } });
+    deleteOfferHandle({ _id: offerId });
   };
 
   return {

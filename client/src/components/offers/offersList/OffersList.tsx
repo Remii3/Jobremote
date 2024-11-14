@@ -1,4 +1,3 @@
-import { cleanEmptyData, client } from "@/lib/utils";
 import { debounce } from "lodash";
 import { useCallback, useEffect, useRef } from "react";
 import OfferItem from "./OfferItem";
@@ -10,7 +9,7 @@ import {
 import { useUser } from "@/context/UserContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Loader2 } from "lucide-react";
-
+import { useOffersList } from "./offersList.hooks";
 interface OffersListProps {
   filters: OfferFiltersType;
   sortOption: OfferSortOptionsTypes;
@@ -26,30 +25,14 @@ export default function OffersList({
   const observerRef = useRef<null | HTMLDivElement>(null);
 
   const {
-    data: offersResponse,
-    error: offersError,
-    isPending: offersIsPending,
-    refetch: offersRefetch,
-    isFetchingNextPage: offersIsFetchingNextPage,
-    hasNextPage: offersHasNextPage,
-    fetchNextPage: offersFetchNextPage,
-  } = client.offers.getOffers.useInfiniteQuery({
-    queryKey: ["offers-list"],
-    queryData: ({ pageParam }) => ({
-      query: {
-        filters: cleanEmptyData(filters),
-        sort: sortOption,
-        limit: "10",
-        page: (pageParam as number).toString(),
-      },
-    }),
-    getNextPageParam: (lastPage) => {
-      return lastPage.body.offers.length >= 10
-        ? lastPage.body.pagination.page + 1
-        : undefined;
-    },
-    initialPageParam: 1,
-  });
+    offers,
+    offersError,
+    offersFetchNextPage,
+    offersHasNextPage,
+    offersIsFetchingNextPage,
+    offersIsPending,
+    offersRefetch,
+  } = useOffersList({ sortOption, filters });
 
   const refetchOffersList = useRef(
     debounce(async () => {
@@ -91,10 +74,6 @@ export default function OffersList({
     };
   }, [handleOffersListObserver]);
 
-  const offersList = offersResponse?.pages.flatMap((page) =>
-    page.status === 200 ? page.body.offers : []
-  );
-
   return (
     <>
       {offersIsPending && (
@@ -105,9 +84,9 @@ export default function OffersList({
         </div>
       )}
       {offersError && <p>Error</p>}
-      {offersList && offersList.length > 0 && (
+      {offers && offers.length > 0 && (
         <ul className="space-y-4">
-          {offersList.map((offer) => (
+          {offers.map((offer) => (
             <OfferItem
               key={offer._id}
               offerData={offer}
@@ -123,7 +102,7 @@ export default function OffersList({
           <Loader2 className="h-6 w-6 animate-spin" />
         </div>
       )}
-      {offersList && offersList.length <= 0 && (
+      {offers && offers.length <= 0 && (
         <div className="text-center">
           <span className="text-muted-foreground">No offers</span>
         </div>

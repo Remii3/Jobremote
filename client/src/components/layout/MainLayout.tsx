@@ -4,7 +4,7 @@ import Header from "./Header";
 import {
   QueryClientProvider,
   QueryClient,
-} from "@ts-rest/react-query/tanstack";
+} from "@tanstack/react-query";
 import { CurrencyProvider } from "@/context/CurrencyContext";
 import { UserContextProvider } from "@/context/UserContext";
 import ThemeProvider from "@/context/ThemeProvider";
