@@ -93,10 +93,10 @@ export default function ModelForm({
                       className="flex gap-8 px-4 lg:flex-row flex-col"
                     >
                       {paymentTypes.paymentTypes
-                        .sort((a, b) => {
+                        .sort((a: any, b: any) => {
                           return a.price > b.price ? 1 : -1;
                         })
-                        .map((option) => (
+                        .map((option: any) => (
                           <FormItem
                             key={option.name}
                             className="relative basis-[33%]"
@@ -121,9 +121,11 @@ export default function ModelForm({
                                 </CardHeader>
                                 <CardContent>
                                   <ul className="space-y-3 list-disc text-base pl-4 font-normal">
-                                    {option.benefits.map((benefit, i) => {
-                                      return <li key={i}>{benefit}</li>;
-                                    })}
+                                    {option.benefits.map(
+                                      (benefit: any, i: any) => {
+                                        return <li key={i}>{benefit}</li>;
+                                      }
+                                    )}
                                   </ul>
                                 </CardContent>
                                 <CardFooter>

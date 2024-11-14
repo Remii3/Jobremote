@@ -378,7 +378,7 @@ const OfferForm = ({
                       <CommandEmpty>No technology found.</CommandEmpty>
                       <CommandGroup>
                         {avTechnologies &&
-                          avTechnologies.technologies.map((tech) => (
+                          avTechnologies.technologies.map((tech: any) => (
                             <CommandItem
                               key={tech._id}
                               value={tech.name}
