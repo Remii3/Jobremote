@@ -1,4 +1,3 @@
-import { initServer } from "@ts-rest/express";
 import { compare, genSalt, hash } from "bcrypt";
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";

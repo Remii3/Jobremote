@@ -12,11 +12,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
-import { client } from "@/lib/utils";
+import { axiosInstance } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { isFetchError } from "@ts-rest/react-query/v5";
+import { useMutation } from "@tanstack/react-query";
+import { isAxiosError } from "axios";
 import { useRouter } from "next/navigation";
-import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 const emailResetSchema = z.object({ email: z.string().email() });
@@ -30,38 +30,20 @@ export default function ResetPasswordPage() {
     defaultValues: { email: "" },
   });
 
-  const { mutate, isPending } = client.users.resetPassword.useMutation({
+  const { mutate, isPending } = useMutation({
+    mutationFn: async (data: z.infer<typeof emailResetSchema>) => {
+      const response = await axiosInstance.post("/users/reset-password", data);
+      return response.data;
+    },
     onSuccess: () => {
       router.push("/login");
     },
     onError: (error) => {
-      if (isFetchError(error)) {
+      if (isAxiosError(error)) {
         toast({
           title: "Error",
           description:
             "Failed to change the password. Please check your internet connection.",
-          variant: "destructive",
-        });
-      } else if (error.status === 404) {
-        form.setError("email", {
-          type: "manual",
-          message: error.body.msg,
-        });
-
-        toast({
-          title: "Error",
-          description: error.body.msg,
-          variant: "destructive",
-        });
-      } else if (error.status === 500) {
-        form.setError("root", {
-          type: "manual",
-          message: error.body.msg,
-        });
-
-        toast({
-          title: "Error",
-          description: error.body.msg,
           variant: "destructive",
         });
       }
@@ -70,7 +52,7 @@ export default function ResetPasswordPage() {
   });
 
   function handleSubmit(data: z.infer<typeof emailResetSchema>) {
-    mutate({ body: data });
+    mutate(data);
   }
 
   return (

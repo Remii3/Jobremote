@@ -7,9 +7,6 @@ import {
   createOffer,
   deleteOffer,
   extendActiveOffer,
-  getContractTypes,
-  getEmploymentTypes,
-  getExperiences,
   getOffers,
   getPaymentTypes,
   getTechnologies,
@@ -37,9 +34,6 @@ router.post("/apply", [upload.array("cv")], offerApply);
 // Static data routes
 router.get("/metadata/payments", getPaymentTypes);
 router.get("/metadata/technologies", getTechnologies);
-router.get("/metadata/employments", getEmploymentTypes);
-router.get("/metadata/experiences", getExperiences);
-router.get("/metadata/contracts", getContractTypes);
 
 // Payment routes
 router.post("/:id/payment", [priceLogic], payForOffer);

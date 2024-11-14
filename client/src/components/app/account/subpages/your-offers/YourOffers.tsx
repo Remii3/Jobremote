@@ -7,7 +7,7 @@ import { Button } from "../../../../ui/button";
 import EditOffer from "../edit-offer/EditOffer";
 
 import { Separator } from "../../../../ui/separator";
-import { useQueryClient } from "@ts-rest/react-query/tanstack";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { useYourOffers } from "./YourOffers.hooks";
 import OffersTable from "./OffersTable";
@@ -39,12 +39,6 @@ export default function YourOffers({ user, fetchUserData }: YourOffersProps) {
   });
 
   const [selectedOffer, setSelectedOfferId] = useState<OfferType | null>(null);
-
-  // const currentOffer = useMemo(
-  //   () =>
-  //     userOffersList?.body.offers.find((offer) => offer._id === editOfferId),
-  //   [editOfferId, userOffersList]
-  // );
 
   const handleEditOfferChange = (offerId: OfferType | null) => {
     setSelectedOfferId(offerId);
@@ -89,14 +83,14 @@ export default function YourOffers({ user, fetchUserData }: YourOffersProps) {
           </div>
           {userOffersList && paymentList && (
             <OffersTable
-              userOffers={userOffersList.body.offers}
+              userOffers={userOffersList.offers}
               onEditChange={handleEditOfferChange}
               deleteOfferHandler={deleteOfferHandler}
               deleteOfferIsPending={deleteOfferIsPending}
               extendOfferDurationHandler={extendOfferDurationHandler}
               payForOfferHandler={payForOfferHandler}
               payForOfferIsPending={payForOfferIsPending}
-              paymentList={paymentList.body.paymentTypes}
+              paymentList={paymentList.paymentTypes}
             />
           )}
         </>

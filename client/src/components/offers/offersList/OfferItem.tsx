@@ -150,7 +150,7 @@ export default function OfferItem({
         {isYoungerThan2Days ? (
           <Badge
             variant={"outlinePrimary"}
-            className="absolute -top-2.5 -right-2.5"
+            className="absolute bg-background -top-2.5 -right-2.5"
           >
             New
           </Badge>

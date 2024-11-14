@@ -18,7 +18,7 @@ const router = Router();
 
 // User management routes
 router.post("/", createUser);
-router.get("/:id", getUser);
+router.get("/me", getUser);
 router.patch("/:id/profile", updateUser);
 router.patch("/:id/settings", updateUserSettings);
 router.patch("/:id/mark-deleted", deleteUser);
@@ -30,7 +30,7 @@ router.get("/offers/:offerId", getUserOffer);
 // Authentication and session routes
 router.post("/login", loginUser);
 router.post("/logout", logoutUser);
-router.get("/check-user-session", checkUserSession);
+router.get("/check-session", checkUserSession);
 
 // Password management routes
 router.post("/reset-password", resetPassword);

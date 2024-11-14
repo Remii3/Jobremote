@@ -1,13 +1,14 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { client, getOnlyDirtyFormFields } from "@/lib/utils";
+import { axiosInstance, getOnlyDirtyFormFields } from "@/lib/utils";
 import { UpdateUserSettingsSchema } from "jobremotecontracts/dist/schemas/userSchemas";
 import { useEffect } from "react";
 import { useToast } from "../../../../ui/use-toast";
 import { TOAST_TITLES } from "@/data/constant";
-import { isFetchError } from "@ts-rest/react-query/v5";
 import { UserType } from "@/types/types";
+import { useMutation } from "@tanstack/react-query";
+import { isAxiosError } from "axios";
 
 const UserSettingsSchema = UpdateUserSettingsSchema.omit({ _id: true });
 
@@ -24,53 +25,50 @@ export function useSettings({ fetchUserData, user }: UseSettingsProps) {
     defaultValues: { commercialConsent: user.commercialConsent },
   });
 
-  const { mutate: updateSettings, isPending } =
-    client.users.updateUserSettings.useMutation({
-      onSuccess: () => {
-        fetchUserData();
-        toast({
-          title: TOAST_TITLES.SUCCESS,
-          description: "Settings have been updated successfully.",
+  const { mutate: updateSettings, isPending } = useMutation({
+    mutationFn: async (data: any) => {
+      const res = await axiosInstance.patch(
+        `/users/${user._id}/settings`,
+        data
+      );
+      return res.data;
+    },
+    onSuccess: () => {
+      fetchUserData();
+      toast({
+        title: TOAST_TITLES.SUCCESS,
+        description: "Settings have been updated successfully.",
+      });
+    },
+    onError: (error) => {
+      if (isAxiosError(error)) {
+        form.setError("root", {
+          type: "manual",
+          message: error.message,
         });
-      },
-      onError: (error) => {
-        if (isFetchError(error)) {
-          form.setError("root", {
-            type: "manual",
-            message: error.message,
-          });
-          toast({
-            title: TOAST_TITLES.ERROR,
-            description:
-              "An error occurred while updating settings. Please check your internet connection.",
-          });
-        } else if (error.status === 404 || error.status === 500) {
-          form.setError("root", {
-            type: "manual",
-            message: error.body.msg,
-          });
-          toast({
-            title: TOAST_TITLES.ERROR,
-            description: error.body.msg,
-          });
-        } else {
-          console.error("error", error);
-          form.setError("root", {
-            type: "manual",
-            message: "Something went wrong. Please try again later.",
-          });
-          toast({
-            title: TOAST_TITLES.ERROR,
-            description: "An error occurred while updating settings.",
-          });
-        }
-      },
-    });
+        toast({
+          title: TOAST_TITLES.ERROR,
+          description:
+            "An error occurred while updating settings. Please check your internet connection.",
+        });
+      } else {
+        console.error("error", error);
+        form.setError("root", {
+          type: "manual",
+          message: "Something went wrong. Please try again later.",
+        });
+        toast({
+          title: TOAST_TITLES.ERROR,
+          description: "An error occurred while updating settings.",
+        });
+      }
+    },
+  });
 
   function handleSubmit(values: z.infer<typeof UserSettingsSchema>) {
     const updatedFieldsValues = getOnlyDirtyFormFields(values, form);
 
-    updateSettings({ body: { ...updatedFieldsValues, _id: user._id } });
+    updateSettings({ ...updatedFieldsValues });
   }
 
   useEffect(() => {

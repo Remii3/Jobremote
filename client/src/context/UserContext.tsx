@@ -1,5 +1,4 @@
 "use client";
-// import { client } from "@/lib/utils";
 import { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { UserType } from "@/types/types";
@@ -16,32 +15,32 @@ interface UserContextTypes {
 interface UserContextProviderTypes {
   children: React.ReactNode;
 }
-const logoutUser = async () => {
-  const response = await axiosInstance.post('/users/logout');
-  return response.data;  // Return only the data from the response
-};
-function useLogout(setUser) {
+
+function useLogout(handleUserDataChange: (state: null) => void) {
   const router = useRouter();
 
   return useMutation({
-    mutationFn: logoutUser,
+    mutationFn: async () => {
+      const response = await axiosInstance.post("/users/logout");
+      return response.data;
+    },
     onSuccess: () => {
-      setUser(null);       // Clear user data
-      router.push("/");     // Redirect to home page
+      handleUserDataChange(null);
+      router.push("/");
     },
     onError: (error) => {
       console.error("Logout failed:", error.message);
     },
   });
 }
-const getUser = async () => {
-  const response = await axiosInstance.get("/users/me");
-  return response.data;
-}
+
 function useGetUser() {
   return useQuery({
     queryKey: ["userData"],
-    queryFn: getUser,
+    queryFn: async () => {
+      const response = await axiosInstance.get("/users/me");
+      return response.data;
+    },
     enabled: false,
     retry: false,
     refetchOnReconnect: false,
@@ -49,13 +48,13 @@ function useGetUser() {
     refetchOnMount: false,
   });
 }
-async function checkSession  () {
-  return await axiosInstance.get("/users/check-session");
-}
+
 function useCheckSession() {
   return useQuery({
     queryKey: ["userSession"],
-    queryFn: checkSession,
+    queryFn: async () => {
+      return await axiosInstance.get("/users/check-session");
+    },
     retry: false,
   });
 }
@@ -64,18 +63,16 @@ const UserContext = createContext<UserContextTypes | undefined>(undefined);
 function UserContextProvider({ children }: UserContextProviderTypes) {
   const [user, setUser] = useState<UserType | null>(null);
   const [userDataIsLoading, setUserDataIsLoading] = useState(true);
-  const router = useRouter();
 
-  const { mutate: logout } = useLogout(setUser);
+  const handleUserDataChange = (state: UserType | null) => {
+    setUser(state);
+  };
 
-  const { data: sessionState, isPending: sessionLoading } =
-  useCheckSession();
+  const { mutate: logout } = useLogout(handleUserDataChange);
 
-  const {
-    data: userData,
-    refetch,
-    isError,
-  } = useGetUser();
+  const { data: sessionState, isPending: sessionLoading } = useCheckSession();
+
+  const { data: userData, refetch, isError } = useGetUser();
 
   useEffect(() => {
     if (!sessionLoading) {
@@ -90,7 +87,7 @@ function UserContextProvider({ children }: UserContextProviderTypes) {
 
   useEffect(() => {
     if (userData) {
-      setUser(userData.body.user);
+      setUser(userData.user);
       setUserDataIsLoading(false);
     } else if (isError) {
       setUser(null);
@@ -105,6 +102,7 @@ function UserContextProvider({ children }: UserContextProviderTypes) {
   const logOut = () => {
     logout();
   };
+
   return (
     <UserContext.Provider
       value={{ logOut, user, fetchUserData, userDataIsLoading }}

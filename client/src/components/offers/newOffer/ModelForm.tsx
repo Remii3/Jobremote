@@ -18,24 +18,25 @@ import {
   FormRootError,
 } from "@/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { client } from "@/lib/utils";
+import { axiosInstance } from "@/lib/utils";
 import { ClientModelFormSchema } from "@/schema/OfferSchema";
 import { z } from "zod";
 import { UseFormReturn } from "react-hook-form";
-import { isFetchError } from "@ts-rest/react-query/v5";
 import { useToast } from "@/components/ui/use-toast";
+import { useQuery } from "@tanstack/react-query";
+import { isAxiosError } from "axios";
 
 type ModelFormPropsTypes = {
   form: UseFormReturn<z.infer<typeof ClientModelFormSchema>>;
   handleSubmit: () => void;
   isPendingCreateOffer: boolean;
-  changeStepPrev: (step: number) => void;
+  changeCurrentStep: (step: number) => void;
 };
 
 export default function ModelForm({
   form,
   handleSubmit,
-  changeStepPrev,
+  changeCurrentStep,
   isPendingCreateOffer,
 }: ModelFormPropsTypes) {
   const {
@@ -43,26 +44,22 @@ export default function ModelForm({
     isPending: isPendingPaymentTypes,
     error: errorPaymentTypes,
     isError: isErrorPaymentTypes,
-  } = client.offers.getPaymentTypes.useQuery({ queryKey: ["payment-types"] });
+  } = useQuery({
+    queryKey: ["payment-types"],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get("/offers/metadata/payments");
+      return data;
+    },
+  });
   const { toast } = useToast();
 
   if (isErrorPaymentTypes) {
-    if (isFetchError(errorPaymentTypes)) {
+    if (isAxiosError(errorPaymentTypes)) {
       console.error(errorPaymentTypes.message);
       toast({
         title: "Error",
         description:
           "Unable to retrieve the available payment types. Please check your internet connection.",
-        variant: "destructive",
-      });
-    } else if (
-      errorPaymentTypes.status === 404 ||
-      errorPaymentTypes.status === 500
-    ) {
-      console.error(errorPaymentTypes.body.msg);
-      toast({
-        title: "Error",
-        description: errorPaymentTypes.body.msg,
         variant: "destructive",
       });
     } else {
@@ -95,7 +92,7 @@ export default function ModelForm({
                       defaultValue={field.value}
                       className="flex gap-8 px-4 lg:flex-row flex-col"
                     >
-                      {paymentTypes.body.paymentTypes
+                      {paymentTypes.paymentTypes
                         .sort((a, b) => {
                           return a.price > b.price ? 1 : -1;
                         })
@@ -148,7 +145,7 @@ export default function ModelForm({
           <FormRootError />
           <div className="flex mt-8 gap-4 justify-end lg:justify-start">
             <Button
-              onClick={() => changeStepPrev(1)}
+              onClick={() => changeCurrentStep(1)}
               size={"lg"}
               variant={"outline"}
             >

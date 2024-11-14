@@ -12,7 +12,6 @@ import {
   Gauge,
   MapPin,
   Wallet,
-  X,
   FilePlus as FileIcon,
   FilePenIcon,
 } from "lucide-react";
@@ -26,12 +25,8 @@ import {
   FormMessage,
   FormRootError,
 } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { client } from "@/lib/utils";
 import { DropzoneOptions } from "react-dropzone";
 import {
   FileInput,
@@ -39,12 +34,8 @@ import {
   FileUploaderContent,
   FileUploaderItem,
 } from "@/components/ui/extension/file-upload";
-import { useEffect } from "react";
-import { useUser } from "@/context/UserContext";
 import Link from "next/link";
-import { isFetchError } from "@ts-rest/react-query/v5";
-import { useToast } from "@/components/ui/use-toast";
-import { DialogClose } from "@/components/ui/dialog";
+import useOfferDetails from "./offerDetails.hooks";
 
 interface OfferDetailsContentProps {
   offer: OfferType;
@@ -61,122 +52,14 @@ const dropzone = {
   maxSize: 4 * 1024 * 1024,
 } satisfies DropzoneOptions;
 
-const applicationSchema = z
-  .object({
-    name: z.string().min(1, { message: "First and last name is required." }),
-    email: z.string().min(1, { message: "Email is required." }).email(),
-    description: z.string().optional(),
-    cv: z
-      .array(
-        z.instanceof(File).refine((file) => file.size < 5 * 1024 * 1024, {
-          message: "File size must be less than 5MB",
-        })
-      )
-      .max(1, { message: "Only one file is allowed." })
-      .nullable(),
-  })
-  .refine(
-    (data) => {
-      if (data.cv === null) {
-        return false;
-      }
-      return true;
-    },
-    {
-      path: ["cv"],
-      message: "CV is required.",
-    }
-  );
-
 export default function OfferDetailsContent({
   offer,
   isMobile,
   toggleSuccessApplied,
 }: OfferDetailsContentProps) {
-  const { user, fetchUserData } = useUser();
+  const { form, isPendingApplyForOffer, submitApplicationHandler } =
+    useOfferDetails({ toggleSuccessApplied, offerId: offer._id });
   const { formatCurrency, currency } = useCurrency();
-  const { toast } = useToast();
-
-  const form = useForm<z.infer<typeof applicationSchema>>({
-    resolver: zodResolver(applicationSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      description: "",
-      cv: [],
-    },
-  });
-
-  const { mutate: handleOfferApply, isPending: isPendingApplyForOffer } =
-    client.offers.offerApply.useMutation({
-      onSuccess: () => {
-        fetchUserData();
-        form.reset();
-        toggleSuccessApplied();
-      },
-      onError: (error) => {
-        if (isFetchError(error)) {
-          form.setError("root", {
-            type: "manual",
-            message: "Unable to apply for the offer. Please try again.",
-          });
-          return toast({
-            title: "Error",
-            description:
-              "Unable to apply for the offer. Please check your internet connection.",
-            variant: "destructive",
-          });
-        } else if (error.status === 404 || error.status === 500) {
-          form.setError("root", {
-            type: "manual",
-            message: error.body.msg,
-          });
-
-          return toast({
-            title: "Error",
-            description: error.body.msg,
-            variant: "destructive",
-          });
-        }
-
-        form.setError("root", {
-          type: "manual",
-          message: "An error occurred while applying for the offer.",
-        });
-        return toast({
-          title: "Error",
-          description:
-            "An error occurred while applying for the offer. Please try again later.",
-          variant: "destructive",
-        });
-      },
-    });
-
-  function submitApplicationHandler(values: z.infer<typeof applicationSchema>) {
-    if (values.cv === null) return;
-    const applyFormData = new FormData();
-    applyFormData.append("name", values.name);
-    applyFormData.append("email", values.email);
-    applyFormData.append("description", values.description || "");
-    applyFormData.append("offerId", offer._id);
-    applyFormData.append("cv", values.cv[0]);
-    if (user) {
-      applyFormData.append("userId", user._id);
-    }
-    handleOfferApply({
-      body: applyFormData,
-    });
-  }
-
-  useEffect(() => {
-    if (user) {
-      form.reset({
-        name: user.name,
-        email: user.email,
-        description: user.description,
-      });
-    }
-  }, [user, form]);
 
   return (
     <Form {...form}>

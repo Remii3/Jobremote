@@ -1,4 +1,3 @@
-import { axiosInstance, cleanEmptyData, client } from "@/lib/utils";
 import { debounce } from "lodash";
 import { useCallback, useEffect, useRef } from "react";
 import OfferItem from "./OfferItem";
@@ -10,42 +9,11 @@ import {
 import { useUser } from "@/context/UserContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Loader2 } from "lucide-react";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import axios from "axios";
-const baseUrl = process.env.NEXT_PUBLIC_SERVER_URI || "";
+import { useOffersList } from "./offersList.hooks";
 interface OffersListProps {
   filters: OfferFiltersType;
   sortOption: OfferSortOptionsTypes;
   changeCurrentOffer: (newId: OfferType | null) => void;
-}
-const fetchOffers = async ({ pageParam = 1, queryKey }) => {
-  const [_key, { filters, sortOption }] = queryKey;
-  
-  const data = await axiosInstance.get(`/offers`, {
-params: {
-        filters: cleanEmptyData(filters),
-        sort: sortOption,
-        limit: "10",
-        page: (pageParam as number).toString(),
-      }
-   
-  });
-
-console.log('data',data)
-  return data.data;
-};
-export function useOffersInfiniteQuery(filters, sortOption) {
-  return useInfiniteQuery({
-    queryKey: ["offers-list", { filters, sortOption }],
-    queryFn: fetchOffers,
-    getNextPageParam: (lastPage) => {
-      console.log('lastPage',lastPage)
-      return lastPage.offers.length >= 10
-        ? lastPage.pagination.page + 1
-        : undefined;
-    },
-    initialPageParam: 1,
-  });
 }
 
 export default function OffersList({
@@ -56,41 +24,16 @@ export default function OffersList({
   const { user } = useUser();
   const observerRef = useRef<null | HTMLDivElement>(null);
 
-  // const {
-  //   data: offersResponse,
-  //   error: offersError,
-  //   isPending: offersIsPending,
-  //   refetch: offersRefetch,
-  //   isFetchingNextPage: offersIsFetchingNextPage,
-  //   hasNextPage: offersHasNextPage,
-  //   fetchNextPage: offersFetchNextPage,
-  // } = client.offers.getOffers.useInfiniteQuery({
-  //   queryKey: ["offers-list"],
-  //   queryData: ({ pageParam }) => ({
-  //     query: {
-  //       filters: cleanEmptyData(filters),
-  //       sort: sortOption,
-  //       limit: "10",
-  //       page: (pageParam as number).toString(),
-  //     },
-  //   }),
-  //   getNextPageParam: (lastPage) => {
-  //     return lastPage.body.offers.length >= 10
-  //       ? lastPage.body.pagination.page + 1
-  //       : undefined;
-  //   },
-  //   initialPageParam: 1,
-  // });
-
   const {
-    data: offersResponse,
-    error: offersError,
-    isPending: offersIsPending,
-    isFetchingNextPage: offersIsFetchingNextPage,
-    hasNextPage: offersHasNextPage,
-    fetchNextPage: offersFetchNextPage,refetch: offersRefetch,
-  } = useOffersInfiniteQuery(filters, sortOption);
-console.log('offersResponse',offersResponse)
+    offers,
+    offersError,
+    offersFetchNextPage,
+    offersHasNextPage,
+    offersIsFetchingNextPage,
+    offersIsPending,
+    offersRefetch,
+  } = useOffersList({ sortOption, filters });
+
   const refetchOffersList = useRef(
     debounce(async () => {
       offersRefetch();
@@ -130,11 +73,7 @@ console.log('offersResponse',offersResponse)
       if (observerRef.current) observer.unobserve(observerRef.current);
     };
   }, [handleOffersListObserver]);
-console.log('offerResponse', offersResponse);
-  const offersList = offersResponse?.pages.flatMap((page) =>
-    page.offers ? page.offers : []
-  );
-console.log('offersList',offersList)
+
   return (
     <>
       {offersIsPending && (
@@ -145,9 +84,9 @@ console.log('offersList',offersList)
         </div>
       )}
       {offersError && <p>Error</p>}
-      {offersList && offersList.length > 0 && (
+      {offers && offers.length > 0 && (
         <ul className="space-y-4">
-          {offersList.map((offer) => (
+          {offers.map((offer) => (
             <OfferItem
               key={offer._id}
               offerData={offer}
@@ -163,7 +102,7 @@ console.log('offersList',offersList)
           <Loader2 className="h-6 w-6 animate-spin" />
         </div>
       )}
-      {offersList && offersList.length <= 0 && (
+      {offers && offers.length <= 0 && (
         <div className="text-center">
           <span className="text-muted-foreground">No offers</span>
         </div>

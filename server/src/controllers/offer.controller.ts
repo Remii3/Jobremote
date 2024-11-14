@@ -3,9 +3,6 @@ import { User } from "../models/User.model";
 import { createTransport } from "nodemailer";
 import mongoose from "mongoose";
 import TechnologyModel from "../models/Technology.model";
-import EmploymentTypeModel from "../models/EmploymentType.model";
-import ExperienceModel from "../models/Experience.model";
-import ContractTypeModel from "../models/ContractType.model";
 import { updateFiles, uploadFile } from "../utils/uploadthing";
 import { PaymentModel } from "../models/PaymentType.model";
 import Stripe from "stripe";
@@ -171,6 +168,7 @@ export const getOffers = async (
       _id: offer._id.toString(),
       userId: offer.userId.toString(),
     }));
+
     return res.status(200).json({
       offers: preparedOffers,
       msg: "Offers fetched successfully",
@@ -189,7 +187,8 @@ export const getOffers = async (
 };
 
 export const updateOffer = async (req: Request, res: Response) => {
-  const { _id, ...updatedData } = req.body;
+  const { id: _id } = req.params;
+  const { ...updatedData } = req.body;
   const offerData = await OfferModel.findById(_id).lean();
 
   if (!offerData) {
@@ -370,6 +369,7 @@ export const getTechnologies = async (req: Request, res: Response) => {
         createdAt: 0,
       })
       .sort({ name: 1 });
+
     if (!technologies.length) {
       return res.status(200).json({
         technologies: [],
@@ -383,81 +383,6 @@ export const getTechnologies = async (req: Request, res: Response) => {
   } catch (err) {
     return res.status(500).json({
       msg: "We failed to get you available technologies.",
-    });
-  }
-};
-
-export const getEmploymentTypes = async (req: Request, res: Response) => {
-  try {
-    const employmentTypes = await EmploymentTypeModel.find()
-      .select({
-        code: 0,
-        createdAt: 0,
-      })
-      .sort({ name: 1 });
-    if (!employmentTypes.length) {
-      return res.status(200).json({
-        employmentTypes: [],
-        msg: "No employment types found",
-      });
-    }
-    return res.status(200).json({
-      employmentTypes,
-      msg: "Employment types fetched successfully",
-    });
-  } catch (err) {
-    return res.status(500).json({
-      msg: "We failed to get you available employment types.",
-    });
-  }
-};
-
-export const getExperiences = async (req: Request, res: Response) => {
-  try {
-    const experiences = await ExperienceModel.find()
-      .select({
-        code: 0,
-        createdAt: 0,
-      })
-      .sort({ name: 1 });
-    if (!experiences.length) {
-      return res.status(200).json({
-        experiences: [],
-        msg: "No experiences found",
-      });
-    }
-    return res.status(200).json({
-      experiences,
-      msg: "Experiences fetched successfully",
-    });
-  } catch (err) {
-    return res.status(500).json({
-      msg: "We failed to get you available experiences.",
-    });
-  }
-};
-
-export const getContractTypes = async (req: Request, res: Response) => {
-  try {
-    const contractTypes = await ContractTypeModel.find()
-      .select({
-        code: 0,
-        createdAt: 0,
-      })
-      .sort({ name: 1 });
-    if (!contractTypes.length) {
-      return res.status(200).json({
-        contractTypes: [],
-        msg: "No contract types found",
-      });
-    }
-    return res.status(200).json({
-      contractTypes,
-      msg: "Contract types fetched successfully",
-    });
-  } catch (err) {
-    return res.status(500).json({
-      msg: "We failed to get you available contract types.",
     });
   }
 };
@@ -594,6 +519,10 @@ export const webhook = async (req: Request, res: Response) => {
               activeUntil,
             },
           });
+          return res.status(200).json({
+            msg: `Webhook received ${event.id}`,
+            type: `${session.metadata.type} `,
+          });
         }
         if (session.metadata.type === "extend") {
           const activeUntilDate = new Date(session.metadata.activeUntil);
@@ -608,10 +537,13 @@ export const webhook = async (req: Request, res: Response) => {
               activeUntil,
             },
           });
+          return res.status(200).json({
+            msg: `Webhook received ${event.id}`,
+            type: `${session.metadata.type} `,
+          });
         }
       }
     }
-
     return res.status(200).json({
       msg: `Webhook received ${event.id}`,
     });

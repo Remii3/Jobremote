@@ -109,7 +109,8 @@ export const getUserOffer = async (req: Request, res: Response) => {
 };
 
 export const updateUser = async (req: Request, res: Response) => {
-  const { _id, ...updatedFieldsValues } = req.body;
+  const { id: _id } = req.params;
+  const { ...updatedFieldsValues } = req.body;
   try {
     const updatedUser = await User.findByIdAndUpdate(
       { _id },
@@ -131,7 +132,8 @@ export const updateUser = async (req: Request, res: Response) => {
 };
 
 export const updateUserSettings = async (req: Request, res: Response) => {
-  const { _id, ...updatedSettings } = req.body;
+  const { id: _id } = req.params;
+  const { ...updatedSettings } = req.body;
   try {
     const updateStatus = await User.findByIdAndUpdate(
       _id,
@@ -373,7 +375,6 @@ export const changePassword = async (req: Request, res: Response) => {
 export const checkUserSession = async (req: Request, res: Response) => {
   try {
     const userId = await getDataFromToken(req, res);
-
     if (!userId) {
       return res.status(401).json({
         msg: "User session is inactive",
