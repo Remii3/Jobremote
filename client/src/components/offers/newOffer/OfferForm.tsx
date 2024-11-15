@@ -27,7 +27,7 @@ import useGetAvailableTechnologies from "@/hooks/useGetAvailableTechnologies";
 import { useCurrency } from "@/context/CurrencyContext";
 import { UseFormReturn } from "react-hook-form";
 import { z } from "zod";
-import { ClientOfferFormSchema } from "@/schema/OfferSchema";
+import { CreateOfferSchema } from "@/schema/OfferSchema";
 import dynamic from "next/dynamic";
 import AvatarUploader from "@/components/ui/avatar-uploader";
 import {
@@ -65,7 +65,7 @@ const dropzone = {
 } satisfies DropzoneOptions;
 
 type OfferFormPropsTypes = {
-  form: UseFormReturn<z.infer<typeof ClientOfferFormSchema>>;
+  form: UseFormReturn<z.infer<typeof CreateOfferSchema>>;
   changeCurrentStep: (values: any) => void;
   selectedLogo: File[] | null;
   handleChangeLogo: (newLogo: File[] | null) => void;

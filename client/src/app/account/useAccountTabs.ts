@@ -7,7 +7,7 @@ const tabs: { code: string; name: string }[] = [
   { name: "Your Offers", code: "your-offers" },
 ];
 
-export const useAccountTabs = () => {
+export function useAccountTabs() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -36,10 +36,10 @@ export const useAccountTabs = () => {
       router.replace(`/account?${tabFromParams.toString()}`);
     }
   }, [searchParams, router, currentTab]);
-  
+
   return {
     currentTab,
     changeTab,
     tabs,
   };
-};
+}

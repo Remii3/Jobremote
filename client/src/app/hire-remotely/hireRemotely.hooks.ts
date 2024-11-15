@@ -1,34 +1,37 @@
-import { TOAST_TITLES } from "@/data/constant";
 import { axiosInstance } from "@/lib/utils";
-import {
-  ClientModelFormSchema,
-  ClientOfferFormSchema,
-} from "@/schema/OfferSchema";
+import { ClientModelFormSchema, CreateOfferSchema } from "@/schema/OfferSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { loadStripe } from "@stripe/stripe-js";
 import { useToast } from "@/components/ui/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useUser } from "@/context/UserContext";
 import { useState } from "react";
-import { isAxiosError } from "axios";
+import { UserType } from "@/types/types";
+import { handleError } from "@/lib/errorHandler";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY || ""
 );
 
-export const useHireRemotely = () => {
+export const useHireRemotely = ({
+  user,
+  fetchUserData,
+}: {
+  user: UserType;
+  fetchUserData: () => void;
+}) => {
   const [selectedLogo, setSelectedLogo] = useState<File[] | null>(null);
   const [technologies, setTechnologies] = useState<string[]>([]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { user, fetchUserData } = useUser();
+
   function handleChangeLogo(newLogo: File[] | null) {
     setSelectedLogo(newLogo);
   }
-  const offerForm = useForm<z.infer<typeof ClientOfferFormSchema>>({
-    resolver: zodResolver(ClientOfferFormSchema),
+
+  const offerForm = useForm<z.infer<typeof CreateOfferSchema>>({
+    resolver: zodResolver(CreateOfferSchema),
     defaultValues: {
       title: "",
       content: "",
@@ -66,37 +69,13 @@ export const useHireRemotely = () => {
         });
 
         if (error) {
-          console.error("Stripe error:", error);
+          handleError(error, toast);
         }
         queryClient.invalidateQueries({ queryKey: ["offers-list"] });
         offerForm.reset();
       },
       onError: (error) => {
-        if (isAxiosError(error)) {
-          offerForm.setError("root", {
-            type: "manual",
-            message: error.message,
-          });
-
-          toast({
-            title: TOAST_TITLES.ERROR,
-            description: error.message,
-            variant: "destructive",
-          });
-        } else {
-          console.error("error", error);
-
-          offerForm.setError("root", {
-            type: "manual",
-            message: "Something went wrong. Please try again later.",
-          });
-
-          toast({
-            title: TOAST_TITLES.ERROR,
-            description: "An error occurred while creating offer.",
-            variant: "destructive",
-          });
-        }
+        handleError(error, toast);
       },
     });
 

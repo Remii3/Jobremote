@@ -2,15 +2,14 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { axiosInstance } from "@/lib/utils";
-
 import { useRouter } from "next/navigation";
 import { useUser } from "@/context/UserContext";
-import { LoginUserSchema } from "jobremotecontracts/dist/schemas/userSchemas";
 import { useToast } from "@/components/ui/use-toast";
 import { useMutation } from "@tanstack/react-query";
-import { isAxiosError } from "axios";
+import { handleError } from "@/lib/errorHandler";
+import { LoginUserSchema } from "@/schema/UserSchemas";
 
-export const useLoginPageHooks = () => {
+export function useLoginPageHooks() {
   const router = useRouter();
   const { toast } = useToast();
   const { fetchUserData } = useUser();
@@ -25,21 +24,7 @@ export const useLoginPageHooks = () => {
       router.push("/");
     },
     onError: (error) => {
-      if (isAxiosError(error)) {
-        toast({
-          title: "Error",
-          description:
-            "Failed to change the password. Please check your internet connection.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: "An unexpected error occurred",
-          variant: "destructive",
-        });
-      }
-      console.error(error);
+      handleError(error, toast);
     },
   });
 
@@ -54,9 +39,10 @@ export const useLoginPageHooks = () => {
   function submitHandler(data: z.infer<typeof LoginUserSchema>) {
     handleLogin(data);
   }
+
   return {
     form,
     loginIsPending,
     submitHandler,
   };
-};
+}

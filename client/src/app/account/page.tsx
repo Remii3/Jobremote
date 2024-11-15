@@ -5,12 +5,9 @@ import TabContent from "@/components/app/account/TabContent";
 import TabSelector from "@/components/app/account/TabSelector";
 import withAuth from "@/components/AuthGuard";
 import { useAccountTabs } from "@/app/account/useAccountTabs";
-
 import { WithAuthProps } from "@/types/types";
 
-type AccountPageProps = WithAuthProps;
-
-function AccountPage({ user, fetchUserData, logOut }: AccountPageProps) {
+function AccountPage({ user, fetchUserData, logOut }: WithAuthProps) {
   const { changeTab, currentTab, tabs } = useAccountTabs();
 
   return (

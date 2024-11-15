@@ -1,5 +1,17 @@
-import { CreateUserSchema } from "jobremotecontracts/dist/schemas/userSchemas";
 import { z } from "zod";
+
+export const LoginUserSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+});
+
+export const CreateUserSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+  passwordRepeat: z.string(),
+  commercialConsent: z.boolean(),
+  privacyPolicyConsent: z.boolean(),
+});
 
 export const CreateUserSchemaRefined = CreateUserSchema.superRefine(
   (data, ctx) => {
@@ -19,3 +31,13 @@ export const CreateUserSchemaRefined = CreateUserSchema.superRefine(
     }
   }
 );
+
+export const UpdateUserSchema = z.object({
+  name: z.string().optional(),
+  description: z.string().optional(),
+});
+
+export const UpdateUserSettingsSchema = z.object({
+  privacyPolicyConsent: z.boolean().optional(),
+  commercialConsent: z.boolean().optional(),
+});

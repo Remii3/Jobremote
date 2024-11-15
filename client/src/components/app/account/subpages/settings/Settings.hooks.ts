@@ -2,15 +2,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { axiosInstance, getOnlyDirtyFormFields } from "@/lib/utils";
-import { UpdateUserSettingsSchema } from "jobremotecontracts/dist/schemas/userSchemas";
 import { useEffect } from "react";
 import { useToast } from "../../../../ui/use-toast";
-import { TOAST_TITLES } from "@/data/constant";
+import { TOAST_TITLES } from "@/constants/constant";
 import { UserType } from "@/types/types";
 import { useMutation } from "@tanstack/react-query";
-import { isAxiosError } from "axios";
-
-const UserSettingsSchema = UpdateUserSettingsSchema.omit({ _id: true });
+import { handleError } from "@/lib/errorHandler";
+import { UpdateUserSettingsSchema } from "@/schema/UserSchemas";
 
 type UseSettingsProps = {
   user: UserType;
@@ -20,8 +18,8 @@ type UseSettingsProps = {
 export function useSettings({ fetchUserData, user }: UseSettingsProps) {
   const { toast } = useToast();
 
-  const form = useForm<z.infer<typeof UserSettingsSchema>>({
-    resolver: zodResolver(UserSettingsSchema),
+  const form = useForm<z.infer<typeof UpdateUserSettingsSchema>>({
+    resolver: zodResolver(UpdateUserSettingsSchema),
     defaultValues: { commercialConsent: user.commercialConsent },
   });
 
@@ -41,31 +39,11 @@ export function useSettings({ fetchUserData, user }: UseSettingsProps) {
       });
     },
     onError: (error) => {
-      if (isAxiosError(error)) {
-        form.setError("root", {
-          type: "manual",
-          message: error.message,
-        });
-        toast({
-          title: TOAST_TITLES.ERROR,
-          description:
-            "An error occurred while updating settings. Please check your internet connection.",
-        });
-      } else {
-        console.error("error", error);
-        form.setError("root", {
-          type: "manual",
-          message: "Something went wrong. Please try again later.",
-        });
-        toast({
-          title: TOAST_TITLES.ERROR,
-          description: "An error occurred while updating settings.",
-        });
-      }
+      handleError(error, toast);
     },
   });
 
-  function handleSubmit(values: z.infer<typeof UserSettingsSchema>) {
+  function handleSubmit(values: z.infer<typeof UpdateUserSettingsSchema>) {
     const updatedFieldsValues = getOnlyDirtyFormFields(values, form);
 
     updateSettings({ ...updatedFieldsValues });

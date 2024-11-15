@@ -1,9 +1,11 @@
 import { useToast } from "@/components/ui/use-toast";
-import { TOAST_TITLES } from "@/data/constant";
+import { TOAST_TITLES } from "@/constants/constant";
+import { handleError } from "@/lib/errorHandler";
 import { axiosInstance } from "@/lib/utils";
 import { UserType } from "@/types/types";
 import { loadStripe } from "@stripe/stripe-js";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY || ""
@@ -36,10 +38,13 @@ type UseUserOffersProps = {
 };
 
 export function useUserOffers({ user }: UseUserOffersProps) {
+  const { toast } = useToast();
+
   const {
     data: userOffersList,
     isPending: userOffersIsPending,
-    error: userOffersError,
+    error,
+    isError,
   } = useQuery({
     queryKey: ["userOffersList"],
     queryFn: async () => {
@@ -58,10 +63,16 @@ export function useUserOffers({ user }: UseUserOffersProps) {
     refetchInterval: false,
   });
 
+  useEffect(() => {
+    if (isError) {
+      handleError(error, toast);
+    }
+  }, [error, isError, toast]);
+
   return {
     userOffersList,
     userOffersIsPending,
-    userOffersError,
+    userOffersError: error,
   };
 }
 
@@ -101,21 +112,11 @@ export function usePayments({ fetchUserData }: UsePaymentsProps) {
         });
 
         if (error) {
-          console.error("Stripe error:", error);
-          toast({
-            title: TOAST_TITLES.ERROR,
-            description: "An error occurred while redirecting to the payment.",
-            variant: "destructive",
-          });
+          handleError(error, toast);
         }
       },
       onError: (error) => {
-        console.error("Error paying for offer: ", error);
-        toast({
-          title: TOAST_TITLES.ERROR,
-          description: "An error occurred while paying for the offer.",
-          variant: "destructive",
-        });
+        handleError(error, toast);
       },
     });
 
@@ -172,21 +173,11 @@ export function useOfferActions({
         sessionId: param.sessionId,
       });
       if (error) {
-        console.error("Stripe error:", error);
-        toast({
-          title: TOAST_TITLES.ERROR,
-          description: "An error occurred while redirecting to the payment.",
-          variant: "destructive",
-        });
+        handleError(error, toast);
       }
     },
     onError: (error) => {
-      console.error("Error extending offer: ", error);
-      toast({
-        title: TOAST_TITLES.ERROR,
-        description: "An error occurred while extending the offer.",
-        variant: "destructive",
-      });
+      handleError(error, toast);
     },
   });
 
@@ -209,16 +200,11 @@ export function useOfferActions({
         });
       },
       onError: (error) => {
-        console.error("Error deleting offer: ", error);
-        toast({
-          title: TOAST_TITLES.ERROR,
-          description: "An error occurred while deleting the offer.",
-          variant: "destructive",
-        });
+        handleError(error, toast);
       },
     });
 
-  const extendOfferDurationHandler = async ({
+  async function extendOfferDurationHandler({
     offerId,
     currency,
     pricing,
@@ -228,18 +214,18 @@ export function useOfferActions({
     currency: string;
     pricing: string;
     title: string;
-  }) => {
+  }) {
     extendOfferDurationHandle({
       offerId,
       currency,
       pricing,
       title,
     });
-  };
+  }
 
-  const deleteOfferHandler = (offerId: string) => {
+  function deleteOfferHandler(offerId: string) {
     deleteOfferHandle({ _id: offerId });
-  };
+  }
 
   return {
     extendOfferDurationIsPending,

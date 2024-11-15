@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import { UserType } from "@/types/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { axiosInstance } from "@/lib/utils";
+import { handleError } from "@/lib/errorHandler";
+import { useToast } from "@/components/ui/use-toast";
 
 interface UserContextTypes {
   user: UserType | null;
@@ -18,7 +20,7 @@ interface UserContextProviderTypes {
 
 function useLogout(handleUserDataChange: (state: null) => void) {
   const router = useRouter();
-
+  const { toast } = useToast();
   return useMutation({
     mutationFn: async () => {
       const response = await axiosInstance.post("/users/logout");
@@ -29,7 +31,7 @@ function useLogout(handleUserDataChange: (state: null) => void) {
       router.push("/");
     },
     onError: (error) => {
-      console.error("Logout failed:", error.message);
+      handleError(error, toast);
     },
   });
 }

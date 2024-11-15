@@ -10,7 +10,7 @@ import {
 import { Input } from "../../ui/input";
 import { UseFormReturn } from "react-hook-form";
 import { z } from "zod";
-import { LoginUserSchema } from "jobremotecontracts/dist/schemas/userSchemas";
+import { LoginUserSchema } from "@/schema/UserSchemas";
 
 type PasswordFieldProps = {
   form: UseFormReturn<z.infer<typeof LoginUserSchema>>;

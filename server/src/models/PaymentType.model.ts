@@ -1,6 +1,6 @@
 import { model, Schema } from "mongoose";
 import { z } from "zod";
-import { PaymentTypeOfferSchema } from "jobremotecontracts/dist/schemas/offerSchemas";
+import { PaymentTypeOfferSchema } from "../schemas/OfferSchema";
 
 export type PaymentTypeSchemaType = z.infer<typeof PaymentTypeOfferSchema>;
 

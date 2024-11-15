@@ -2,33 +2,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getOnlyDirtyFormFields, axiosInstance } from "@/lib/utils";
 import { useToast } from "../../../../ui/use-toast";
-import { TOAST_TITLES } from "@/data/constant";
+import { TOAST_TITLES } from "@/constants/constant";
 import { useEffect, useState } from "react";
 import { OfferType } from "@/types/types";
 import { z } from "zod";
-import { UpdateOfferSchema } from "jobremotecontracts/dist/schemas/offerSchemas";
+import { UpdateOfferSchema } from "@/schema/OfferSchema";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { isAxiosError } from "axios";
-
-const editOfferSchema = UpdateOfferSchema.omit({
-  _id: true,
-  technologies: true,
-})
-  .extend({
-    logo: z.array(z.instanceof(File)).optional().nullable(),
-  })
-  .refine(
-    (data) => {
-      if (data.minSalary !== undefined && data.maxSalary !== undefined) {
-        return data.minSalary < data.maxSalary;
-      }
-      return true;
-    },
-    {
-      message: "Min salary must be lower than max salary",
-      path: ["minSalary"],
-    }
-  );
+import { handleError } from "@/lib/errorHandler";
 
 type EditOfferProps = {
   offerData: OfferType;
@@ -50,8 +30,8 @@ export function useEditOffer({
   const [techOpen, setTechOpen] = useState(false);
   const [localizationOpen, setLocalizationOpen] = useState(false);
 
-  const form = useForm<z.infer<typeof editOfferSchema>>({
-    resolver: zodResolver(editOfferSchema),
+  const form = useForm<z.infer<typeof UpdateOfferSchema>>({
+    resolver: zodResolver(UpdateOfferSchema),
     defaultValues: {
       title: offerData.title,
       content: offerData.content,
@@ -82,38 +62,11 @@ export function useEditOffer({
       handleChangeCurrentEditOffer(null);
     },
     onError: (error) => {
-      if (isAxiosError(error)) {
-        form.setError("root", {
-          type: "manual",
-          message:
-            "Failed to change the data. Please check your internet connection.",
-        });
-
-        toast({
-          title: TOAST_TITLES.ERROR,
-          description:
-            "Failed to change the password. Please check your internet connection.",
-          variant: "destructive",
-        });
-      } else {
-        console.error("error", error);
-
-        form.setError("root", {
-          type: "manual",
-          message: "Something went wrong. Please try again later.",
-        });
-
-        toast({
-          title: TOAST_TITLES.ERROR,
-          description:
-            "An error occurred while updating the offer information.",
-          variant: "destructive",
-        });
-      }
+      handleError(error, toast);
     },
   });
 
-  function handleSubmit(values: z.infer<typeof editOfferSchema>) {
+  function handleSubmit(values: z.infer<typeof UpdateOfferSchema>) {
     const updatedFieldsValues = getOnlyDirtyFormFields(values, form);
     const formData = new FormData();
     Object.entries(updatedFieldsValues).forEach(([key, value]) => {

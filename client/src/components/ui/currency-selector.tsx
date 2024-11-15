@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "./dropdown-menu";
 import { useCurrency } from "@/context/CurrencyContext";
-import { allowedCurrencies } from "@/data/constant";
+import { allowedCurrencies } from "@/constants/constant";
 
 export default function CurrencySelector() {
   const { currency, changeCurrency } = useCurrency();

@@ -1,11 +1,7 @@
 import { model, Schema, Types } from "mongoose";
 import { z } from "zod";
 import { comparePassword, genPassword } from "../utils/utils";
-import { UserSchema as ContractUserSchema } from "jobremotecontracts/dist/schemas/userSchemas";
-
-const UserSchema = ContractUserSchema.omit({ _id: true }).extend({
-  _id: z.instanceof(Types.ObjectId),
-});
+import { UserSchema } from "../schemas/UserSchema";
 
 export type UserType = z.infer<typeof UserSchema>;
 

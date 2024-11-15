@@ -25,6 +25,7 @@ import { UseFormReturn } from "react-hook-form";
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
+import { useModelForm } from "./modelForm.hooks";
 
 type ModelFormPropsTypes = {
   form: UseFormReturn<z.infer<typeof ClientModelFormSchema>>;
@@ -39,38 +40,7 @@ export default function ModelForm({
   changeCurrentStep,
   isPendingCreateOffer,
 }: ModelFormPropsTypes) {
-  const {
-    data: paymentTypes,
-    isPending: isPendingPaymentTypes,
-    error: errorPaymentTypes,
-    isError: isErrorPaymentTypes,
-  } = useQuery({
-    queryKey: ["payment-types"],
-    queryFn: async () => {
-      const { data } = await axiosInstance.get("/offers/metadata/payments");
-      return data;
-    },
-  });
-  const { toast } = useToast();
-
-  if (isErrorPaymentTypes) {
-    if (isAxiosError(errorPaymentTypes)) {
-      console.error(errorPaymentTypes.message);
-      toast({
-        title: "Error",
-        description:
-          "Unable to retrieve the available payment types. Please check your internet connection.",
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Error",
-        description:
-          "An error occurred while fetching the payment types. Please try again later.",
-        variant: "destructive",
-      });
-    }
-  }
+  const { isPendingPaymentTypes, paymentTypes } = useModelForm();
 
   return (
     <div>

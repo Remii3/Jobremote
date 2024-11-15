@@ -7,18 +7,13 @@ import { useRouter } from "next/navigation";
 import { CreateUserSchemaRefined } from "@/schema/UserSchemas";
 import { useToast } from "@/components/ui/use-toast";
 import { useMutation } from "@tanstack/react-query";
-import { isAxiosError } from "axios";
+import { handleError } from "@/lib/errorHandler";
 
 export const useRegisterPage = () => {
   const router = useRouter();
   const { toast } = useToast();
 
-  const {
-    mutate: handleRegister,
-    isPending,
-    isError,
-    error,
-  } = useMutation({
+  const { mutate: handleRegister, isPending } = useMutation({
     mutationFn: async (data: z.infer<typeof CreateUserSchemaRefined>) => {
       const response = await axiosInstance.post("/users", data);
       return response.data;
@@ -27,15 +22,7 @@ export const useRegisterPage = () => {
       router.push("/login");
     },
     onError: (error) => {
-      if (isAxiosError(error)) {
-        toast({
-          title: "Error",
-          description:
-            "Failed to change the password. Please check your internet connection.",
-          variant: "destructive",
-        });
-      }
-      console.error(error);
+      handleError(error, toast);
     },
   });
 
@@ -53,6 +40,7 @@ export const useRegisterPage = () => {
   function submitHandler(data: z.infer<typeof CreateUserSchemaRefined>) {
     handleRegister(data);
   }
+
   return {
     form,
     submitHandler,

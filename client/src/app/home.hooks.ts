@@ -1,28 +1,11 @@
-"use client";
-
-import OfferDetails from "./offerDetails/OfferDetails";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useIsMobile } from "@/hooks/useIsMobile";
-import Filters from "../filters/Filters";
 import { findFocusableElements } from "@/lib/utils";
-import OffersList from "./offersList/OffersList";
 import {
   OfferFiltersType,
   OfferSortOptionsTypes,
   OfferType,
 } from "@/types/types";
-
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "../ui/dialog";
-
-import { Button } from "../ui/button";
 
 const initialFilters: OfferFiltersType = {
   minSalary: 0,
@@ -34,7 +17,7 @@ const initialFilters: OfferFiltersType = {
   technologies: [],
 };
 
-const Offers = () => {
+export function useHome() {
   const offerDetailsRef = useRef<HTMLElement | null>(null);
   const offersListRef = useRef<HTMLElement | null>(null);
   const lastOfferRef = useRef<HTMLElement | null>(null);
@@ -116,64 +99,18 @@ const Offers = () => {
     };
   }, [handleKeyDown]);
 
-  return (
-    <div className="flex flex-col h-full">
-      <section className="px-2 py-3 space-y-3 border-b border-b-input">
-        <Filters
-          filters={filters}
-          changeFilters={updateFilters}
-          resetFilters={resetFilters}
-          sortOption={sortOption}
-          setSortOption={setSortOption}
-        />
-      </section>
-      <div className="flex flex-grow overflow-hidden">
-        <section
-          className={`lg:w-1/2 w-full 
-          overflow-y-auto px-4 py-4 bg-violet-50 dark:bg-violet-950/50 lg:rounded-tr-lg`}
-          ref={offersListRef as React.RefObject<HTMLUListElement>}
-        >
-          <OffersList
-            filters={filters}
-            changeCurrentOffer={changeCurrentOffer}
-            sortOption={sortOption}
-          />
-        </section>
-
-        <section
-          ref={offerDetailsRef}
-          className={`w-1/2 
-          overflow-y-auto lg:block hidden`}
-        >
-          <OfferDetails
-            isMobile={isMobile}
-            selectedOffer={selectedOffer}
-            toggleSuccessApplied={toggleSuccessApplied}
-            changeSelectedOffer={changeCurrentOffer}
-          />
-        </section>
-      </div>
-      <Dialog open={isSuccessApplied} onOpenChange={toggleSuccessApplied}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              You have successfully applied for this offer!
-            </DialogTitle>
-            <DialogDescription>
-              All that&apos;s left is to wait for the employer to contact you.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant={"default"} className="mt-2 sm:mt-0 w-full">
-                Great!
-              </Button>
-            </DialogClose>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-};
-
-export default Offers;
+  return {
+    filters,
+    updateFilters,
+    resetFilters,
+    sortOption,
+    setSortOption,
+    changeCurrentOffer,
+    offerDetailsRef,
+    offersListRef,
+    selectedOffer,
+    isMobile,
+    toggleSuccessApplied,
+    isSuccessApplied,
+  };
+}

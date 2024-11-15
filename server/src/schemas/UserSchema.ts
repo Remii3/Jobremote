@@ -1,0 +1,55 @@
+import { Types } from "mongoose";
+import { z } from "zod";
+import { OfferSchema } from "./OfferSchema";
+
+export const UserSchema = z.object({
+  _id: z.instanceof(Types.ObjectId),
+  email: z.string().email(),
+  name: z.string(),
+  description: z.string(),
+  password: z.string().min(6),
+  privacyPolicyConsent: z.boolean(),
+  commercialConsent: z.boolean(),
+  loginAttempts: z.number(),
+  lockUntil: z.number().optional(),
+  lockCount: z.number(),
+  banned: z.boolean(),
+  resetPasswordToken: z.string().optional(),
+  resetPasswordExpires: z.number().optional(),
+  createdOffers: z.array(
+    OfferSchema.pick({
+      title: true,
+      maxSalary: true,
+      companyName: true,
+      content: true,
+      contractType: true,
+      employmentType: true,
+      experience: true,
+      localization: true,
+      logo: true,
+      technologies: true,
+      minSalary: true,
+      currency: true,
+      pricing: true,
+      activeUntil: true,
+      isPaid: true,
+      createdAt: true,
+      updatedAt: true,
+      redirectLink: true,
+    }).extend({
+      _id: z.string(),
+    })
+  ),
+  appliedToOffers: z.array(z.string()),
+  expireAt: z.date().nullable(),
+  isDeleted: z.boolean().default(false),
+  deletedAt: z.date().nullable(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  isLocked: z.function(),
+  isBanned: z.function(),
+  incLoginAttempts: z.function(),
+  resetLoginAttempts: z.function(),
+  setPassword: z.function(),
+  validatePassword: z.function(),
+});

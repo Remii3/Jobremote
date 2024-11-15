@@ -2,15 +2,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { getOnlyDirtyFormFields, axiosInstance } from "@/lib/utils";
-import { UpdateUserSchema } from "jobremotecontracts/dist/schemas/userSchemas";
 import { useToast } from "../../../../ui/use-toast";
-import { TOAST_TITLES } from "@/data/constant";
+import { TOAST_TITLES } from "@/constants/constant";
 import { useEffect } from "react";
 import { UserType } from "@/types/types";
 import { useMutation } from "@tanstack/react-query";
-import { isAxiosError } from "axios";
-
-const UserDataSchema = UpdateUserSchema.omit({ _id: true });
+import { handleError } from "@/lib/errorHandler";
+import { UpdateUserSchema } from "@/schema/UserSchemas";
 
 type UseDetialsProps = {
   user: UserType;
@@ -19,8 +17,8 @@ type UseDetialsProps = {
 
 export function useDetails({ fetchUserData, user }: UseDetialsProps) {
   const { toast } = useToast();
-  const form = useForm<z.infer<typeof UserDataSchema>>({
-    resolver: zodResolver(UserDataSchema),
+  const form = useForm<z.infer<typeof UpdateUserSchema>>({
+    resolver: zodResolver(UpdateUserSchema),
     defaultValues: {
       name: user.name,
       description: user.description,
@@ -40,29 +38,11 @@ export function useDetails({ fetchUserData, user }: UseDetialsProps) {
       });
     },
     onError: (error) => {
-      if (isAxiosError(error)) {
-        toast({
-          title: TOAST_TITLES.ERROR,
-          description:
-            "Failed to change the password. Please check your internet connection.",
-          variant: "destructive",
-        });
-      } else {
-        console.error("error", error);
-        form.setError("root", {
-          type: "manual",
-          message: "Something went wrong. Please try again later.",
-        });
-        toast({
-          title: TOAST_TITLES.ERROR,
-          description: "An error occurred while updating the account details.",
-          variant: "destructive",
-        });
-      }
+      handleError(error, toast);
     },
   });
 
-  function handleSubmit(values: z.infer<typeof UserDataSchema>) {
+  function handleSubmit(values: z.infer<typeof UpdateUserSchema>) {
     const updatedFieldsValues = getOnlyDirtyFormFields(values, form);
     updateUser({ ...updatedFieldsValues });
   }

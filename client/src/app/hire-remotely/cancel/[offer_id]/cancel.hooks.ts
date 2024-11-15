@@ -1,9 +1,11 @@
 import { useToast } from "@/components/ui/use-toast";
 import { useUser } from "@/context/UserContext";
+import { TOAST_TITLES } from "@/constants/constant";
 import { axiosInstance } from "@/lib/utils";
 import { useMutation } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 import { useRouter } from "next/navigation";
+import { handleError } from "@/lib/errorHandler";
 
 export default function useCancel() {
   const router = useRouter();
@@ -23,21 +25,14 @@ export default function useCancel() {
       router.push("/");
     },
     onError: (error) => {
-      if (isAxiosError(error)) {
-        toast({
-          title: "Error",
-          description:
-            "Failed to change the password. Please check your internet connection.",
-          variant: "destructive",
-        });
-      }
-      console.error(error);
+      handleError(error, toast);
     },
   });
 
   function handleDeleteOffer(offerId: string) {
     deleteOffer({ _id: offerId });
   }
+
   return {
     handleDeleteOffer,
   };

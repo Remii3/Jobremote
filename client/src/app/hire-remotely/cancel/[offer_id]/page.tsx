@@ -32,7 +32,7 @@ export default function CancelOrderPage({
             href={"/"}
             className={buttonVariants({ variant: "default", size: "lg" })}
           >
-            Save offer as draft
+            Go back to homepage
           </Link>
 
           {
@@ -42,7 +42,7 @@ export default function CancelOrderPage({
               className="text-destructive hover:text-destructive"
               onClick={() => handleDeleteOffer(params.offer_id)}
             >
-              Go back to main page
+              Remove draft
             </Button>
           }
         </div>

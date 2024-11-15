@@ -1,5 +1,5 @@
 import { model, Schema } from "mongoose";
-import { TechnologyOfferSchema } from "jobremotecontracts/dist/schemas/offerSchemas";
+import { TechnologyOfferSchema } from "../schemas/OfferSchema";
 import z from "zod";
 
 export type TechnologySchemaType = z.infer<typeof TechnologyOfferSchema>;

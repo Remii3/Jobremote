@@ -6,8 +6,9 @@ import { MultiStepProgressBar } from "@/components/ui/multi-step-progress";
 
 import { useState } from "react";
 import { useHireRemotely } from "./hireRemotely.hooks";
+import { WithAuthProps } from "@/types/types";
 
-function HireRemotely() {
+function HireRemotely({ user, fetchUserData }: WithAuthProps) {
   const {
     handleChangeLogo,
     handlePaymentFormSubmit,
@@ -17,7 +18,8 @@ function HireRemotely() {
     technologies,
     isPendingCreateOffer,
     modelForm,
-  } = useHireRemotely();
+  } = useHireRemotely({ user, fetchUserData });
+
   const [currentStep, setCurrentStep] = useState(1);
 
   const changeCurrentStepHandler = (step: number) => {

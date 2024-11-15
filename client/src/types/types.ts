@@ -1,6 +1,3 @@
-import { OfferSortOptionsSchema } from "jobremotecontracts/dist/schemas/offerSchemas";
-import { z } from "zod";
-
 export type AllowedCurrenciesType = "USD" | "EUR";
 
 export type OfferType = {
@@ -45,7 +42,10 @@ export type OfferFilterType = {
 
 // Filters
 
-export type OfferSortOptionsTypes = z.infer<typeof OfferSortOptionsSchema>;
+export type OfferSortOptionsTypes =
+  | "latest"
+  | "salary_highest"
+  | "salary_lowest";
 
 export type UserType = {
   _id: string;

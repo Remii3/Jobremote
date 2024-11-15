@@ -4,23 +4,19 @@ import { axiosInstance } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 
-function useGetAvailableTechnologies() {
+export function useModelForm() {
   const { toast } = useToast();
-
   const {
-    data: avTechnologies,
-    isPending,
+    data: paymentTypes,
+    isPending: isPendingPaymentTypes,
     error,
     isError,
   } = useQuery({
-    queryKey: ["technologies"],
+    queryKey: ["payment-types"],
     queryFn: async () => {
-      const response = await axiosInstance.get("/offers/metadata/technologies");
-      return response.data;
+      const { data } = await axiosInstance.get("/offers/metadata/payments");
+      return data;
     },
-    refetchOnMount: false,
-    refetchOnReconnect: false,
-    refetchOnWindowFocus: false,
   });
 
   useEffect(() => {
@@ -30,10 +26,7 @@ function useGetAvailableTechnologies() {
   }, [error, isError, toast]);
 
   return {
-    avTechnologies,
-    avTechnologiesIsLoading: isPending,
-    avTechnologiesError: error,
+    paymentTypes,
+    isPendingPaymentTypes,
   };
 }
-
-export default useGetAvailableTechnologies;

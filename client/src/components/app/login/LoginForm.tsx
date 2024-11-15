@@ -10,7 +10,7 @@ import {
 import Link from "next/link";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { LoginUserSchema } from "jobremotecontracts/dist/schemas/userSchemas";
+import { LoginUserSchema } from "@/schema/UserSchemas";
 import { UseFormReturn } from "react-hook-form";
 import { z } from "zod";
 import PasswordField from "@/components/app/login/PasswordField";
