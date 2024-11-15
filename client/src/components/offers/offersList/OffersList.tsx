@@ -59,6 +59,7 @@ export default function OffersList({
   );
 
   useEffect(() => {
+    const currentObserver = observerRef.current;
     const observerOptions = {
       root: null,
       rootMargin: "20px",
@@ -68,9 +69,9 @@ export default function OffersList({
       handleOffersListObserver,
       observerOptions
     );
-    if (observerRef.current) observer.observe(observerRef.current);
+    if (currentObserver) observer.observe(currentObserver);
     return () => {
-      if (observerRef.current) observer.unobserve(observerRef.current);
+      if (currentObserver) observer.unobserve(currentObserver);
     };
   }, [handleOffersListObserver]);
 
