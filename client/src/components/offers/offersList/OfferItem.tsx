@@ -59,6 +59,7 @@ export default function OfferItem({
                 src={logo.url}
                 alt="Company logo"
                 fill
+                sizes="62px 62px"
                 className="object-scale-down object-center aspect-auto w-full h-full"
               />
             </div>

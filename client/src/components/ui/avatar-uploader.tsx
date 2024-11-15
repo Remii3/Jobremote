@@ -37,24 +37,24 @@ const AvatarUploader = React.memo(function AvatarUploader({
         <FileInput className="h-full">
           {oldFile ? (
             <div className="whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-6 justify-between cursor-pointer flex items-center p-0 rounded-full min-h-[160px] min-w-[160px] max-w-[160px] relative">
-
-            <div className="group font-medium leading-none tracking-tight flex items-center h-full w-full gap-1.5 relative">
-              <div className="size-full relative">
-                <Image
-                  src={oldFile.url}
-                  alt="Company current uploaded logo"
-                  className="object-cover rounded-full aspect-square min-w-[160px] transition-all duration-75"
-                  fill
-                />
-                <div className="group-hover:opacity-50 rounded-full bg-black opacity-0 h-full w-full absolute top-0 left-0 transition-opacity"></div>
-                <button
-                  type="button"
-                  className="absolute top-0 left-0 w-full h-full opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <FileEditIcon className="hidden group-hover:block w-6 h-6 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 group-hover:stroke-white duration-200 ease-in-out" />
-                </button>
+              <div className="group font-medium leading-none tracking-tight flex items-center h-full w-full gap-1.5 relative">
+                <div className="size-full relative">
+                  <Image
+                    src={oldFile.url}
+                    alt="Company current uploaded logo"
+                    className="object-cover rounded-full aspect-square min-w-[160px] transition-all duration-75"
+                    fill
+                    sizes="160px 160px"
+                  />
+                  <div className="group-hover:opacity-50 rounded-full bg-black opacity-0 h-full w-full absolute top-0 left-0 transition-opacity"></div>
+                  <button
+                    type="button"
+                    className="absolute top-0 left-0 w-full h-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <FileEditIcon className="hidden group-hover:block w-6 h-6 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 group-hover:stroke-white duration-200 ease-in-out" />
+                  </button>
+                </div>
               </div>
-            </div>
             </div>
           ) : (
             <div className="group p-4 h-full border-2 border-dashed rounded-full flex items-center justify-center gap-1 min-w-[160px] max-w-[160px] min-h-[160px] max-h-[160px]">
@@ -79,6 +79,7 @@ const AvatarUploader = React.memo(function AvatarUploader({
                   alt={file.name}
                   className="object-cover rounded-full aspect-square min-w-[160px] transition-all duration-75"
                   fill
+                  sizes="160px 160px"
                 />
               </div>
             </FileUploaderItem>
