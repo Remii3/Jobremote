@@ -356,6 +356,31 @@ export default function OfferForm({
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="priceType"
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <FormLabel>Price type</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Price type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <FormMessage />
+                      <SelectContent>
+                        <SelectItem value="monthly">Monthly</SelectItem>
+                        <SelectItem value="yearly">Yearly</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              />
             </div>
             <div className="space-y-3">
               <Popover open={techOpen} onOpenChange={setTechOpen}>
@@ -449,7 +474,7 @@ export default function OfferForm({
                 type="submit"
                 variant={"default"}
                 size={"lg"}
-                disabled={!form.formState.isDirty}
+                disabled={!form.formState.isValid}
               >
                 Choose your model
               </Button>

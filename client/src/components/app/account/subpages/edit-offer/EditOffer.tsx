@@ -149,6 +149,16 @@ export default function EditOffer({
             name="maxSalary"
             type="number"
           />
+
+          <SelectField
+            control={form.control}
+            label="Price type"
+            name="priceType"
+            options={[
+              { name: "monthly", _id: "Monthly" },
+              { name: "yearly", _id: "Yearly" },
+            ]}
+          />
         </div>
         {avTechnologies && (
           <TechnologySelection

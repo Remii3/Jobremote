@@ -44,6 +44,7 @@ export function useEditOffer({
       maxSalary: offerData.maxSalary,
       currency: offerData.currency,
       redirectLink: offerData.redirectLink || "",
+      priceType: offerData.priceType,
     },
   });
 
@@ -110,6 +111,7 @@ export function useEditOffer({
         maxSalary: offerData.maxSalary,
         currency: offerData.currency,
         redirectLink: offerData.redirectLink,
+        priceType: offerData.priceType,
       });
     }
   }, [form, offerData]);

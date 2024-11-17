@@ -17,6 +17,7 @@ export const CreateOfferSchema = z
     currency: z.string(),
     companyName: z.string(),
     redirectLink: z.string().optional(),
+    priceType: z.enum(["monthly", "yearly"]),
   })
   .refine(
     (data) => {
@@ -54,6 +55,7 @@ export const UpdateOfferSchema = z
       }),
     currency: z.string().optional(),
     redirectLink: z.string().optional(),
+    priceType: z.enum(["monthly", "yearly"]).optional(),
   })
   .refine(
     (data) => {

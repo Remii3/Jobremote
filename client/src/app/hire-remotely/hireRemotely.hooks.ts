@@ -44,6 +44,7 @@ export const useHireRemotely = ({
       contractType: "",
       companyName: "",
       redirectLink: "",
+      priceType: "monthly",
     },
   });
 
@@ -101,6 +102,7 @@ export const useHireRemotely = ({
     newOfferFormData.append("minSalary", offerValues.minSalary.toString());
     newOfferFormData.append("maxSalary", offerValues.maxSalary.toString());
     newOfferFormData.append("currency", offerValues.currency);
+    newOfferFormData.append("priceType", offerValues.priceType);
     newOfferFormData.append("userId", user._id);
     newOfferFormData.append("companyName", offerValues.companyName);
     newOfferFormData.append("pricing", modelValues.pricing);

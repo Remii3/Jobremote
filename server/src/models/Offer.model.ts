@@ -1,4 +1,4 @@
-import { Schema, model, Types } from "mongoose";
+import { Schema, model } from "mongoose";
 import { z } from "zod";
 import { OfferSchema } from "../schemas/OfferSchema";
 
@@ -75,6 +75,11 @@ const offerSchema = new Schema<OfferType>(
     },
     pricing: {
       type: String,
+      required: true,
+    },
+    priceType: {
+      type: String,
+      enum: ["monthly", "yearly"],
       required: true,
     },
     expireAt: { type: Date, default: null, index: { expires: "0s" } },

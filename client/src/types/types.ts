@@ -17,6 +17,7 @@ export type OfferType = {
   createdAt: string;
   updatedAt: string;
   redirectLink: string;
+  priceType: "monthly" | "yearly";
 };
 
 export type AdminOfferType = OfferType & {
