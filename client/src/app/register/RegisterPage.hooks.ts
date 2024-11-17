@@ -9,7 +9,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { handleError } from "@/lib/errorHandler";
 
-export const useRegisterPage = () => {
+export function useRegisterPage() {
   const router = useRouter();
   const { toast } = useToast();
 
@@ -46,4 +46,4 @@ export const useRegisterPage = () => {
     submitHandler,
     isPending,
   };
-};
+}

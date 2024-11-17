@@ -1,7 +1,7 @@
 "use client";
 
 import { Separator } from "@/components/ui/separator";
-import { RegisterForm } from "../../components/app/register/RegisterForm";
+import RegisterForm from "../../components/app/register/RegisterForm";
 import { useRegisterPage } from "./RegisterPage.hooks";
 
 export default function RegisterPage() {

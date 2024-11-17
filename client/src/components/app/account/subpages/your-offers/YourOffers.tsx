@@ -1,8 +1,6 @@
-"use client";
-
 import { OfferType, UserType } from "@/types/types";
 import { ArrowLeft } from "lucide-react";
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { Button } from "../../../../ui/button";
 import EditOffer from "../edit-offer/EditOffer";
 
@@ -28,10 +26,6 @@ export default function YourOffers({ user, fetchUserData }: YourOffersProps) {
     payForOfferHandler,
     payForOfferIsPending,
     paymentList,
-    paymentListError,
-    paymentListIsPending,
-    userOffersError,
-    userOffersIsPending,
   } = useYourOffers({
     user,
     fetchUserData,
@@ -40,9 +34,9 @@ export default function YourOffers({ user, fetchUserData }: YourOffersProps) {
 
   const [selectedOffer, setSelectedOfferId] = useState<OfferType | null>(null);
 
-  const handleEditOfferChange = (offerId: OfferType | null) => {
+  function handleEditOfferChange(offerId: OfferType | null) {
     setSelectedOfferId(offerId);
-  };
+  }
 
   return (
     <>

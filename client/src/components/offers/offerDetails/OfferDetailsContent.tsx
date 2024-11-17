@@ -1,5 +1,3 @@
-"use client";
-
 import { Badge } from "@/components/ui/badge";
 import { useCurrency } from "@/context/CurrencyContext";
 import { OfferType } from "@/types/types";
@@ -35,7 +33,7 @@ import {
   FileUploaderItem,
 } from "@/components/ui/extension/file-upload";
 import Link from "next/link";
-import useOfferDetails from "./offerDetails.hooks";
+import { useOfferDetails } from "./offerDetails.hooks";
 
 interface OfferDetailsContentProps {
   offer: OfferType;

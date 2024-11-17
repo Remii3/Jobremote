@@ -15,7 +15,10 @@ import { Eye, EyeOff } from "lucide-react";
 type PasswordRepeatFieldProps = {
   form: UseFormReturn<z.infer<typeof CreateUserSchemaRefined>>;
 };
-const PasswordRepeatField = ({ form }: PasswordRepeatFieldProps) => {
+
+export default function PasswordRepeatField({
+  form,
+}: PasswordRepeatFieldProps) {
   const [showPassword, setShowPassword] = useState(false);
 
   function toggleShowPassword() {
@@ -55,6 +58,4 @@ const PasswordRepeatField = ({ form }: PasswordRepeatFieldProps) => {
       )}
     />
   );
-};
-
-export default PasswordRepeatField;
+}

@@ -13,6 +13,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useSelectTechnology } from "@/hooks/useSelectTechnology";
 import { cn } from "@/lib/utils";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { useState } from "react";
@@ -24,20 +25,8 @@ interface TechnologySelectionProps {
 export default function TechnologySelection({
   availableTechnologies,
 }: TechnologySelectionProps) {
-  const [selectedTechnologies, setSelectedTechnologies] = useState<string[]>(
-    []
-  );
   const [techOpen, setTechOpen] = useState(false);
-
-  const handleSelectTechnology = (techName: string) => {
-    if (selectedTechnologies.includes(techName)) {
-      setSelectedTechnologies(
-        selectedTechnologies.filter((tech) => tech !== techName)
-      );
-    } else {
-      setSelectedTechnologies([...selectedTechnologies, techName]);
-    }
-  };
+  const { selectedTechnologies, toggleTechnology } = useSelectTechnology();
 
   return (
     <div className="space-y-3">
@@ -65,7 +54,7 @@ export default function TechnologySelection({
                 {availableTechnologies.map((tech) => (
                   <CommandItem
                     key={tech._id}
-                    onSelect={() => handleSelectTechnology(tech.name)}
+                    onSelect={() => toggleTechnology(tech.name)}
                   >
                     <Check
                       className={cn(
@@ -90,7 +79,7 @@ export default function TechnologySelection({
               <Badge
                 variant="outline"
                 className="py-1 px-3 cursor-pointer"
-                onClick={() => handleSelectTechnology(tech)}
+                onClick={() => toggleTechnology(tech)}
               >
                 {tech}
               </Badge>

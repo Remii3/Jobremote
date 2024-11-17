@@ -48,7 +48,7 @@ type OfferstableProps = {
   }[];
 };
 
-const OffersTable = ({
+export default function OffersTable({
   onEditChange,
   userOffers,
   deleteOfferHandler,
@@ -57,7 +57,7 @@ const OffersTable = ({
   payForOfferHandler,
   payForOfferIsPending,
   paymentList,
-}: OfferstableProps) => {
+}: OfferstableProps) {
   return (
     <section className="md:col-span-4 md:col-start-2 px-2 overflow-y-auto">
       <Table>
@@ -127,5 +127,4 @@ const OffersTable = ({
       )}
     </section>
   );
-};
-export default OffersTable;
+}

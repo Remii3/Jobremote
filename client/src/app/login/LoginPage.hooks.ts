@@ -8,19 +8,22 @@ import { useToast } from "@/components/ui/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { handleError } from "@/lib/errorHandler";
 import { LoginUserSchema } from "@/schema/UserSchemas";
+import { useAuth } from "@/context/AuthContext";
 
 export function useLoginPageHooks() {
   const router = useRouter();
   const { toast } = useToast();
   const { fetchUserData } = useUser();
-
+  const { setAccessToken } = useAuth();
   const { mutate: handleLogin, isPending: loginIsPending } = useMutation({
     mutationFn: async (data: z.infer<typeof LoginUserSchema>) => {
       const response = await axiosInstance.post("/users/login", data);
       return response.data;
     },
-    onSuccess: () => {
-      fetchUserData();
+    onSuccess: async (response) => {
+      setAccessToken(response.accessToken);
+      localStorage.setItem("loggedIn", "true");
+      await fetchUserData();
       router.push("/");
     },
     onError: (error) => {

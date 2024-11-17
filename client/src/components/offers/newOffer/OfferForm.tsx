@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Form,
   FormControl,
@@ -23,7 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 
 import { DropzoneOptions } from "react-dropzone";
-import useGetAvailableTechnologies from "@/hooks/useGetAvailableTechnologies";
+import { useGetAvailableTechnologies } from "@/hooks/useGetAvailableTechnologies";
 import { useCurrency } from "@/context/CurrencyContext";
 import { UseFormReturn } from "react-hook-form";
 import { z } from "zod";
@@ -50,6 +48,7 @@ import { EXPERIENCES } from "@/constants/experiences";
 import { EMPLOYMENTS } from "@/constants/employments";
 import { CONTRACTS } from "@/constants/contracts";
 import { LOCALIZATIONS } from "@/constants/localizations";
+
 const OfferCkEditor = dynamic(
   () => import("../../ui/ckeditor").then((mod) => mod.OfferCkEditor),
   { ssr: false }
@@ -73,14 +72,14 @@ type OfferFormPropsTypes = {
   handleTechnologies: (tech: string) => void;
 };
 
-const OfferForm = ({
+export default function OfferForm({
   form,
   changeCurrentStep,
   handleTechnologies,
   selectedLogo,
   handleChangeLogo,
   technologies,
-}: OfferFormPropsTypes) => {
+}: OfferFormPropsTypes) {
   const [techOpen, setTechOpen] = useState<boolean>(false);
 
   const { avTechnologies } = useGetAvailableTechnologies();
@@ -463,6 +462,4 @@ const OfferForm = ({
       </div>
     </div>
   );
-};
-
-export default OfferForm;
+}

@@ -1,12 +1,10 @@
-"use client";
-
 import Nav from "./Nav";
 import Link from "next/link";
 
 import CurrencySelector from "../ui/currency-selector";
 import ThemeSelector from "../ui/theme-selector";
 
-const Header = () => {
+export default function Header() {
   return (
     <header className="px-2 py-3 flex justify-between items-center border-b border-b-input shadow-sm sticky top-0 bg-background z-10">
       <div className="flex gap-3 items-center">
@@ -24,6 +22,4 @@ const Header = () => {
       <Nav />
     </header>
   );
-};
-
-export default Header;
+}

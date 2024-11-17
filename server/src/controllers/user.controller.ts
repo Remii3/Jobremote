@@ -1,11 +1,16 @@
 import { User } from "../models/User.model";
-import { genPassword, getDataFromToken } from "../utils/utils";
-import { sign } from "jsonwebtoken";
+import { genPassword } from "../utils/utils";
+import { JwtPayload, verify } from "jsonwebtoken";
 import { createTransport } from "nodemailer";
 import mongoose from "mongoose";
 import OfferModel from "../models/Offer.model";
 import { Request, Response } from "express";
 import { CreateUser } from "../types/controllers";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+} from "../utils/generateTokens";
+import { Token } from "../models/Token.model";
 
 export const createUser = async (
   req: Request<{}, {}, CreateUser>,
@@ -198,27 +203,20 @@ export const loginUser = async (req: Request, res: Response) => {
 
     user.resetLoginAttempts();
 
-    const tokenData = {
-      _id: user._id,
-    };
-    const token = sign(tokenData, process.env.JWT_SECRET!, {
-      expiresIn: "1d",
-    });
-    res.cookie("token", token, {
+    const accessToken = generateAccessToken(user._id.toString());
+    const refreshToken = await generateRefreshToken(user._id.toString());
+
+    res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      //   TODO - change expires to 24h after testing
-      expires: new Date(Date.now() + 86400000),
-      //   expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
       path: "/",
     });
 
     return res.status(200).json({
-      msg: "User logged in",
-      data: {
-        email: user.email,
-      },
+      msg: "User logged in.",
+      accessToken,
     });
   } catch (err) {
     console.error("Error during login:", err);
@@ -228,15 +226,59 @@ export const loginUser = async (req: Request, res: Response) => {
   }
 };
 
+export const refreshToken = async (req: Request, res: Response) => {
+  const refreshToken = req.cookies.refreshToken;
+
+  if (!refreshToken) {
+    return res.status(403).json({ msg: "Forbidden." });
+  }
+
+  try {
+    const decoded = verify(
+      refreshToken,
+      process.env.REFRESH_TOKEN!
+    ) as JwtPayload;
+
+    const existingToken = await Token.findOne({ token: refreshToken });
+
+    if (!existingToken) {
+      return res.status(401).json({ msg: "Invalid refresh token." });
+    }
+
+    await Token.deleteOne({ token: refreshToken });
+
+    const newAccessToken = generateAccessToken(decoded._id);
+    const newRefreshToken = await generateRefreshToken(decoded._id);
+
+    res.cookie("refreshToken", newRefreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: "/",
+    });
+
+    return res.status(200).json({
+      msg: "Token refreshed",
+      accessToken: newAccessToken,
+    });
+  } catch (error) {
+    console.error("Error during token refresh:", error);
+    return res.status(500).json({
+      msg: "We failed to refresh your token. Please try again later.",
+    });
+  }
+};
+
 export const getUser = async (req: Request, res: Response) => {
   try {
-    const userId = await getDataFromToken(req, res);
-    if (!userId) {
-      return res.status(200).json({
+    if (!req.user) {
+      return res.status(401).json({
         msg: "User not authenticated.",
       });
     }
-    const user = await User.findById(userId, {
+
+    const user = await User.findById(req.user._id, {
       _id: 1,
       email: 1,
       commercialConsent: 1,
@@ -249,7 +291,7 @@ export const getUser = async (req: Request, res: Response) => {
 
     if (!user) {
       return res.status(404).json({
-        msg: "User not found",
+        msg: "User not found.",
       });
     }
 
@@ -271,16 +313,16 @@ export const getUser = async (req: Request, res: Response) => {
 
 export const logoutUser = async (req: Request, res: Response) => {
   try {
-    res.cookie("token", "", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      path: "/",
-      expires: new Date(0),
-    });
+    const refreshToken = req.cookies.refreshToken;
+
+    if (refreshToken) {
+      await Token.deleteOne({ token: refreshToken });
+    }
+
+    res.clearCookie("refreshToken", { path: "/" });
 
     return res.status(200).json({
-      msg: "User logged out",
+      msg: "Logged out successfully.",
     });
   } catch (err) {
     console.error("Error during logout:", err);
@@ -368,28 +410,6 @@ export const changePassword = async (req: Request, res: Response) => {
 
     return res.status(500).json({
       msg: "We failed to change your password. Please try again later.",
-    });
-  }
-};
-
-export const checkUserSession = async (req: Request, res: Response) => {
-  try {
-    const userId = await getDataFromToken(req, res);
-    if (!userId) {
-      return res.status(401).json({
-        msg: "User session is inactive",
-        state: false,
-      });
-    }
-    return res.status(200).json({
-      msg: "User session is active",
-      state: true,
-    });
-  } catch (err) {
-    console.error("Error checking user session:", err);
-
-    return res.status(500).json({
-      msg: "We failed to check your session. Please try again later.",
     });
   }
 };

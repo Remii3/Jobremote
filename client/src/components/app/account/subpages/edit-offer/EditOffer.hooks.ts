@@ -91,9 +91,11 @@ export function useEditOffer({
     formData.append("_id", offerData._id);
     updateOffer(formData);
   }
+
   function handleChangeLogo(newLogo: File[] | null) {
     setSelectedLogo(newLogo);
   }
+
   useEffect(() => {
     if (form.formState.isDirty) {
       form.reset({
@@ -121,13 +123,13 @@ export function useEditOffer({
     });
   }
 
-  const changeTechOpenHandler = (newVal: boolean) => {
+  function changeTechOpenHandler(newVal: boolean) {
     setTechOpen(newVal);
-  };
+  }
 
-  const changeLocalizationOpenHandler = (newVal: boolean) => {
+  function changeLocalizationOpenHandler(newVal: boolean) {
     setLocalizationOpen(newVal);
-  };
+  }
 
   return {
     form,

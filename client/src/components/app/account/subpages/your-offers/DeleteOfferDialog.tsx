@@ -19,14 +19,14 @@ type DeleteOfferDialogProps = {
   deleteOfferIsPending: boolean;
 };
 
-const DeleteOfferDialog = ({
+export default function DeleteOfferDialog({
   deleteOfferIsPending,
   handlerDeleteOffer,
   offerId,
-}: DeleteOfferDialogProps) => {
-  const deleteOfferHandler = () => {
+}: DeleteOfferDialogProps) {
+  function deleteOfferHandler() {
     handlerDeleteOffer(offerId);
-  };
+  }
 
   return (
     <AlertDialog>
@@ -56,6 +56,4 @@ const DeleteOfferDialog = ({
       </AlertDialogContent>
     </AlertDialog>
   );
-};
-
-export default DeleteOfferDialog;
+}

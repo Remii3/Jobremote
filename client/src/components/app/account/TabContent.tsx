@@ -9,11 +9,11 @@ type TabContentPropsType = {
   fetchUserData: () => void;
 };
 
-const TabContent = ({
+export default function TabContent({
   currentTab,
   fetchUserData,
   user,
-}: TabContentPropsType) => {
+}: TabContentPropsType) {
   if (currentTab === "details") {
     return <Details user={user} fetchUserData={fetchUserData} />;
   }
@@ -27,6 +27,4 @@ const TabContent = ({
   }
 
   return null;
-};
-
-export default TabContent;
+}

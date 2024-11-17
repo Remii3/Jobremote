@@ -35,16 +35,16 @@ type ExtendOfferDialogProps = {
   }[];
 };
 
-const ExtendOfferDialog = ({
+export default function ExtendOfferDialog({
   offer,
   extendOfferDurationHandler,
   paymentList,
-}: ExtendOfferDialogProps) => {
+}: ExtendOfferDialogProps) {
   const [selectedPricing, setSelectedPricing] = useState("");
 
-  const changeSelectedPricingHandler = (value: string) => {
+  function changeSelectedPricingHandler(value: string) {
     setSelectedPricing(value);
-  };
+  }
 
   return (
     <Dialog>
@@ -97,6 +97,4 @@ const ExtendOfferDialog = ({
       </DialogContent>
     </Dialog>
   );
-};
-
-export default ExtendOfferDialog;
+}

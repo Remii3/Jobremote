@@ -1,10 +1,10 @@
 import { useToast } from "@/components/ui/use-toast";
-import { useCurrency } from "@/context/CurrencyContext";
 import { useUser } from "@/context/UserContext";
+import { handleError } from "@/lib/errorHandler";
 import { axiosInstance } from "@/lib/utils";
+import { applicationSchema } from "@/schema/OfferSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { isAxiosError } from "axios";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -13,37 +13,8 @@ type Props = {
   toggleSuccessApplied: () => void;
   offerId: string;
 };
-const applicationSchema = z
-  .object({
-    name: z.string().min(1, { message: "First and last name is required." }),
-    email: z.string().min(1, { message: "Email is required." }).email(),
-    description: z.string().optional(),
-    cv: z
-      .array(
-        z.instanceof(File).refine((file) => file.size < 5 * 1024 * 1024, {
-          message: "File size must be less than 5MB",
-        })
-      )
-      .max(1, { message: "Only one file is allowed." })
-      .nullable(),
-  })
-  .refine(
-    (data) => {
-      if (data.cv === null) {
-        return false;
-      }
-      return true;
-    },
-    {
-      path: ["cv"],
-      message: "CV is required.",
-    }
-  );
 
-export default function useOfferDetails({
-  toggleSuccessApplied,
-  offerId,
-}: Props) {
+export function useOfferDetails({ toggleSuccessApplied, offerId }: Props) {
   const { user, fetchUserData } = useUser();
   const { toast } = useToast();
 
@@ -66,29 +37,7 @@ export default function useOfferDetails({
         toggleSuccessApplied();
       },
       onError: (error) => {
-        if (isAxiosError(error)) {
-          form.setError("root", {
-            type: "manual",
-            message: "Unable to apply for the offer. Please try again.",
-          });
-          return toast({
-            title: "Error",
-            description:
-              "Unable to apply for the offer. Please check your internet connection.",
-            variant: "destructive",
-          });
-        } else {
-          form.setError("root", {
-            type: "manual",
-            message: "An error occurred while applying for the offer.",
-          });
-          return toast({
-            title: "Error",
-            description:
-              "An error occurred while applying for the offer. Please try again later.",
-            variant: "destructive",
-          });
-        }
+        handleError(error, toast);
       },
     });
 

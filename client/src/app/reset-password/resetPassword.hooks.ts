@@ -1,13 +1,12 @@
 import { useToast } from "@/components/ui/use-toast";
 import { handleError } from "@/lib/errorHandler";
 import { axiosInstance } from "@/lib/utils";
+import { emailResetSchema } from "@/schema/UserSchemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-
-const emailResetSchema = z.object({ email: z.string().email() });
 
 export function useResetPassword() {
   const router = useRouter();

@@ -85,3 +85,30 @@ export const ChangePasswordSchema = z
     },
     { message: "Passwords don't match", path: ["password"] }
   );
+
+export const applicationSchema = z
+  .object({
+    name: z.string().min(1, { message: "First and last name is required." }),
+    email: z.string().min(1, { message: "Email is required." }).email(),
+    description: z.string().optional(),
+    cv: z
+      .array(
+        z.instanceof(File).refine((file) => file.size < 5 * 1024 * 1024, {
+          message: "File size must be less than 5MB",
+        })
+      )
+      .max(1, { message: "Only one file is allowed." })
+      .nullable(),
+  })
+  .refine(
+    (data) => {
+      if (data.cv === null || data.cv.length === 0) {
+        return false;
+      }
+      return true;
+    },
+    {
+      path: ["cv"],
+      message: "CV is required.",
+    }
+  );

@@ -24,11 +24,11 @@ type RegisterFormProps = {
   isPending: boolean;
 };
 
-export const RegisterForm = ({
+export default function RegisterForm({
   form,
   isPending,
   submitHandler,
-}: RegisterFormProps) => {
+}: RegisterFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(submitHandler)}>
@@ -115,4 +115,4 @@ export const RegisterForm = ({
       </form>
     </Form>
   );
-};
+}

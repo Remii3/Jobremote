@@ -41,3 +41,5 @@ export const UpdateUserSettingsSchema = z.object({
   privacyPolicyConsent: z.boolean().optional(),
   commercialConsent: z.boolean().optional(),
 });
+
+export const emailResetSchema = z.object({ email: z.string().email() });

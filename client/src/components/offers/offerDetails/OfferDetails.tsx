@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Dialog,
   DialogContent,
@@ -19,12 +17,12 @@ interface OfferDetailsProps {
   toggleSuccessApplied: () => void;
 }
 
-const OfferDetails = ({
+export default function OfferDetails({
   selectedOffer,
   changeSelectedOffer,
   isMobile,
   toggleSuccessApplied,
-}: OfferDetailsProps) => {
+}: OfferDetailsProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   function closeCurrentOfferHandler() {
@@ -40,7 +38,7 @@ const OfferDetails = ({
     }
   }, [selectedOffer]);
 
-  const renderContent = () => {
+  function renderContent() {
     if (selectedOffer) {
       return (
         <OfferDetailsContent
@@ -51,7 +49,7 @@ const OfferDetails = ({
       );
     }
     return null;
-  };
+  }
 
   if (isMobile) {
     return (
@@ -80,17 +78,15 @@ const OfferDetails = ({
   }
   return (
     <div className="h-full w-full flex items-center flex-col justify-center text-center">
-        <Image
-          src="/marketing_man.webp"
-          alt="No offer selected"
-          width={500}
-          height={332}
-          className="aspect-auto h-[332px] w-[500px]"
-          priority
-        />
-        <span className="text-muted-foreground">Choose an offer</span>
+      <Image
+        src="/marketing_man.webp"
+        alt="No offer selected"
+        width={500}
+        height={332}
+        className="aspect-auto h-[332px] w-[500px]"
+        priority
+      />
+      <span className="text-muted-foreground">Choose an offer</span>
     </div>
   );
-};
-
-export default OfferDetails;
+}

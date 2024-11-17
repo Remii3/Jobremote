@@ -1,9 +1,7 @@
 import { useToast } from "@/components/ui/use-toast";
 import { useUser } from "@/context/UserContext";
-import { TOAST_TITLES } from "@/constants/constant";
 import { axiosInstance } from "@/lib/utils";
 import { useMutation } from "@tanstack/react-query";
-import { isAxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { handleError } from "@/lib/errorHandler";
 

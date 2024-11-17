@@ -4,7 +4,7 @@ import { axiosInstance } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 
-function useGetAvailableTechnologies() {
+export function useGetAvailableTechnologies() {
   const { toast } = useToast();
 
   const {
@@ -35,5 +35,3 @@ function useGetAvailableTechnologies() {
     avTechnologiesError: error,
   };
 }
-
-export default useGetAvailableTechnologies;

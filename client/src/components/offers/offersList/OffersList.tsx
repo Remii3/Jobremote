@@ -1,5 +1,3 @@
-import { debounce } from "lodash";
-import { useCallback, useEffect, useRef } from "react";
 import OfferItem from "./OfferItem";
 import {
   OfferFiltersType,
@@ -22,58 +20,14 @@ export default function OffersList({
   sortOption,
 }: OffersListProps) {
   const { user } = useUser();
-  const observerRef = useRef<null | HTMLDivElement>(null);
 
   const {
     offers,
     offersError,
-    offersFetchNextPage,
-    offersHasNextPage,
     offersIsFetchingNextPage,
     offersIsPending,
-    offersRefetch,
+    observerRef,
   } = useOffersList({ sortOption, filters });
-
-  const refetchOffersList = useRef(
-    debounce(async () => {
-      offersRefetch();
-    }, 400)
-  ).current;
-
-  useEffect(() => {
-    refetchOffersList();
-  }, [filters, sortOption, refetchOffersList]);
-
-  const handleOffersListObserver = useCallback(
-    (entries: IntersectionObserverEntry[]) => {
-      const target = entries[0];
-      if (
-        target.isIntersecting &&
-        offersHasNextPage &&
-        !offersIsFetchingNextPage
-      ) {
-        offersFetchNextPage();
-      }
-    },
-    [offersFetchNextPage, offersHasNextPage, offersIsFetchingNextPage]
-  );
-
-  useEffect(() => {
-    const currentObserver = observerRef.current;
-    const observerOptions = {
-      root: null,
-      rootMargin: "20px",
-      threshold: 1.0,
-    };
-    const observer = new IntersectionObserver(
-      handleOffersListObserver,
-      observerOptions
-    );
-    if (currentObserver) observer.observe(currentObserver);
-    return () => {
-      if (currentObserver) observer.unobserve(currentObserver);
-    };
-  }, [handleOffersListObserver]);
 
   return (
     <>

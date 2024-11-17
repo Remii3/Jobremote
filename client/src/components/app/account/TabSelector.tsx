@@ -12,7 +12,11 @@ type TabSelectorPropsType = {
   changeTab: (value: string) => void;
 };
 
-const TabSelector = ({ tabs, currentTab, changeTab }: TabSelectorPropsType) => {
+export default function TabSelector({
+  tabs,
+  currentTab,
+  changeTab,
+}: TabSelectorPropsType) {
   return (
     <Select onValueChange={changeTab}>
       <SelectTrigger className="md:hidden mb-6">
@@ -33,6 +37,4 @@ const TabSelector = ({ tabs, currentTab, changeTab }: TabSelectorPropsType) => {
       </SelectContent>
     </Select>
   );
-};
-
-export default TabSelector;
+}

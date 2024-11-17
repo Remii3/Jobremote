@@ -4,7 +4,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useCurrency } from "@/context/CurrencyContext";
 import { Slider } from "@/components/ui/slider";
-import useGetAvailableTechnologies from "@/hooks/useGetAvailableTechnologies";
+import { useGetAvailableTechnologies } from "@/hooks/useGetAvailableTechnologies";
 import { EXPERIENCES } from "@/constants/experiences";
 import { CONTRACTS } from "@/constants/contracts";
 import { EMPLOYMENTS } from "@/constants/employments";
@@ -38,11 +38,11 @@ const FilterComponent = ({
   );
 };
 
-const MoreFilters = ({
+export default function MoreFilters({
   filters,
   changeSalaryHandler,
   changeTextHandler,
-}: MoreFiltersTypes) => {
+}: MoreFiltersTypes) {
   const { formatCurrency, currency } = useCurrency();
   const { avTechnologies } = useGetAvailableTechnologies();
   return (
@@ -158,6 +158,4 @@ const MoreFilters = ({
       </FilterComponent>
     </div>
   );
-};
-
-export default MoreFilters;
+}

@@ -1,5 +1,3 @@
-"use client";
-
 import { Badge } from "@/components/ui/badge";
 import { useCurrency } from "@/context/CurrencyContext";
 import { OfferType } from "@/types/types";
@@ -32,13 +30,16 @@ export default function OfferItem({
     createdAt,
     companyName,
   } = offerData;
+
   function showOfferHandler() {
     changeCurrentOffer(offerData);
   }
+
   const daysOld = Math.floor(
     (new Date().getTime() - new Date(createdAt).getTime()) /
       (1000 * 60 * 60 * 24)
   );
+
   const isYoungerThan2Days = daysOld < 3;
 
   return (

@@ -10,12 +10,12 @@ type SidebarMenuPropsType = {
   logOut: () => void;
 };
 
-const SidebarMenu = ({
+export default function SidebarMenu({
   changeTab,
   currentTab,
   logOut,
   tabs,
-}: SidebarMenuPropsType) => {
+}: SidebarMenuPropsType) {
   return (
     <div className="hidden md:flex flex-col justify-between md:col-span-1 md:row-span-2 space-y-6">
       <ul className="space-y-4">
@@ -43,6 +43,4 @@ const SidebarMenu = ({
       </Button>
     </div>
   );
-};
-
-export default SidebarMenu;
+}

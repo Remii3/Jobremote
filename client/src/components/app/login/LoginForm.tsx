@@ -21,7 +21,11 @@ type LoginFormProps = {
   form: UseFormReturn<z.infer<typeof LoginUserSchema>>;
 };
 
-const LoginForm = ({ form, loginIsPending, submitHandler }: LoginFormProps) => {
+export default function LoginForm({
+  form,
+  loginIsPending,
+  submitHandler,
+}: LoginFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(submitHandler)}>
@@ -69,6 +73,4 @@ const LoginForm = ({ form, loginIsPending, submitHandler }: LoginFormProps) => {
       </form>
     </Form>
   );
-};
-
-export default LoginForm;
+}

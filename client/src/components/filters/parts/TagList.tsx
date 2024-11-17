@@ -9,6 +9,7 @@ type TagListProps = {
   currency: AllowedCurrenciesType;
   changeSalaryHandler: (value: number) => void;
 };
+
 export default function TagList({
   filters,
   changeTextsHandler,
@@ -22,20 +23,20 @@ export default function TagList({
       if (filter.hasOwnProperty(key)) {
         const value = filter[key];
 
-        // Check based on expected default values
         if (Array.isArray(value) && value.length > 0) {
-          return true; // Array is not empty, so filter is changed
+          return true;
         }
         if (typeof value === "string" && value !== "") {
-          return true; // String is not empty, so filter is changed
+          return true;
         }
         if (typeof value === "number" && value !== 0) {
-          return true; // Number is not 0, so filter is changed
+          return true;
         }
       }
     }
-    return false; // No changes detected
+    return false;
   };
+
   return (
     <>
       {checkIsFilterChanged(filters) && (

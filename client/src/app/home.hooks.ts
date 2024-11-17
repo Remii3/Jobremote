@@ -63,9 +63,9 @@ export function useHome() {
     setFilters(initialFilters);
   }, []);
 
-  const changeCurrentOffer = (newOfferData: OfferType | null) => {
+  function changeCurrentOffer(newOfferData: OfferType | null) {
     setSelectedOffer(newOfferData);
-  };
+  }
 
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
     const activeElement = document.activeElement;

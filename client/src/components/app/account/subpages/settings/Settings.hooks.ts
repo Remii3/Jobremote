@@ -54,6 +54,7 @@ export function useSettings({ fetchUserData, user }: UseSettingsProps) {
       form.reset({ commercialConsent: user.commercialConsent });
     }
   }, [user.commercialConsent, form]);
+
   return {
     form,
     isPending,

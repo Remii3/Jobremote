@@ -12,7 +12,7 @@ import {
 } from "../../../../ui/form";
 import { Input } from "../../../../ui/input";
 
-import useGetAvailableTechnologies from "@/hooks/useGetAvailableTechnologies";
+import { useGetAvailableTechnologies } from "@/hooks/useGetAvailableTechnologies";
 import { useCurrency } from "@/context/CurrencyContext";
 import dynamic from "next/dynamic";
 import { OfferType } from "@/types/types";

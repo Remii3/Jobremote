@@ -41,7 +41,7 @@ type OfferActionProps = {
   }[];
 };
 
-const OfferAction = ({
+export default function OfferAction({
   offer,
   onEditChange,
   payForOfferHandler,
@@ -50,7 +50,7 @@ const OfferAction = ({
   deleteOfferIsPending,
   extendOfferDurationHandler,
   paymentList,
-}: OfferActionProps) => {
+}: OfferActionProps) {
   return (
     <>
       <Button
@@ -92,6 +92,4 @@ const OfferAction = ({
       />
     </>
   );
-};
-
-export default OfferAction;
+}

@@ -4,10 +4,8 @@ import { z } from "zod";
 import { axiosInstance } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { isAxiosError } from "axios";
 import { useMutation } from "@tanstack/react-query";
 import { ChangePasswordSchema } from "@/schema/OfferSchema";
-import { TOAST_TITLES } from "@/constants/constant";
 import { handleError } from "@/lib/errorHandler";
 
 export function useChangePassword({ resetToken }: { resetToken: string }) {

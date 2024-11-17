@@ -16,7 +16,7 @@ type PasswordFieldProps = {
   form: UseFormReturn<z.infer<typeof LoginUserSchema>>;
 };
 
-const PasswordField = ({ form }: PasswordFieldProps) => {
+export default function PasswordField({ form }: PasswordFieldProps) {
   const [showPassword, setShowPassword] = useState(false);
 
   function toggleShowPassword() {
@@ -56,6 +56,4 @@ const PasswordField = ({ form }: PasswordFieldProps) => {
       )}
     />
   );
-};
-
-export default PasswordField;
+}

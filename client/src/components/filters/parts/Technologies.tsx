@@ -7,7 +7,6 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
 import {
   Popover,
   PopoverContent,

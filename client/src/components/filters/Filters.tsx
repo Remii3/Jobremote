@@ -24,7 +24,7 @@ import { Slider } from "../ui/slider";
 import { useCurrency } from "@/context/CurrencyContext";
 import Technologies from "./parts/Technologies";
 import Localizations from "./parts/Localizations";
-import useGetAvailableTechnologies from "@/hooks/useGetAvailableTechnologies";
+import { useGetAvailableTechnologies } from "@/hooks/useGetAvailableTechnologies";
 
 import TagList from "./parts/TagList";
 import { LOCALIZATIONS } from "@/constants/localizations";
@@ -47,13 +47,13 @@ const SORT_OPTIONS_ARRAY = Object.keys(SORT_OPTIONS).map((key) => ({
   value: SORT_OPTIONS[key as OfferSortOptionsTypes],
 }));
 
-const Filters = ({
+export default function Filters({
   filters,
   changeFilters,
   resetFilters,
   setSortOption,
   sortOption,
-}: FiltersPropsType) => {
+}: FiltersPropsType) {
   const { formatCurrency, currency } = useCurrency();
   const [showMoreFilters, setShowMoreFilters] = useState(false);
 
@@ -201,6 +201,4 @@ const Filters = ({
       />
     </>
   );
-};
-
-export default Filters;
+}

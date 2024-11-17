@@ -1,11 +1,16 @@
 "use client";
-import { createContext, useContext, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { UserType } from "@/types/types";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { axiosInstance } from "@/lib/utils";
 import { handleError } from "@/lib/errorHandler";
+import { axiosInstance } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "./AuthContext";
 
 interface UserContextTypes {
   user: UserType | null;
@@ -17,93 +22,66 @@ interface UserContextTypes {
 interface UserContextProviderTypes {
   children: React.ReactNode;
 }
-
-function useLogout(handleUserDataChange: (state: null) => void) {
-  const router = useRouter();
-  const { toast } = useToast();
-  return useMutation({
-    mutationFn: async () => {
-      const response = await axiosInstance.post("/users/logout");
-      return response.data;
-    },
-    onSuccess: () => {
-      handleUserDataChange(null);
-      router.push("/");
-    },
-    onError: (error) => {
-      handleError(error, toast);
-    },
-  });
-}
-
-function useGetUser() {
-  return useQuery({
-    queryKey: ["userData"],
-    queryFn: async () => {
-      const response = await axiosInstance.get("/users/me");
-      return response.data;
-    },
-    enabled: false,
-    retry: false,
-    refetchOnReconnect: false,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-  });
-}
-
-function useCheckSession() {
-  return useQuery({
-    queryKey: ["userSession"],
-    queryFn: async () => {
-      return await axiosInstance.get("/users/check-session");
-    },
-    retry: false,
-  });
-}
 const UserContext = createContext<UserContextTypes | undefined>(undefined);
 
 function UserContextProvider({ children }: UserContextProviderTypes) {
   const [user, setUser] = useState<UserType | null>(null);
   const [userDataIsLoading, setUserDataIsLoading] = useState(true);
+  const { toast } = useToast();
+  const { accessToken, setAccessToken } = useAuth();
 
-  const handleUserDataChange = (state: UserType | null) => {
-    setUser(state);
-  };
-
-  const { mutate: logout } = useLogout(handleUserDataChange);
-
-  const { data: sessionState, isPending: sessionLoading } = useCheckSession();
-
-  const { data: userData, refetch, isError } = useGetUser();
-
-  useEffect(() => {
-    if (!sessionLoading) {
-      if (sessionState?.data.state === true) {
-        refetch();
-      } else {
-        setUser(null);
-        setUserDataIsLoading(false);
-      }
-    }
-  }, [sessionLoading, sessionState, refetch]);
-
-  useEffect(() => {
-    if (userData) {
-      setUser(userData.user);
-      setUserDataIsLoading(false);
-    } else if (isError) {
+  const fetchUserData = useCallback(async () => {
+    if (!accessToken) {
       setUser(null);
       setUserDataIsLoading(false);
+      return;
     }
-  }, [userData, isError]);
 
-  const fetchUserData = async () => {
-    await refetch();
-  };
+    try {
+      setUserDataIsLoading(true);
+      const response = await axiosInstance.get("/users/me", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      setUser(response.data.user);
+    } catch (error) {
+      setUser(null);
+      handleError(error, toast);
+    } finally {
+      setUserDataIsLoading(false);
+    }
+  }, [accessToken, toast]);
 
-  const logOut = () => {
-    logout();
-  };
+  async function logOut() {
+    try {
+      await axiosInstance.post("/users/logout");
+      localStorage.removeItem("loggedIn");
+      setUser(null);
+      setAccessToken(null);
+    } catch (error) {
+      handleError(error, toast);
+    }
+  }
+
+  useEffect(() => {
+    async function initializeAuth() {
+      if (!accessToken) {
+        setUserDataIsLoading(false);
+        setUser(null);
+        return;
+      }
+
+      try {
+        await fetchUserData();
+      } catch (error) {
+        setUserDataIsLoading(false);
+        setUser(null);
+        handleError(error, toast);
+      }
+    }
+    initializeAuth();
+  }, [accessToken, fetchUserData, toast]);
 
   return (
     <UserContext.Provider
