@@ -8,7 +8,6 @@ import {
   getUserOffers,
   loginUser,
   logoutUser,
-  refreshToken,
   resetPassword,
   updateUser,
   updateUserSettings,
@@ -19,14 +18,9 @@ import rateLimit from "express-rate-limit";
 const router = Router();
 
 const loginRateLimit = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10, // limit each IP to 10 requests per windowMs
-  message: "Too many login attempts. Please try again later.",
-});
-
-const refreshRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100, // Limit each IP to 100 requests per window
+  max: 10,
+  message: "Too many login attempts. Please try again later.",
 });
 
 // User management routes
@@ -43,8 +37,6 @@ router.get("/offers/:offerId", getUserOffer);
 // Authentication and session routes
 router.post("/login", loginRateLimit, loginUser);
 router.post("/logout", logoutUser);
-router.get("/refresh-token", refreshRateLimiter, refreshToken);
-// router.get("/check-session", checkUserSession);
 
 // Password management routes
 router.post("/reset-password", resetPassword);

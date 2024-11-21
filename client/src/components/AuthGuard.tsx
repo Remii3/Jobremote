@@ -1,4 +1,3 @@
-import { useAuth } from "@/context/AuthContext";
 import { useUser } from "@/context/UserContext";
 import { WithAuthProps } from "@/types/types";
 import { Loader2 } from "lucide-react";
@@ -11,12 +10,12 @@ export default function withAuth<T extends WithAuthProps>(
   return function AuthenticatedComponent(props: Omit<T, keyof WithAuthProps>) {
     const { user, userDataIsLoading, fetchUserData, logOut } = useUser();
     const router = useRouter();
-    const { accessToken, accessTokenIsLoading } = useAuth();
+
     useEffect(() => {
-      if (!accessTokenIsLoading && !accessToken) {
+      if (!user && !userDataIsLoading) {
         router.replace("/login");
       }
-    }, [user, router, userDataIsLoading, accessToken, accessTokenIsLoading]);
+    }, [user, router, userDataIsLoading]);
 
     if (userDataIsLoading || !user) {
       return (

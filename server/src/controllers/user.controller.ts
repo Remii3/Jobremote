@@ -1,16 +1,10 @@
 import { User } from "../models/User.model";
 import { genPassword } from "../utils/utils";
-import { JwtPayload, verify } from "jsonwebtoken";
 import { createTransport } from "nodemailer";
 import mongoose from "mongoose";
 import OfferModel from "../models/Offer.model";
 import { Request, Response } from "express";
 import { CreateUser } from "../types/controllers";
-import {
-  generateAccessToken,
-  generateRefreshToken,
-} from "../utils/generateTokens";
-import { Token } from "../models/Token.model";
 
 export const createUser = async (
   req: Request<{}, {}, CreateUser>,
@@ -43,7 +37,7 @@ export const createUser = async (
     const passwordHash = await genPassword(password);
     const userId = new mongoose.Types.ObjectId();
 
-    const newUser = await User.create({
+    await User.create({
       _id: userId,
       email,
       password: passwordHash,
@@ -203,20 +197,10 @@ export const loginUser = async (req: Request, res: Response) => {
 
     user.resetLoginAttempts();
 
-    const accessToken = generateAccessToken(user._id.toString());
-    const refreshToken = await generateRefreshToken(user._id.toString());
-
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: "/",
-    });
+    req.session.userId = user._id.toString();
 
     return res.status(200).json({
       msg: "User logged in.",
-      accessToken,
     });
   } catch (err) {
     console.error("Error during login:", err);
@@ -226,59 +210,9 @@ export const loginUser = async (req: Request, res: Response) => {
   }
 };
 
-export const refreshToken = async (req: Request, res: Response) => {
-  const refreshToken = req.cookies.refreshToken;
-
-  if (!refreshToken) {
-    return res.status(403).json({ msg: "Forbidden." });
-  }
-
-  try {
-    const decoded = verify(
-      refreshToken,
-      process.env.REFRESH_TOKEN!
-    ) as JwtPayload;
-
-    const existingToken = await Token.findOne({ token: refreshToken });
-
-    if (!existingToken) {
-      return res.status(401).json({ msg: "Invalid refresh token." });
-    }
-
-    await Token.deleteOne({ token: refreshToken });
-
-    const newAccessToken = generateAccessToken(decoded._id);
-    const newRefreshToken = await generateRefreshToken(decoded._id);
-
-    res.cookie("refreshToken", newRefreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: "/",
-    });
-
-    return res.status(200).json({
-      msg: "Token refreshed",
-      accessToken: newAccessToken,
-    });
-  } catch (error) {
-    console.error("Error during token refresh:", error);
-    return res.status(500).json({
-      msg: "We failed to refresh your token. Please try again later.",
-    });
-  }
-};
-
 export const getUser = async (req: Request, res: Response) => {
   try {
-    if (!req.user) {
-      return res.status(401).json({
-        msg: "User not authenticated.",
-      });
-    }
-
-    const user = await User.findById(req.user._id, {
+    const user = await User.findById(req.session.userId, {
       _id: 1,
       email: 1,
       commercialConsent: 1,
@@ -312,24 +246,16 @@ export const getUser = async (req: Request, res: Response) => {
 };
 
 export const logoutUser = async (req: Request, res: Response) => {
-  try {
-    const refreshToken = req.cookies.refreshToken;
-
-    if (refreshToken) {
-      await Token.deleteOne({ token: refreshToken });
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).json({ msg: "Failed to logout" });
     }
-
-    res.clearCookie("refreshToken", { path: "/" });
+    res.clearCookie("connect.sid"); // Remove the session cookie
 
     return res.status(200).json({
       msg: "Logged out successfully.",
     });
-  } catch (err) {
-    console.error("Error during logout:", err);
-    return res.status(500).json({
-      msg: "We failed to log you out. Please try again later.",
-    });
-  }
+  });
 };
 
 export const resetPassword = async (req: Request, res: Response) => {

@@ -11,6 +11,8 @@ import OfferModel from "./models/Offer.model";
 import { schedule } from "node-cron";
 import { createRouteHandler } from "uploadthing/express";
 import { uploadRouter } from "./utils/uploadthing";
+import session from "express-session";
+import MongoStore from "connect-mongo";
 
 const app: Express = express();
 
@@ -22,6 +24,24 @@ app.use(
 );
 
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(
+  session({
+    // TODO secret MongoDB URI
+    secret: process.env.TOKEN_SECRET!, // Replace with a strong secret in production
+    resave: false, // Avoid saving the session if it hasn't been modified
+    saveUninitialized: false, // Don't save empty sessions
+    store: MongoStore.create({
+      mongoUrl: `${process.env.MONGO_URI!}`, // Replace with your MongoDB URI
+    }),
+    cookie: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // Use secure cookies in production
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
+    },
+  })
+);
+
 app.use((req, res, next) => {
   if (req.path === "/webhook") {
     return next();

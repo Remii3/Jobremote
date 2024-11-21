@@ -13,13 +13,12 @@ import CurrencySelector from "../ui/currency-selector";
 import ThemeSelector from "../ui/theme-selector";
 import { useUser } from "@/context/UserContext";
 import { useState } from "react";
-import { useAuth } from "@/context/AuthContext";
 
 export default function Nav() {
   const [sheetOpen, setSheetOpen] = useState(false);
 
   const { user, userDataIsLoading, logOut } = useUser();
-  const { accessToken, accessTokenIsLoading } = useAuth();
+
   function toggleSheet() {
     setSheetOpen((prevState) => !prevState);
   }
@@ -32,7 +31,7 @@ export default function Nav() {
   return (
     <nav className="flex gap-3 items-center">
       <div className="hidden md:flex gap-3 items-center">
-        {!accessToken && !accessTokenIsLoading && (
+        {!user && !userDataIsLoading && (
           <Link
             href={"/login"}
             className={buttonVariants({ variant: "outline" })}
@@ -40,7 +39,7 @@ export default function Nav() {
             Login
           </Link>
         )}
-        {accessToken && !accessTokenIsLoading && (
+        {user && !userDataIsLoading && (
           <Link
             href={"/account"}
             className={buttonVariants({ variant: "outline" })}

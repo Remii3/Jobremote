@@ -10,7 +10,6 @@ import { UserType } from "@/types/types";
 import { handleError } from "@/lib/errorHandler";
 import { axiosInstance } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
-import { useAuth } from "./AuthContext";
 
 interface UserContextTypes {
   user: UserType | null;
@@ -28,22 +27,11 @@ function UserContextProvider({ children }: UserContextProviderTypes) {
   const [user, setUser] = useState<UserType | null>(null);
   const [userDataIsLoading, setUserDataIsLoading] = useState(true);
   const { toast } = useToast();
-  const { accessToken, setAccessToken } = useAuth();
 
   const fetchUserData = useCallback(async () => {
-    if (!accessToken) {
-      setUser(null);
-      setUserDataIsLoading(false);
-      return;
-    }
-
     try {
       setUserDataIsLoading(true);
-      const response = await axiosInstance.get("/users/me", {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const response = await axiosInstance.get("/users/me");
       setUser(response.data.user);
     } catch (error) {
       setUser(null);
@@ -51,14 +39,12 @@ function UserContextProvider({ children }: UserContextProviderTypes) {
     } finally {
       setUserDataIsLoading(false);
     }
-  }, [accessToken, toast]);
+  }, [toast]);
 
   async function logOut() {
     try {
       await axiosInstance.post("/users/logout");
-      localStorage.removeItem("loggedIn");
       setUser(null);
-      setAccessToken(null);
     } catch (error) {
       handleError(error, toast);
     }
@@ -66,12 +52,6 @@ function UserContextProvider({ children }: UserContextProviderTypes) {
 
   useEffect(() => {
     async function initializeAuth() {
-      if (!accessToken) {
-        setUserDataIsLoading(false);
-        setUser(null);
-        return;
-      }
-
       try {
         await fetchUserData();
       } catch (error) {
@@ -81,7 +61,7 @@ function UserContextProvider({ children }: UserContextProviderTypes) {
       }
     }
     initializeAuth();
-  }, [accessToken, fetchUserData, toast]);
+  }, [fetchUserData, toast]);
 
   return (
     <UserContext.Provider
