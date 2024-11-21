@@ -1,10 +1,8 @@
 import * as express from "express";
 import { UserPayload } from "../types";
 
-declare global {
-  namespace Express {
-    interface Request {
-      user?: UserPayload;
-    }
+declare module "express-session" {
+  interface Session {
+    userId?: string; // Add custom properties here
   }
 }
