@@ -24,6 +24,8 @@ app.use(
 );
 
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cookieParser());
+
 app.use(
   session({
     // TODO secret MongoDB URI
@@ -49,7 +51,6 @@ app.use((req, res, next) => {
   }
   bodyParser.json()(req, res, next);
 });
-app.use(cookieParser());
 
 app.use(mainRouter);
 
