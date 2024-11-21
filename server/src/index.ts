@@ -28,11 +28,9 @@ app.use(cookieParser());
 app.set("trust proxy", 1);
 app.use(
   session({
-    // TODO secret MongoDB URI
     secret: process.env.TOKEN_SECRET!, // Replace with a strong secret in production
     resave: false, // Avoid saving the session if it hasn't been modified
-    saveUninitialized: false,
-    name: "UserIdSession", // Don't save empty sessions
+    saveUninitialized: false, // Don't save empty sessions
     store: MongoStore.create({
       mongoUrl: `${process.env.MONGO_URI!}`, // Replace with your MongoDB URI
     }),
