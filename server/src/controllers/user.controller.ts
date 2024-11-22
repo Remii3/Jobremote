@@ -5,6 +5,11 @@ import mongoose from "mongoose";
 import OfferModel from "../models/Offer.model";
 import { Request, Response } from "express";
 import { CreateUser } from "../types/controllers";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+} from "../utils/generateToken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
 export const createUser = async (
   req: Request<{}, {}, CreateUser>,
@@ -197,10 +202,14 @@ export const loginUser = async (req: Request, res: Response) => {
 
     user.resetLoginAttempts();
 
-    req.session.userId = user._id.toString();
+    const accessToken = generateAccessToken({ userId: user._id.toString() });
+    const refreshToken = generateRefreshToken({ userId: user._id.toString() });
+
+    req.session.refreshToken = refreshToken;
 
     return res.status(200).json({
       msg: "User logged in.",
+      accessToken,
     });
   } catch (err) {
     console.error("Error during login:", err);
@@ -212,7 +221,7 @@ export const loginUser = async (req: Request, res: Response) => {
 
 export const getUser = async (req: Request, res: Response) => {
   try {
-    const user = await User.findById(req.session.userId, {
+    const user = await User.findById(req.userId, {
       _id: 1,
       email: 1,
       commercialConsent: 1,
@@ -250,12 +259,41 @@ export const logoutUser = async (req: Request, res: Response) => {
     if (err) {
       return res.status(500).json({ msg: "Failed to logout" });
     }
+
     res.clearCookie("connect.sid"); // Remove the session cookie
 
     return res.status(200).json({
       msg: "Logged out successfully.",
     });
   });
+};
+
+export const refreshToken = async (req: Request, res: Response) => {
+  const refreshToken = req.session.refreshToken;
+  if (!refreshToken) {
+    return res.status(401).json({ msg: "No refresh token found" });
+  }
+
+  jwt.verify(
+    refreshToken,
+    process.env.REFRESH_TOKEN_SECRET!,
+    (err, payload) => {
+      if (err) {
+        return res.status(403).json({ msg: "Invalid refresh token" });
+      }
+
+      const accessToken = generateAccessToken({
+        userId: (payload as JwtPayload).userId!.toString(),
+      });
+      const newRefreshToken = generateRefreshToken({
+        userId: (payload as JwtPayload).userId!.toString(),
+      });
+
+      req.session.refreshToken = newRefreshToken;
+
+      return res.status(200).json({ accessToken });
+    }
+  );
 };
 
 export const resetPassword = async (req: Request, res: Response) => {
