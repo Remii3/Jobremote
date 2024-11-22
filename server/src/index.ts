@@ -28,18 +28,16 @@ app.use(cookieParser());
 app.set("trust proxy", 1);
 app.use(
   session({
-    secret: process.env.TOKEN_SECRET!, // Replace with a strong secret in production
-    resave: false, // Avoid saving the session if it hasn't been modified
-    saveUninitialized: false, // Don't save empty sessions
+    secret: process.env.REFRESH_TOKEN_SECRET!,
+    resave: false,
+    saveUninitialized: false,
     store: MongoStore.create({
-      mongoUrl: `${process.env.MONGO_URI!}`, // Replace with your MongoDB URI
+      mongoUrl: `${process.env.MONGO_URI!}`,
     }),
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // Use secure cookies in production
+      secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
-      path: "/",
     },
   })
 );

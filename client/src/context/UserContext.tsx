@@ -10,12 +10,17 @@ import { UserType } from "@/types/types";
 import { handleError } from "@/lib/errorHandler";
 import { axiosInstance } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
+import fetchWithAuth from "@/lib/fetchWithAuth";
 
 interface UserContextTypes {
   user: UserType | null;
   logOut: () => void;
   fetchUserData: () => Promise<void>;
   userDataIsLoading: boolean;
+}
+
+interface ServerUserResponse {
+  user: UserType;
 }
 
 interface UserContextProviderTypes {
@@ -31,7 +36,7 @@ function UserContextProvider({ children }: UserContextProviderTypes) {
   const fetchUserData = useCallback(async () => {
     try {
       setUserDataIsLoading(true);
-      const response = await axiosInstance.get("/users/me");
+      const response = await fetchWithAuth<ServerUserResponse>("/users/me");
       setUser(response.data.user);
     } catch (error) {
       setUser(null);
@@ -44,6 +49,7 @@ function UserContextProvider({ children }: UserContextProviderTypes) {
   async function logOut() {
     try {
       await axiosInstance.post("/users/logout");
+      localStorage.removeItem("accessToken");
       setUser(null);
     } catch (error) {
       handleError(error, toast);
@@ -52,6 +58,12 @@ function UserContextProvider({ children }: UserContextProviderTypes) {
 
   useEffect(() => {
     async function initializeAuth() {
+      if (!localStorage.getItem("accessToken")) {
+        setUserDataIsLoading(false);
+        setUser(null);
+        return;
+      }
+
       try {
         await fetchUserData();
       } catch (error) {

@@ -20,6 +20,7 @@ export function useLoginPageHooks() {
       return response.data;
     },
     onSuccess: async (response) => {
+      localStorage.setItem("accessToken", response.accessToken);
       await fetchUserData();
       router.push("/");
     },

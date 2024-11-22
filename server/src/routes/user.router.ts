@@ -8,6 +8,7 @@ import {
   getUserOffers,
   loginUser,
   logoutUser,
+  refreshToken,
   resetPassword,
   updateUser,
   updateUserSettings,
@@ -37,6 +38,7 @@ router.get("/offers/:offerId", getUserOffer);
 // Authentication and session routes
 router.post("/login", loginRateLimit, loginUser);
 router.post("/logout", logoutUser);
+router.post("/refresh-token", refreshToken);
 
 // Password management routes
 router.post("/reset-password", resetPassword);
