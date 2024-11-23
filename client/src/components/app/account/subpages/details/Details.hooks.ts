@@ -9,6 +9,7 @@ import { UserType } from "@/types/types";
 import { useMutation } from "@tanstack/react-query";
 import { handleError } from "@/lib/errorHandler";
 import { UpdateUserSchema } from "@/schema/UserSchemas";
+import fetchWithAuth from "@/lib/fetchWithAuth";
 
 type UseDetialsProps = {
   user: UserType;
@@ -27,7 +28,7 @@ export function useDetails({ fetchUserData, user }: UseDetialsProps) {
 
   const { mutate: updateUser, isPending } = useMutation({
     mutationFn: async (data: any) => {
-      const res = await axiosInstance.patch(`/users/${user._id}/profile`, data);
+      const res = await fetchWithAuth.patch(`/users/${user._id}/profile`, data);
       return res.data;
     },
     onSuccess: () => {

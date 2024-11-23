@@ -15,26 +15,14 @@ export const createUser = async (
   req: Request<{}, {}, CreateUser>,
   res: Response
 ) => {
-  const {
-    email,
-    password,
-    passwordRepeat,
-    commercialConsent,
-    privacyPolicyConsent,
-  } = req.body;
-
-  if (password !== passwordRepeat) {
-    return res.status(400).json({
-      msg: "Passwords do not match",
-      field: "passwordRepeat",
-    });
-  }
+  const { email, password, commercialConsent, privacyPolicyConsent } = req.body;
 
   try {
     const existingUser = await User.findOne({ email });
+
     if (existingUser) {
       return res.status(409).json({
-        msg: "User already exists",
+        msg: "User already exists.",
         field: "email",
       });
     }
@@ -63,26 +51,34 @@ export const createUser = async (
 
 export const getUserOffers = async (req: Request, res: Response) => {
   const { _id } = req.query;
-  const offers = await User.findOne({ _id })
-    .select("_id")
-    .populate({ path: "createdOffers", match: { isDeleted: false } })
-    .lean();
-  if (!offers) {
-    return res.status(404).json({ msg: "User not found" });
-  }
-  if (offers.createdOffers.length === 0) {
-    return res.status(200).json({ offers: [], msg: "No offers found" });
-  }
+  try {
+    const offers = await User.findOne({ _id })
+      .select("_id")
+      .populate({ path: "createdOffers", match: { isDeleted: false } })
+      .lean();
 
-  const preparedOffers = offers.createdOffers.map((offer) => ({
-    ...offer,
-    _id: offer._id.toString(),
-  }));
+    if (!offers) {
+      return res.status(404).json({ msg: "User not found" });
+    }
 
-  return res.status(200).json({
-    offers: preparedOffers,
-    msg: "Offers fetched successfully",
-  });
+    if (offers.createdOffers.length === 0) {
+      return res.status(200).json({ offers: [], msg: "No offers found" });
+    }
+
+    const preparedOffers = offers.createdOffers.map((offer) => ({
+      ...offer,
+      _id: offer._id.toString(),
+    }));
+
+    return res.status(200).json({
+      offers: preparedOffers,
+      msg: "Offers fetched successfully",
+    });
+  } catch (err) {
+    return res.status(500).json({
+      msg: "We failed to fetch your offers. Please try again later.",
+    });
+  }
 };
 
 export const getUserOffer = async (req: Request, res: Response) => {
@@ -92,6 +88,7 @@ export const getUserOffer = async (req: Request, res: Response) => {
     if (!offer) {
       return res.status(404).json({ msg: "Offer not found" });
     }
+
     if (offer.isDeleted) {
       return res.status(404).json({ msg: "Offer is deleted" });
     }
@@ -101,6 +98,7 @@ export const getUserOffer = async (req: Request, res: Response) => {
       _id: offer._id.toString(),
       userId: offer.userId.toString(),
     };
+
     return res.status(200).json({
       offer: preparedOffer,
       msg: "Offer fetched successfully",
@@ -123,10 +121,10 @@ export const updateUser = async (req: Request, res: Response) => {
     );
 
     if (!updatedUser) {
-      return res.status(404).json({ msg: "User not found" });
+      return res.status(404).json({ msg: "User not found." });
     }
 
-    return res.status(200).json({ msg: "User updated" });
+    return res.status(200).json({ msg: "User updated." });
   } catch (err) {
     console.error("Error updating user:", err);
     return res.status(500).json({
@@ -149,6 +147,7 @@ export const updateUserSettings = async (req: Request, res: Response) => {
     }
     return res.status(200).json({ msg: "Settings updated" });
   } catch (err) {
+    console.error("Error updating user settings:", err);
     return res.status(500).json({
       msg: "We failed to update your settings.",
     });
@@ -158,6 +157,7 @@ export const updateUserSettings = async (req: Request, res: Response) => {
 export const loginUser = async (req: Request, res: Response) => {
   const { email, password } = req.body;
   const maxAttempts = 5;
+
   try {
     const user = await User.findOne({ email });
     if (!user) {
@@ -166,12 +166,14 @@ export const loginUser = async (req: Request, res: Response) => {
         msg: "User not found.",
       });
     }
+
     if (user.isBanned()) {
       return res.status(403).json({
         field: "email",
         msg: "Account is banned. Please reset your password to unlock it.",
       });
     }
+
     if (user.isLocked()) {
       return res.status(403).json({
         field: "email",
@@ -260,7 +262,7 @@ export const logoutUser = async (req: Request, res: Response) => {
       return res.status(500).json({ msg: "Failed to logout" });
     }
 
-    res.clearCookie("connect.sid"); // Remove the session cookie
+    res.clearCookie("connect.sid");
 
     return res.status(200).json({
       msg: "Logged out successfully.",
@@ -269,50 +271,65 @@ export const logoutUser = async (req: Request, res: Response) => {
 };
 
 export const refreshToken = async (req: Request, res: Response) => {
-  const refreshToken = req.session.refreshToken;
-  if (!refreshToken) {
-    return res.status(401).json({ msg: "No refresh token found" });
-  }
+  try {
+    const refreshToken = req.session.refreshToken;
 
-  jwt.verify(
-    refreshToken,
-    process.env.REFRESH_TOKEN_SECRET!,
-    (err, payload) => {
-      if (err) {
-        return res.status(403).json({ msg: "Invalid refresh token" });
-      }
-
-      const accessToken = generateAccessToken({
-        userId: (payload as JwtPayload).userId!.toString(),
-      });
-      const newRefreshToken = generateRefreshToken({
-        userId: (payload as JwtPayload).userId!.toString(),
-      });
-
-      req.session.refreshToken = newRefreshToken;
-
-      return res.status(200).json({ accessToken });
+    if (!refreshToken) {
+      return res.status(401).json({ msg: "No refresh token found" });
     }
-  );
+
+    jwt.verify(
+      refreshToken,
+      process.env.REFRESH_TOKEN_SECRET!,
+      (err, payload) => {
+        if (err) {
+          return res.status(403).json({ msg: "Invalid refresh token" });
+        }
+
+        const accessToken = generateAccessToken({
+          userId: (payload as JwtPayload).userId!.toString(),
+        });
+        const newRefreshToken = generateRefreshToken({
+          userId: (payload as JwtPayload).userId!.toString(),
+        });
+
+        req.session.refreshToken = newRefreshToken;
+
+        return res.status(200).json({ accessToken });
+      }
+    );
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ msg: "Failed to generate new token." });
+  }
 };
 
 export const resetPassword = async (req: Request, res: Response) => {
   const { email } = req.body;
   try {
-    const user = await User.findOne({ email });
+    const resetPasswordToken = crypto.randomUUID();
+    const resetPasswordExpires = Date.now() + 3600000;
+
+    const user = await User.findOneAndUpdate(
+      { email },
+      {
+        $set: {
+          resetPasswordToken,
+          resetPasswordExpires,
+        },
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
     if (!user) {
       return res.status(404).json({
         field: "email",
         msg: "User not found",
       });
     }
-
-    const resetToken = crypto.randomUUID();
-    const resetTokenExpiry = Date.now() + 3600000;
-
-    user.resetPasswordToken = resetToken;
-    user.resetPasswordExpires = resetTokenExpiry;
-    await user.save();
 
     const transporter = createTransport({
       service: process.env.EMAIL_SERVICE || "gmail",
@@ -329,9 +346,10 @@ export const resetPassword = async (req: Request, res: Response) => {
       subject: "Password Reset",
       text: `You are receiving this because you (or someone else) have requested to reset your password for your account.\n\n
              Please click on the following link, or paste it into your browser to complete the process within one hour of receiving it:\n\n
-             ${process.env.CORS_URI}/change-password/${resetToken}\n\n
+             ${process.env.CORS_URI}/change-password/${resetPasswordToken}\n\n
              If you did not request this, please ignore this email and your password will remain unchanged.\n`,
     };
+
     await transporter.sendMail(mailOptions);
     return res.status(200).json({
       msg: "Password reset mail sent.",

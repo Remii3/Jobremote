@@ -15,18 +15,19 @@ import {
   updateOffer,
   webhook,
 } from "../controllers/offer.controller";
+import { authenticateUser } from "../middleware/authenticateUser";
 const router = Router();
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 router.post(
   "/",
-  [upload.array("logo"), priceLogic, sanitizeOfferContent],
+  [upload.array("logo"), priceLogic, sanitizeOfferContent, authenticateUser],
   createOffer
 );
 router.get("/", getOffers);
-router.patch("/:id", [upload.array("logo")], updateOffer);
-router.patch("/:id/mark-deleted", deleteOffer);
+router.patch("/:id", [upload.array("logo")], authenticateUser, updateOffer);
+router.patch("/:id/mark-deleted", authenticateUser, deleteOffer);
 
 // Application routes
 router.post("/apply", [upload.array("cv")], offerApply);

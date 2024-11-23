@@ -8,6 +8,16 @@ export type CreateUser = {
   privacyPolicyConsent: boolean;
 };
 
+export type LoginUser = {
+  email: string;
+  password: string;
+};
+
+export type PasswordChange = {
+  password: string;
+  resetToken: string;
+};
+
 // Offer types
 export type ExtendActiveOffer = {
   offerId: string;
