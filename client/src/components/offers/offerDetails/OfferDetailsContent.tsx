@@ -90,6 +90,7 @@ export default function OfferDetailsContent({
                     <h2 className="text-2xl font-semibold text-white">
                       {offer.title}
                     </h2>
+                    <Link href={`/offer/${offer._id}`}>Show separate page</Link>
                     <p className="flex items-center gap-2 text-white font-medium">
                       <Building2 className="h-5 w-5" />
                       <span>{offer.companyName}</span>

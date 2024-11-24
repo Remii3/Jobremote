@@ -1,7 +1,10 @@
 import multer from "multer";
 import bodyParser from "body-parser";
 import { priceLogic } from "../middleware/priceLogic";
-import { sanitizeOfferContent } from "../middleware/sanitizer";
+import {
+  sanitizeCreateOffer,
+  validateCreateOffer,
+} from "../middleware/validators/validateCreateOffer";
 import { Router } from "express";
 import {
   createOffer,
@@ -9,6 +12,7 @@ import {
   extendActiveOffer,
   getOffers,
   getPaymentTypes,
+  getSingleOffer,
   getTechnologies,
   offerApply,
   payForOffer,
@@ -22,10 +26,17 @@ const upload = multer({ storage: storage });
 
 router.post(
   "/",
-  [upload.array("logo"), priceLogic, sanitizeOfferContent, authenticateUser],
+  [
+    authenticateUser,
+    upload.array("logo"),
+    priceLogic,
+    sanitizeCreateOffer,
+    validateCreateOffer,
+  ],
   createOffer
 );
 router.get("/", getOffers);
+router.get("/:id", getSingleOffer);
 router.patch("/:id", [upload.array("logo")], authenticateUser, updateOffer);
 router.patch("/:id/mark-deleted", authenticateUser, deleteOffer);
 
