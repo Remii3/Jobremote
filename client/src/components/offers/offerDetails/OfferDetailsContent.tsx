@@ -12,6 +12,7 @@ import {
   Wallet,
   FilePlus as FileIcon,
   FilePenIcon,
+  Book,
 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
@@ -90,11 +91,12 @@ export default function OfferDetailsContent({
                     <h2 className="text-2xl font-semibold text-white">
                       {offer.title}
                     </h2>
-                    <Link href={`/offer/${offer._id}`}>Show separate page</Link>
-                    <p className="flex items-center gap-2 text-white font-medium">
-                      <Building2 className="h-5 w-5" />
-                      <span>{offer.companyName}</span>
-                    </p>
+                    <div className="flex gap-4">
+                      <p className="flex items-center gap-2 text-white font-medium">
+                        <Building2 className="h-5 w-5" />
+                        <span>{offer.companyName}</span>
+                      </p>
+                    </div>
                   </div>
                 </div>
                 <p className="p-3 bg-violet-600/50 dark:bg-violet-800/50 font-medium text-lg text-white flex items-center rounded-md">
@@ -307,26 +309,36 @@ export default function OfferDetailsContent({
             </div>
             <span className="text-slate-500">{offer.companyName}</span>
           </div>
-          {offer.redirectLink ? (
+          <div className="flex items-center gap-1">
             <Link
-              href={offer.redirectLink}
-              className={`${buttonVariants({ variant: "default" })} relative`}
-              target="_blank"
-              rel="noopener"
+              href={`/offer/${offer._id}`}
+              className={`${buttonVariants({
+                variant: "link",
+              })} `}
             >
-              Apply
+              Show separate page
             </Link>
-          ) : (
-            <Button
-              variant={"default"}
-              type="submit"
-              showLoader
-              isLoading={isPendingApplyForOffer}
-              disabled={isPendingApplyForOffer}
-            >
-              Apply
-            </Button>
-          )}
+            {offer.redirectLink ? (
+              <Link
+                href={offer.redirectLink}
+                className={`${buttonVariants({ variant: "default" })} relative`}
+                target="_blank"
+                rel="noopener"
+              >
+                Apply
+              </Link>
+            ) : (
+              <Button
+                variant={"default"}
+                type="submit"
+                showLoader
+                isLoading={isPendingApplyForOffer}
+                disabled={isPendingApplyForOffer}
+              >
+                Apply
+              </Button>
+            )}
+          </div>
         </div>
       </form>
     </Form>
