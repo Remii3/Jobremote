@@ -42,6 +42,28 @@ export type CreateOffer = {
   priceType: string;
 };
 
+export type UpdateOffer = {
+  title?: string;
+  content?: string;
+  experience?: string;
+  localization?: string;
+  contractType?: string;
+  employmentType?: string;
+  maxSalary?: number;
+  minSalary?: number;
+  technologies?: string[];
+  currency?: string;
+  logo?: {
+    key: string;
+    url: string;
+    name: string;
+  } | null;
+  companyName?: string;
+  pricing?: string;
+  redirectLink?: string;
+  priceType?: string;
+};
+
 export type ExtendActiveOffer = {
   offerId: string;
   title: string;
