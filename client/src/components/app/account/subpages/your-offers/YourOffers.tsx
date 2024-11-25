@@ -9,6 +9,9 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { useYourOffers } from "./YourOffers.hooks";
 import OffersTable from "./OffersTable";
+import { Skeleton } from "@/components/ui/skeleton";
+import { DataTable } from "./table/DataTable";
+import { columns } from "./table/columns";
 
 type YourOffersProps = {
   user: UserType;
@@ -26,6 +29,7 @@ export default function YourOffers({ user, fetchUserData }: YourOffersProps) {
     payForOfferHandler,
     payForOfferIsPending,
     paymentList,
+    userOffersIsPending,
   } = useYourOffers({
     user,
     fetchUserData,
@@ -37,7 +41,14 @@ export default function YourOffers({ user, fetchUserData }: YourOffersProps) {
   function handleEditOfferChange(offerId: OfferType | null) {
     setSelectedOfferId(offerId);
   }
-
+  const data = [
+    {
+      id: "728ed52f",
+      amount: 100,
+      status: "pending",
+      email: "m@example.com",
+    },
+  ];
   return (
     <>
       {selectedOffer && (
@@ -75,17 +86,25 @@ export default function YourOffers({ user, fetchUserData }: YourOffersProps) {
             </span>
             <Separator className="my-4" />
           </div>
+          {userOffersIsPending && (
+            <div className="md:col-span-4 md:col-start-2 px-2 space-y-4">
+              <Skeleton className="w-full h-[70px] bg-muted/50" />
+              <Skeleton className="w-full h-[70px] bg-muted/50" />
+              <Skeleton className="w-full h-[70px] bg-muted/50" />
+            </div>
+          )}
           {userOffersList && paymentList && (
-            <OffersTable
-              userOffers={userOffersList.offers}
-              onEditChange={handleEditOfferChange}
-              deleteOfferHandler={deleteOfferHandler}
-              deleteOfferIsPending={deleteOfferIsPending}
-              extendOfferDurationHandler={extendOfferDurationHandler}
-              payForOfferHandler={payForOfferHandler}
-              payForOfferIsPending={payForOfferIsPending}
-              paymentList={paymentList.paymentTypes}
-            />
+            <DataTable columns={columns} data={userOffersList.offers} />
+            // <OffersTable
+            //   userOffers={userOffersList.offers}
+            //   onEditChange={handleEditOfferChange}
+            //   deleteOfferHandler={deleteOfferHandler}
+            //   deleteOfferIsPending={deleteOfferIsPending}
+            //   extendOfferDurationHandler={extendOfferDurationHandler}
+            //   payForOfferHandler={payForOfferHandler}
+            //   payForOfferIsPending={payForOfferIsPending}
+            //   paymentList={paymentList.paymentTypes}
+            // />
           )}
         </>
       )}

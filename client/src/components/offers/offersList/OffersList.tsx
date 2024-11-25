@@ -32,10 +32,10 @@ export default function OffersList({
   return (
     <>
       {offersIsPending && (
-        <div className="space-y-2">
-          <Skeleton className="w-full h-[88px] bg-slate-100" />
-          <Skeleton className="w-full h-[88px] bg-slate-100" />
-          <Skeleton className="w-full h-[88px] bg-slate-100" />
+        <div className="space-y-4">
+          <Skeleton className="w-full h-[88px] bg-white dark:bg-muted/50" />
+          <Skeleton className="w-full h-[88px] bg-white dark:bg-muted/50" />
+          <Skeleton className="w-full h-[88px] bg-white dark:bg-muted/50" />
         </div>
       )}
       {offersError && <p>Error</p>}
