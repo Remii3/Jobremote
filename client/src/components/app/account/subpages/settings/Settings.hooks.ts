@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { axiosInstance, getOnlyDirtyFormFields } from "@/lib/utils";
+import { getOnlyDirtyFormFields } from "@/lib/utils";
 import { useEffect } from "react";
 import { useToast } from "../../../../ui/use-toast";
 import { TOAST_TITLES } from "@/constants/constant";
@@ -9,6 +9,7 @@ import { UserType } from "@/types/types";
 import { useMutation } from "@tanstack/react-query";
 import { handleError } from "@/lib/errorHandler";
 import { UpdateUserSettingsSchema } from "@/schema/UserSchemas";
+import fetchWithAuth from "@/lib/fetchWithAuth";
 
 type UseSettingsProps = {
   user: UserType;
@@ -25,7 +26,7 @@ export function useSettings({ fetchUserData, user }: UseSettingsProps) {
 
   const { mutate: updateSettings, isPending } = useMutation({
     mutationFn: async (data: any) => {
-      const res = await axiosInstance.patch(
+      const res = await fetchWithAuth.patch(
         `/users/${user._id}/settings`,
         data
       );

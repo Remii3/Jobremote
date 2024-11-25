@@ -9,10 +9,15 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { UserType } from "@/types/types";
 import { handleError } from "@/lib/errorHandler";
+import fetchWithAuth from "@/lib/fetchWithAuth";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY || ""
 );
+
+type CreateNewOfferResponse = {
+  sessionId: string;
+};
 
 export const useHireRemotely = ({
   user,
@@ -58,7 +63,10 @@ export const useHireRemotely = ({
   const { mutate: handleCreateOffer, isPending: isPendingCreateOffer } =
     useMutation({
       mutationFn: async (data: any) => {
-        const res = await axiosInstance.post("/offers", data);
+        const res = await fetchWithAuth.post<CreateNewOfferResponse>(
+          "/offers",
+          data
+        );
         return res.data;
       },
       onSuccess: async (param) => {

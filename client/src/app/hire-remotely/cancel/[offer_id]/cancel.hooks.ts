@@ -4,6 +4,7 @@ import { axiosInstance } from "@/lib/utils";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { handleError } from "@/lib/errorHandler";
+import fetchWithAuth from "@/lib/fetchWithAuth";
 
 export default function useCancel() {
   const router = useRouter();
@@ -12,7 +13,7 @@ export default function useCancel() {
 
   const { mutate: deleteOffer } = useMutation({
     mutationFn: async (data: any) => {
-      const res = await axiosInstance.post(
+      const res = await fetchWithAuth.post(
         `/offers/${data._id}/mark-deleted`,
         data
       );

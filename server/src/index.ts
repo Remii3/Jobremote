@@ -13,6 +13,7 @@ import { createRouteHandler } from "uploadthing/express";
 import { uploadRouter } from "./utils/uploadthing";
 import session from "express-session";
 import MongoStore from "connect-mongo";
+import { errorHandler } from "./utils/errorHandler";
 
 const app: Express = express();
 
@@ -38,6 +39,7 @@ app.use(
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      path: "/",
     },
   })
 );
@@ -67,14 +69,7 @@ app.use(
   })
 );
 
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  console.error(err.stack); // Log the error for debugging
-
-  res.status(500).json({
-    status: 500,
-    message: err.message || "Internal Server Error",
-  });
-});
+app.use(errorHandler);
 
 schedule("0 0 * * *", async () => {
   try {

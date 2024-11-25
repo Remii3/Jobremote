@@ -1,6 +1,7 @@
 import { useToast } from "@/components/ui/use-toast";
 import { TOAST_TITLES } from "@/constants/constant";
 import { handleError } from "@/lib/errorHandler";
+import fetchWithAuth from "@/lib/fetchWithAuth";
 import { axiosInstance } from "@/lib/utils";
 import { UserType } from "@/types/types";
 import { loadStripe } from "@stripe/stripe-js";
@@ -90,7 +91,7 @@ export function usePayments({ fetchUserData }: UsePaymentsProps) {
     queryKey: ["payment-list"],
     queryFn: async () => {
       const { data } = await axiosInstance.get(`/offers/metadata/payments`);
-      return data;
+      return data.paymentTypes;
     },
   });
 
@@ -184,7 +185,7 @@ export function useOfferActions({
   const { mutate: deleteOfferHandle, isPending: deleteOfferIsPending } =
     useMutation({
       mutationFn: async (data: any) => {
-        const res = await axiosInstance.patch(
+        const res = await fetchWithAuth.patch(
           `/offers/${data._id}/mark-deleted`,
           data
         );

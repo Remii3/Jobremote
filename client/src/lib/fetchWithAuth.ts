@@ -45,4 +45,38 @@ const fetchWithAuth = async <T>(
   }
 };
 
+// Add method-specific shortcuts
+fetchWithAuth.get = <T>(
+  url: string,
+  options: AxiosRequestConfig = {}
+): Promise<AxiosResponse<T>> =>
+  fetchWithAuth<T>(url, { ...options, method: "GET" });
+
+fetchWithAuth.post = <T>(
+  url: string,
+  data?: any,
+  options: AxiosRequestConfig = {}
+): Promise<AxiosResponse<T>> =>
+  fetchWithAuth<T>(url, { ...options, method: "POST", data });
+
+fetchWithAuth.put = <T>(
+  url: string,
+  data?: any,
+  options: AxiosRequestConfig = {}
+): Promise<AxiosResponse<T>> =>
+  fetchWithAuth<T>(url, { ...options, method: "PUT", data });
+
+fetchWithAuth.patch = <T>(
+  url: string,
+  data?: any,
+  options: AxiosRequestConfig = {}
+): Promise<AxiosResponse<T>> =>
+  fetchWithAuth<T>(url, { ...options, method: "PATCH", data });
+
+fetchWithAuth.delete = <T>(
+  url: string,
+  options: AxiosRequestConfig = {}
+): Promise<AxiosResponse<T>> =>
+  fetchWithAuth<T>(url, { ...options, method: "DELETE" });
+
 export default fetchWithAuth;

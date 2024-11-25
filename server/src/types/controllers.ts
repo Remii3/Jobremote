@@ -8,7 +8,62 @@ export type CreateUser = {
   privacyPolicyConsent: boolean;
 };
 
+export type LoginUser = {
+  email: string;
+  password: string;
+};
+
+export type PasswordChange = {
+  password: string;
+  resetToken: string;
+};
+
 // Offer types
+
+export type CreateOffer = {
+  title: string;
+  content: string;
+  experience: string;
+  localization: string;
+  contractType: string;
+  employmentType: string;
+  maxSalary: number;
+  minSalary: number;
+  technologies: string[];
+  currency: string;
+  logo: {
+    key: string;
+    url: string;
+    name: string;
+  } | null;
+  companyName: string;
+  pricing: string;
+  redirectLink: string;
+  priceType: string;
+};
+
+export type UpdateOffer = {
+  title?: string;
+  content?: string;
+  experience?: string;
+  localization?: string;
+  contractType?: string;
+  employmentType?: string;
+  maxSalary?: number;
+  minSalary?: number;
+  technologies?: string[];
+  currency?: string;
+  logo?: {
+    key: string;
+    url: string;
+    name: string;
+  } | null;
+  companyName?: string;
+  pricing?: string;
+  redirectLink?: string;
+  priceType?: string;
+};
+
 export type ExtendActiveOffer = {
   offerId: string;
   title: string;

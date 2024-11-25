@@ -186,6 +186,33 @@ export const getOffers = async (
   }
 };
 
+export async function getSingleOffer(req: Request, res: Response) {
+  const { id } = req.params;
+  try {
+    const offer = await OfferModel.findOne(
+      { _id: id },
+      { deletedAt: 0 }
+    ).lean();
+
+    if (!offer) {
+      return res.status(404).json({
+        msg: "Offer not found",
+      });
+    }
+    return res.status(200).json({
+      offer: {
+        ...offer,
+      },
+      msg: "Offer fetched successfully",
+    });
+  } catch (err) {
+    console.error("Error fetching offer", err);
+    return res.status(500).json({
+      msg: "We failed to get you the offer.",
+    });
+  }
+}
+
 export const updateOffer = async (req: Request, res: Response) => {
   const { id: _id } = req.params;
   const { ...updatedData } = req.body;

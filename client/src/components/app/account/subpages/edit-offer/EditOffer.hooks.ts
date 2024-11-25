@@ -9,6 +9,7 @@ import { z } from "zod";
 import { UpdateOfferSchema } from "@/schema/OfferSchema";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { handleError } from "@/lib/errorHandler";
+import fetchWithAuth from "@/lib/fetchWithAuth";
 
 type EditOfferProps = {
   offerData: OfferType;
@@ -50,7 +51,7 @@ export function useEditOffer({
 
   const { mutate: updateOffer, isPending: updateOfferIsLoading } = useMutation({
     mutationFn: async (data: any) => {
-      const res = await axiosInstance.patch(`/offers/${offerData._id}`, data);
+      const res = await fetchWithAuth.patch(`/offers/${offerData._id}`, data);
       return res.data;
     },
     onSuccess: () => {
