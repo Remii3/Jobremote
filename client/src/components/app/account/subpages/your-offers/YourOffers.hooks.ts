@@ -91,7 +91,7 @@ export function usePayments({ fetchUserData }: UsePaymentsProps) {
     queryKey: ["payment-list"],
     queryFn: async () => {
       const { data } = await axiosInstance.get(`/offers/metadata/payments`);
-      return data;
+      return data.paymentTypes;
     },
   });
 

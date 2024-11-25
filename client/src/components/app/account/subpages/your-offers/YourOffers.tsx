@@ -1,18 +1,30 @@
-import { OfferType, UserType } from "@/types/types";
+import { AdminOfferType, OfferType, UserType } from "@/types/types";
 import { ArrowLeft } from "lucide-react";
 import React, { useState } from "react";
-import { Button } from "../../../../ui/button";
 import EditOffer from "../edit-offer/EditOffer";
 
 import { Separator } from "../../../../ui/separator";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { useYourOffers } from "./YourOffers.hooks";
-import OffersTable from "./OffersTable";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DataTable } from "./table/DataTable";
-import { columns } from "./table/columns";
+import { ColumnDef } from "@tanstack/react-table";
+import { ArrowUpDown } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
+
+import OfferAction from "./OfferAction";
+import { useCurrency } from "@/context/CurrencyContext";
+
+export type Payment = {
+  id: string;
+  amount: number;
+  status: "pending" | "processing" | "success" | "failed";
+  email: string;
+  minSalary: number;
+  maxSalary: number;
+};
 type YourOffersProps = {
   user: UserType;
   fetchUserData: () => void;
@@ -20,12 +32,13 @@ type YourOffersProps = {
 
 export default function YourOffers({ user, fetchUserData }: YourOffersProps) {
   const queryClient = useQueryClient();
+  const { formatCurrency, currency } = useCurrency();
+
   const {
     userOffersList,
     deleteOfferHandler,
     deleteOfferIsPending,
     extendOfferDurationHandler,
-    extendOfferDurationIsPending,
     payForOfferHandler,
     payForOfferIsPending,
     paymentList,
@@ -41,14 +54,83 @@ export default function YourOffers({ user, fetchUserData }: YourOffersProps) {
   function handleEditOfferChange(offerId: OfferType | null) {
     setSelectedOfferId(offerId);
   }
-  const data = [
+
+  const columns: ColumnDef<AdminOfferType>[] = [
     {
-      id: "728ed52f",
-      amount: 100,
-      status: "pending",
-      email: "m@example.com",
+      accessorKey: "title",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant={"ghost"}
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Title
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        );
+      },
+    },
+    {
+      accessorKey: "salary",
+      header: () => <div className="text-right">Salary</div>,
+      cell: ({ row }) => {
+        const minSalary = row.original.minSalary;
+        const maxSalary = row.original.maxSalary;
+        const formattedMin = formatCurrency(minSalary, currency);
+        const formattedMax = formatCurrency(maxSalary, currency);
+        return (
+          <div className="text-right">
+            {formattedMin} - {formattedMax}
+          </div>
+        );
+      },
+    },
+
+    {
+      accessorKey: "isPaid",
+      header: ({ column }) => {
+        return (
+          <div className="text-center">
+            <Button
+              variant="ghost"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === "asc")
+              }
+            >
+              Status
+              <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        );
+      },
+      cell: ({ row }) => {
+        const isPaid = row.getValue("isPaid");
+
+        return isPaid ? "Paid" : "Not paid";
+      },
+    },
+
+    {
+      id: "actions",
+      cell: ({ row }) => {
+        return (
+          <div className="text-center space-x-3">
+            <OfferAction
+              offer={row.original}
+              onEditChange={handleEditOfferChange}
+              payForOfferHandler={payForOfferHandler}
+              payForOfferIsPending={payForOfferIsPending}
+              deleteOfferIsPending={deleteOfferIsPending}
+              handlerDeleteOffer={deleteOfferHandler}
+              paymentList={paymentList}
+              extendOfferDurationHandler={extendOfferDurationHandler}
+            />
+          </div>
+        );
+      },
     },
   ];
+
   return (
     <>
       {selectedOffer && (
@@ -95,16 +177,6 @@ export default function YourOffers({ user, fetchUserData }: YourOffersProps) {
           )}
           {userOffersList && paymentList && (
             <DataTable columns={columns} data={userOffersList.offers} />
-            // <OffersTable
-            //   userOffers={userOffersList.offers}
-            //   onEditChange={handleEditOfferChange}
-            //   deleteOfferHandler={deleteOfferHandler}
-            //   deleteOfferIsPending={deleteOfferIsPending}
-            //   extendOfferDurationHandler={extendOfferDurationHandler}
-            //   payForOfferHandler={payForOfferHandler}
-            //   payForOfferIsPending={payForOfferIsPending}
-            //   paymentList={paymentList.paymentTypes}
-            // />
           )}
         </>
       )}

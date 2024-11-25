@@ -45,7 +45,7 @@ export default function ExtendOfferDialog({
   function changeSelectedPricingHandler(value: string) {
     setSelectedPricing(value);
   }
-
+  console.log("paymentList", paymentList);
   return (
     <Dialog>
       <DialogTrigger asChild>

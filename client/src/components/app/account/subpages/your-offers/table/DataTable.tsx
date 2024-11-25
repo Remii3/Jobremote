@@ -40,7 +40,12 @@ export function DataTable<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const [sorting, setSorting] = useState<SortingState>([
+    {
+      id: "title",
+      desc: false,
+    },
+  ]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
@@ -65,14 +70,15 @@ export function DataTable<TData, TValue>({
   });
 
   return (
-    <div className="md:col-span-4 md:col-start-2 px-2 overflow-y-auto">
+    <div className="md:col-span-4 md:col-start-2 px-2 flex flex-col max-h-[100%] overflow-hidden">
       <div className="flex items-center py-4">
         <Input
           placeholder="Filter titles..."
           value={(table.getColumn("title")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("title")?.setFilterValue(event.target.value)
-          }
+          onChange={(event) => {
+            const filterValue = event.target.value;
+            table.getColumn("title")?.setFilterValue(filterValue);
+          }}
           className="max-w-sm"
         />
         <DropdownMenu>
@@ -95,15 +101,15 @@ export function DataTable<TData, TValue>({
                       column.toggleVisibility(!!value)
                     }
                   >
-                    {column.id}
+                    {column.id === "isPaid" ? "Status" : column.id}
                   </DropdownMenuCheckboxItem>
                 );
               })}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <Table>
-        <TableHeader>
+      <Table className="min-w-[800px] ">
+        <TableHeader className="sticky top-0 left-0 right-0 bg-background">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
@@ -130,11 +136,14 @@ export function DataTable<TData, TValue>({
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => {
-                    console.log("Cell", cell.column.id);
                     if (cell.column.id === "isPaid") {
                       return (
-                        <TableCell key={cell.id}>
-                          <Badge variant={"outline"}>
+                        <TableCell key={cell.id} className="text-center">
+                          <Badge
+                            variant={`${
+                              cell.getValue() === true ? "default" : "outline"
+                            }`}
+                          >
                             {flexRender(
                               cell.column.columnDef.cell,
                               cell.getContext()
@@ -166,8 +175,8 @@ export function DataTable<TData, TValue>({
       </Table>
       <div className="flex items-center justify-end space-x-2 py-4">
         <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
+          {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}{" "}
+          pages.
         </div>
         <Button
           variant="outline"
