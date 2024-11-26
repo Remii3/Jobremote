@@ -127,7 +127,6 @@ export const getOffers = async (
         }
       }
     });
-    console.log("filters", filters);
 
     filters.isDeleted = false;
     filters.isPaid = true;
@@ -196,10 +195,25 @@ export async function getSingleOffer(req: Request, res: Response) {
         msg: "Offer not found",
       });
     }
+
+    const relatedOffers = await OfferModel.find({
+      companyName: offer.companyName,
+      _id: { $ne: offer._id },
+    })
+      .limit(8)
+      .lean();
+
+    const similarOffers = await OfferModel.find({
+      technologies: { $in: offer.technologies },
+      _id: { $ne: offer._id },
+    })
+      .limit(8)
+      .lean();
+
     return res.status(200).json({
-      offer: {
-        ...offer,
-      },
+      offer,
+      relatedOffers,
+      similarOffers,
       msg: "Offer fetched successfully",
     });
   } catch (err) {

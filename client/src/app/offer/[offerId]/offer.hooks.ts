@@ -8,6 +8,8 @@ import { useEffect } from "react";
 
 type OfferResponse = {
   offer: OfferType;
+  relatedOffers: OfferType[];
+  similarOffers: OfferType[];
   msg: string;
 };
 
@@ -24,7 +26,7 @@ export function useOffer() {
     queryKey: ["offer", offerId],
     queryFn: async () => {
       const res = await axiosInstance.get<OfferResponse>(`/offers/${offerId}`);
-      return res.data.offer;
+      return res.data;
     },
   });
 
@@ -34,5 +36,5 @@ export function useOffer() {
     }
   }, [error, isError, toast]);
 
-  return { offer, isPending, error };
+  return { offerData: offer, isPending, error };
 }
