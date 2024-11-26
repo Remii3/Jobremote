@@ -27,7 +27,7 @@ export type AdminOfferType = OfferType & {
 };
 
 export type OfferFiltersType = {
-  keyword: string;
+  keyword: string[];
   localization: string[];
   experience: string[];
   contractType: string[];

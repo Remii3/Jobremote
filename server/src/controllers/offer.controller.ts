@@ -87,51 +87,52 @@ export const getOffers = async (
   const skip = (page - 1) * limit;
   try {
     const filters: any = {};
-    if (
-      req.query.filters?.employmentType &&
-      req.query.filters.employmentType.length > 0
-    ) {
-      filters.employmentType = { $in: req.query.filters.employmentType };
-    }
-    if (
-      req.query.filters?.localization &&
-      req.query.filters.localization.length > 0
-    ) {
-      filters.localization = { $in: req.query.filters.localization };
-    }
-    if (
-      req.query.filters?.experience &&
-      req.query.filters.experience.length > 0
-    ) {
-      filters.experience = { $in: req.query.filters.experience };
-    }
 
-    if (
-      req.query.filters?.technologies &&
-      req.query.filters.technologies.length > 0
-    ) {
-      filters.technologies = { $in: req.query.filters.technologies };
-    }
-    if (req.query.filters?.keyword) {
-      filters.$or = [
-        { title: { $regex: req.query.filters.keyword, $options: "i" } },
-        { content: { $regex: req.query.filters.keyword, $options: "i" } },
-      ];
-    }
-    if (req.query.filters?.minSalary) {
-      filters.minSalary = { $gte: req.query.filters.minSalary };
-    }
+    type FilterKeys = {
+      employmentType: string[];
+      localization: string[];
+      experience: string[];
+      technologies: string[];
+      keyword: string[];
+      contractType: string[];
+      minSalary: string;
+    };
 
-    if (
-      req.query.filters?.contractType &&
-      req.query.filters.contractType.length > 0
-    ) {
-      filters.contractType = { $in: req.query.filters.contractType };
-    }
+    const queryFilters = req.query.filters as FilterKeys;
+
+    const filterKeys = {
+      employmentType: "$in",
+      localization: "$in",
+      experience: "$in",
+      technologies: "$in",
+      contractType: "$in",
+      minSalary: "$gte",
+      keyword: "$and",
+    };
+
+    Object.entries(filterKeys).forEach(([key, operator]) => {
+      const filterValue = queryFilters[key as keyof FilterKeys] as string[];
+
+      if (filterValue && filterValue.length > 0) {
+        if (key === "keyword") {
+          filters[operator] = filterValue.map((kw: string) => ({
+            $or: [
+              { title: { $regex: kw, $options: "i" } },
+              { content: { $regex: kw, $options: "i" } },
+              { companyName: { $regex: kw, $options: "i" } },
+            ],
+          }));
+        } else {
+          filters[key] = { [operator as string]: filterValue };
+        }
+      }
+    });
+    console.log("filters", filters);
 
     filters.isDeleted = false;
     filters.isPaid = true;
     let sortValue = {};
+
     switch (req.query.sort) {
       case "salary_highest":
         sortValue = { minSalary: -1 };
@@ -152,6 +153,7 @@ export const getOffers = async (
         OfferModel.find(filters).sort(sortValue).skip(skip).limit(limit).lean(),
         OfferModel.countDocuments(filters),
       ]);
+
     if (!fetchedOffers.length) {
       return res.status(200).json({
         offers: [],
@@ -163,14 +165,9 @@ export const getOffers = async (
         },
       });
     }
-    const preparedOffers = fetchedOffers.map((offer) => ({
-      ...offer,
-      _id: offer._id.toString(),
-      userId: offer.userId.toString(),
-    }));
 
     return res.status(200).json({
-      offers: preparedOffers,
+      offers: fetchedOffers,
       msg: "Offers fetched successfully",
       pagination: {
         total,

@@ -21,6 +21,7 @@ export const useOffersList = ({ sortOption, filters }: any) => {
   } = useInfiniteQuery({
     queryKey: ["offers-list"],
     queryFn: async ({ pageParam = 1 }) => {
+      console.log("Filters", cleanEmptyData(filters));
       const res = await axiosInstance.get(`/offers`, {
         params: {
           filters: cleanEmptyData(filters),

@@ -94,8 +94,8 @@ export type GetOffers = {
     localization: string[];
     experience: string[];
     technologies: string[];
-    keyword: string;
+    keyword: string[];
+    contractType: string[];
     minSalary: string;
-    contractType: string;
   };
 };

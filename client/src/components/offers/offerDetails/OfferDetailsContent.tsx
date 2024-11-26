@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { useCurrency } from "@/context/CurrencyContext";
-import { OfferType } from "@/types/types";
+import { OfferFiltersType, OfferType } from "@/types/types";
 import Image from "next/image";
 
 import {
@@ -40,6 +40,7 @@ interface OfferDetailsContentProps {
   offer: OfferType;
   isMobile: boolean;
   toggleSuccessApplied: () => void;
+  changeFilters: (filters: keyof OfferFiltersType, value: string) => void;
 }
 
 const dropzone = {
@@ -55,6 +56,7 @@ export default function OfferDetailsContent({
   offer,
   isMobile,
   toggleSuccessApplied,
+  changeFilters,
 }: OfferDetailsContentProps) {
   const { form, isPendingApplyForOffer, submitApplicationHandler } =
     useOfferDetails({ toggleSuccessApplied, offerId: offer._id });
@@ -92,10 +94,17 @@ export default function OfferDetailsContent({
                       {offer.title}
                     </h2>
                     <div className="flex gap-4">
-                      <p className="flex items-center gap-2 text-white font-medium">
+                      <Button
+                        variant={"link"}
+                        type="button"
+                        className="flex items-center gap-2 text-white font-medium p-0"
+                        onClick={() =>
+                          changeFilters("keyword", offer.companyName)
+                        }
+                      >
                         <Building2 className="h-5 w-5" />
                         <span>{offer.companyName}</span>
-                      </p>
+                      </Button>
                     </div>
                   </div>
                 </div>

@@ -36,22 +36,22 @@ export default function TagList({
     }
     return false;
   };
-
+  console.log("Taglist: ", filters.keyword);
   return (
     <>
       {checkIsFilterChanged(filters) && (
         <ul className="flex gap-2 flex-wrap lg:flex-nowrap lg:overflow-x-auto">
-          {filters.keyword.trim() !== "" && (
-            <li className={badgeVariants({ variant: "outline" })}>
+          {filters.keyword?.map((item) => (
+            <li key={item} className={badgeVariants({ variant: "outline" })}>
               <button
                 type="button"
-                onClick={() => changeTextsHandler("keyword", "")}
+                onClick={() => changeTextsHandler("keyword", item)}
                 className="text-nowrap"
               >
-                {filters.keyword}
+                {item}
               </button>
             </li>
-          )}
+          ))}
           {filters.localization?.map((item) => (
             <li key={item} className={badgeVariants({ variant: "outline" })}>
               <button

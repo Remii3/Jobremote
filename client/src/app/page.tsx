@@ -1,7 +1,7 @@
 "use client";
 
 import OfferDetails from "@/components/offers/offerDetails/OfferDetails";
-import Filters from "@/components/filters/Filters";
+import Filters from "@/components/offers/filters/Filters";
 import OffersList from "@/components/offers/offersList/OffersList";
 
 import {
@@ -20,19 +20,19 @@ import { useHome } from "./home.hooks";
 export default function Home() {
   const {
     changeCurrentOffer,
-    filters,
     isMobile,
     offerDetailsRef,
     offersListRef,
-    resetFilters,
     selectedOffer,
     setSortOption,
     sortOption,
     toggleSuccessApplied,
-    updateFilters,
     isSuccessApplied,
+    filters,
+    resetFilters,
+    updateFilters,
   } = useHome();
-
+  console.log("filters", filters);
   return (
     <div className="flex flex-col h-full">
       <section className="px-2 py-3 space-y-3 border-b border-b-input">
@@ -67,6 +67,7 @@ export default function Home() {
             selectedOffer={selectedOffer}
             toggleSuccessApplied={toggleSuccessApplied}
             changeSelectedOffer={changeCurrentOffer}
+            changeFilters={updateFilters}
           />
         </section>
       </div>

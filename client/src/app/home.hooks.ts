@@ -12,7 +12,7 @@ const initialFilters: OfferFiltersType = {
   contractType: [],
   employmentType: [],
   experience: [],
-  keyword: "",
+  keyword: [],
   localization: [],
   technologies: [],
 };
@@ -26,33 +26,28 @@ export function useHome() {
   const [isSuccessApplied, setIsSuccessApplied] = useState<boolean>(false);
   const [filters, setFilters] =
     useState<Required<OfferFiltersType>>(initialFilters);
-
   const isMobile = useIsMobile();
-
-  function toggleSuccessApplied() {
-    setIsSuccessApplied((prev) => !prev);
-  }
 
   const updateFilters = useCallback(
     (key: keyof OfferFiltersType, value: any) => {
-      setFilters((prevState) => {
-        if (Array.isArray(prevState[key])) {
-          if (prevState[key]?.includes(value)) {
-            return {
-              ...prevState,
-              [key]: prevState[key].filter((item) => item !== value),
-            };
-          } else {
-            return {
-              ...prevState,
-              [key]: [...prevState[key], value],
-            };
-          }
+      console.log(key, value);
+      setFilters((prevFilters) => {
+        const currentValue = prevFilters[key];
+        if (Array.isArray(currentValue)) {
+          // Toggle array values
+          const updatedArray = currentValue.includes(value)
+            ? currentValue.filter((item) => {
+                console.log("item", item);
+                console.log("value", value);
+                return item !== value;
+              }) // Remove if exists
+            : [...currentValue, value]; // Add if doesn't exist
+
+          return { ...prevFilters, [key]: updatedArray };
         } else {
-          return {
-            ...prevState,
-            [key]: value,
-          };
+          console.log("first");
+          // Handle primitive values like minSalary
+          return { ...prevFilters, [key]: value };
         }
       });
     },
@@ -62,6 +57,10 @@ export function useHome() {
   const resetFilters = useCallback(() => {
     setFilters(initialFilters);
   }, []);
+
+  function toggleSuccessApplied() {
+    setIsSuccessApplied((prev) => !prev);
+  }
 
   function changeCurrentOffer(newOfferData: OfferType | null) {
     setSelectedOffer(newOfferData);
@@ -92,17 +91,15 @@ export function useHome() {
   }, []);
 
   useEffect(() => {
-    window.addEventListener("keyup", handleKeyDown);
+    const handler = (event: KeyboardEvent) => handleKeyDown(event);
+    window.addEventListener("keyup", handler);
 
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keydown", handler);
     };
   }, [handleKeyDown]);
 
   return {
-    filters,
-    updateFilters,
-    resetFilters,
     sortOption,
     setSortOption,
     changeCurrentOffer,
@@ -112,5 +109,8 @@ export function useHome() {
     isMobile,
     toggleSuccessApplied,
     isSuccessApplied,
+    resetFilters,
+    filters,
+    updateFilters,
   };
 }

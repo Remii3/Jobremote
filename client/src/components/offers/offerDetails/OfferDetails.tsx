@@ -8,13 +8,14 @@ import {
 import OfferDetailsContent from "./OfferDetailsContent";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { OfferType } from "@/types/types";
+import { OfferFiltersType, OfferType } from "@/types/types";
 
 interface OfferDetailsProps {
   selectedOffer: OfferType | null;
   changeSelectedOffer: (newOfferData: null) => void;
   isMobile: boolean;
   toggleSuccessApplied: () => void;
+  changeFilters: (filters: keyof OfferFiltersType, value: string) => void;
 }
 
 export default function OfferDetails({
@@ -22,6 +23,7 @@ export default function OfferDetails({
   changeSelectedOffer,
   isMobile,
   toggleSuccessApplied,
+  changeFilters,
 }: OfferDetailsProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -45,6 +47,7 @@ export default function OfferDetails({
           offer={selectedOffer}
           isMobile={isMobile}
           toggleSuccessApplied={toggleSuccessApplied}
+          changeFilters={changeFilters}
         />
       );
     }

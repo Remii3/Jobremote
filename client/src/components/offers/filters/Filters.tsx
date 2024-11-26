@@ -1,5 +1,5 @@
 import { OfferFiltersType, OfferSortOptionsTypes } from "@/types/types";
-import { Button } from "../ui/button";
+import { Button } from "../../ui/button";
 import {
   Dialog,
   DialogContent,
@@ -8,8 +8,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "../ui/dialog";
-import { Input } from "../ui/input";
+} from "../../ui/dialog";
+import { Input } from "../../ui/input";
 import MoreFilters from "./parts/MoreFilters";
 import {
   DropdownMenu,
@@ -17,10 +17,10 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
+} from "../../ui/dropdown-menu";
 import { ArrowUpDown, Search, Settings2 } from "lucide-react";
 import { FormEvent, useState } from "react";
-import { Slider } from "../ui/slider";
+import { Slider } from "../../ui/slider";
 import { useCurrency } from "@/context/CurrencyContext";
 import Technologies from "./parts/Technologies";
 import Localizations from "./parts/Localizations";
@@ -28,6 +28,7 @@ import { useGetAvailableTechnologies } from "@/hooks/useGetAvailableTechnologies
 
 import TagList from "./parts/TagList";
 import { LOCALIZATIONS } from "@/constants/localizations";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface FiltersPropsType {
   filters: Required<OfferFiltersType>;
@@ -56,11 +57,12 @@ export default function Filters({
 }: FiltersPropsType) {
   const { formatCurrency, currency } = useCurrency();
   const [showMoreFilters, setShowMoreFilters] = useState(false);
-
+  const [textValue, setTextValue] = useState("");
   const { avTechnologies, avTechnologiesError, avTechnologiesIsLoading } =
     useGetAvailableTechnologies();
 
   function changeTextsHandler(key: keyof OfferFiltersType, text: string) {
+    console.log("asd", key, text);
     changeFilters(key, text);
   }
 
@@ -83,9 +85,15 @@ export default function Filters({
             <Input
               name="keyword"
               placeholder="Keyword..."
-              value={filters.keyword}
+              value={textValue}
+              onChange={(e) => setTextValue(e.target.value)}
               className="pr-10"
-              onChange={(e) => changeTextsHandler("keyword", e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && textValue.trim()) {
+                  changeTextsHandler("keyword", textValue.trim());
+                  setTextValue("");
+                }
+              }}
             />
             <button
               className="absolute top-0.5 p-2 right-1 rounded-full"
