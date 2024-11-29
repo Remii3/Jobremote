@@ -24,7 +24,6 @@ const newOfferSchema = z.object({
   companyName: z.string().min(1, { message: "Company name is required" }),
   pricing: z.string(),
   redirectLink: z.string(),
-  priceType: z.enum(["monthly", "yearly"]),
 });
 
 export function validateCreateOffer(
@@ -57,7 +56,6 @@ export function sanitizeCreateOffer(
     logo,
     maxSalary,
     minSalary,
-    priceType,
     pricing,
     redirectLink,
     technologies,
@@ -117,10 +115,6 @@ export function sanitizeCreateOffer(
       : null,
     maxSalary: Number(maxSalary),
     minSalary: Number(minSalary),
-    priceType: sanitizeHtml(priceType, {
-      allowedTags: [],
-      allowedAttributes: {},
-    }),
     pricing: sanitizeHtml(pricing, {
       allowedTags: [],
       allowedAttributes: {},

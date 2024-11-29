@@ -31,7 +31,6 @@ const UpdateOfferSchema = z
     companyName: z.string().min(1, { message: "Company name is required" }),
     pricing: z.string(),
     redirectLink: z.string(),
-    priceType: z.enum(["monthly", "yearly"]),
   })
   .partial();
 
@@ -137,13 +136,6 @@ export function sanitizeUpdateOffer(
 
   if (req.body.minSalary !== undefined) {
     sanitizedBody.minSalary = Number(req.body.minSalary);
-  }
-
-  if (req.body.priceType) {
-    sanitizedBody.priceType = sanitizeHtml(req.body.priceType, {
-      allowedTags: [],
-      allowedAttributes: {},
-    });
   }
 
   if (req.body.pricing) {

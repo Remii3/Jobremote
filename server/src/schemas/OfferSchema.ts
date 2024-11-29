@@ -33,7 +33,6 @@ export const OfferSchema = z.object({
   activeUntil: z.string().nullable(),
   userId: z.instanceof(Types.ObjectId),
   redirectLink: z.string(),
-  priceType: z.enum(["monthly", "yearly"]),
   createdAt: z.string(),
   updatedAt: z.string(),
 });

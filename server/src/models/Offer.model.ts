@@ -77,13 +77,7 @@ const offerSchema = new Schema<OfferType>(
       type: String,
       required: true,
     },
-    priceType: {
-      type: String,
-      enum: ["monthly", "yearly"],
-      required: true,
-    },
     expireAt: { type: Date, default: null, index: { expires: "0s" } },
-
     isDeleted: { type: Boolean, default: false },
     deletedAt: { type: Date, default: null },
   },

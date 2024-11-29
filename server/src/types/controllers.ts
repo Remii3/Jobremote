@@ -39,7 +39,6 @@ export type CreateOffer = {
   companyName: string;
   pricing: string;
   redirectLink: string;
-  priceType: string;
 };
 
 export type UpdateOffer = {
@@ -61,7 +60,6 @@ export type UpdateOffer = {
   companyName?: string;
   pricing?: string;
   redirectLink?: string;
-  priceType?: string;
 };
 
 export type ExtendActiveOffer = {

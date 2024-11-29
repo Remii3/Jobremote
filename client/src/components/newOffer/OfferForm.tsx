@@ -50,7 +50,7 @@ import { CONTRACTS } from "@/constants/contracts";
 import { LOCALIZATIONS } from "@/constants/localizations";
 
 const OfferCkEditor = dynamic(
-  () => import("../../ui/ckeditor").then((mod) => mod.OfferCkEditor),
+  () => import("../ui/ckeditor").then((mod) => mod.OfferCkEditor),
   { ssr: false }
 );
 
@@ -351,31 +351,6 @@ export default function OfferForm({
                             {currency}
                           </SelectItem>
                         ))}
-                      </SelectContent>
-                    </Select>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="priceType"
-                render={({ field }) => (
-                  <FormItem className="w-full">
-                    <FormLabel>Price type</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Price type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <FormMessage />
-                      <SelectContent>
-                        <SelectItem value="monthly">Monthly</SelectItem>
-                        <SelectItem value="yearly">Yearly</SelectItem>
                       </SelectContent>
                     </Select>
                   </FormItem>
