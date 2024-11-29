@@ -30,23 +30,17 @@ export function useHome() {
 
   const updateFilters = useCallback(
     (key: keyof OfferFiltersType, value: any) => {
-      console.log(key, value);
       setFilters((prevFilters) => {
         const currentValue = prevFilters[key];
         if (Array.isArray(currentValue)) {
-          // Toggle array values
           const updatedArray = currentValue.includes(value)
             ? currentValue.filter((item) => {
-                console.log("item", item);
-                console.log("value", value);
                 return item !== value;
-              }) // Remove if exists
-            : [...currentValue, value]; // Add if doesn't exist
+              })
+            : [...currentValue, value];
 
           return { ...prevFilters, [key]: updatedArray };
         } else {
-          console.log("first");
-          // Handle primitive values like minSalary
           return { ...prevFilters, [key]: value };
         }
       });

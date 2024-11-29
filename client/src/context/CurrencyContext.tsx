@@ -1,6 +1,7 @@
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
 import { AllowedCurrenciesType } from "@/types/types";
+import { allowedCurrencies } from "@/constants/constant";
 
 interface CurrencyContextTypes {
   currency: AllowedCurrenciesType;
@@ -13,14 +14,19 @@ const CurrencyContext = createContext<CurrencyContextTypes | undefined>(
   undefined
 );
 
+const LOCALES = {
+  USD: "en-US",
+  EUR: "de-DE",
+};
+
 const CurrencyProvider = ({ children }: { children: React.ReactNode }) => {
   const [currency, setCurrency] = useState<AllowedCurrenciesType>("USD");
   const [currencyRates, setCurrencyRates] = useState<{ [key: string]: number }>(
     {}
   );
-  const allowedCurrencies: AllowedCurrenciesType[] = ["USD", "EUR"];
   const changeCurrency = (newCurrency: AllowedCurrenciesType) => {
     setCurrency(newCurrency);
+    localStorage.setItem("currency", newCurrency);
   };
 
   const formatCurrency = (
@@ -28,14 +34,27 @@ const CurrencyProvider = ({ children }: { children: React.ReactNode }) => {
     productCurrency: AllowedCurrenciesType
   ) => {
     if (amount < 0 || typeof amount !== "number") return "N/A";
-    if (!productCurrency) return amount.toString();
-    const preparedAmount =
-      amount === 0
-        ? "0"
-        : amount / currencyRates[productCurrency.toLowerCase()];
 
-    const locale =
-      currency === "USD" ? "en-US" : currency === "EUR" ? "de-DE" : "pl-PL";
+    if (!productCurrency || !currency) return amount.toString();
+
+    const productCurrencyRate = currencyRates[productCurrency.toLowerCase()];
+    const targetCurrencyRate = currencyRates[currency.toLowerCase()];
+    if (!productCurrencyRate || !targetCurrencyRate) return "N/A";
+
+    let preparedAmount = amount === 0 ? 0 : amount / productCurrencyRate; // Convert to base unit (USD equivalent)
+
+    if (currency === "USD") {
+      if (productCurrency !== "USD") {
+        preparedAmount *= 12;
+      }
+    } else {
+      if (productCurrency === "USD") {
+        preparedAmount /= 12;
+      }
+      preparedAmount *= targetCurrencyRate;
+    }
+
+    const locale = LOCALES[currency] || "en-US";
 
     return new Intl.NumberFormat(locale, {
       style: "currency",
@@ -54,6 +73,10 @@ const CurrencyProvider = ({ children }: { children: React.ReactNode }) => {
       setCurrencyRates(data[currency.toLowerCase()]);
     };
     fetchCurrencyRates();
+
+    if (localStorage.getItem("currency") !== currency) {
+      setCurrency(localStorage.getItem("currency") as AllowedCurrenciesType);
+    }
   }, [currency]);
 
   return (

@@ -1,7 +1,7 @@
 "use client";
 import AuthGuard from "@/components/AuthGuard";
-import ModelForm from "@/components/offers/newOffer/ModelForm";
-import OfferForm from "@/components/offers/newOffer/OfferForm";
+import ModelForm from "@/components/newOffer/ModelForm";
+import OfferForm from "@/components/newOffer/OfferForm";
 import { MultiStepProgressBar } from "@/components/ui/multi-step-progress";
 
 import { useState } from "react";

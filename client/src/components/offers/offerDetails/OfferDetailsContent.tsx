@@ -110,9 +110,9 @@ export default function OfferDetailsContent({
                 </div>
                 <p className="p-3 bg-violet-600/50 dark:bg-violet-800/50 font-medium text-lg text-white flex items-center rounded-md">
                   <Wallet className="h-6 w-6 mr-2" />
-                  <span>{formatCurrency(offer.minSalary, currency)}</span>
+                  <span>{formatCurrency(offer.minSalary, offer.currency)}</span>
                   <span className="px-1">-</span>
-                  <span>{formatCurrency(offer.maxSalary, currency)}</span>
+                  <span>{formatCurrency(offer.maxSalary, offer.currency)}</span>
                 </p>
               </div>
             </div>
@@ -312,9 +312,9 @@ export default function OfferDetailsContent({
         <div className="sticky bottom-0 right-0 border-t border-t-input bg-background flex justify-between px-4 lg:px-4 py-4 h-[72px] w-full">
           <div>
             <div className="flex font-medium text-green-500">
-              <span>{formatCurrency(offer.minSalary, currency)}</span>
+              <span>{formatCurrency(offer.minSalary, offer.currency)}</span>
               <span className="px-1">-</span>
-              <span>{formatCurrency(offer.maxSalary, currency)}</span>
+              <span>{formatCurrency(offer.maxSalary, offer.currency)}</span>
             </div>
             <span className="text-slate-500">{offer.companyName}</span>
           </div>

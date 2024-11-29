@@ -32,7 +32,7 @@ export default function Home() {
     resetFilters,
     updateFilters,
   } = useHome();
-  console.log("filters", filters);
+
   return (
     <div className="flex flex-col h-full">
       <section className="px-2 py-3 space-y-3 border-b border-b-input">

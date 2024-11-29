@@ -36,7 +36,6 @@ export default function TagList({
     }
     return false;
   };
-  console.log("Taglist: ", filters.keyword);
   return (
     <>
       {checkIsFilterChanged(filters) && (

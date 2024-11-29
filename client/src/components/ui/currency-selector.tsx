@@ -29,8 +29,15 @@ export default function CurrencySelector() {
           }
         >
           {allowedCurrencies.map((currency) => (
-            <DropdownMenuRadioItem key={currency} value={currency}>
-              {currency}
+            <DropdownMenuRadioItem
+              key={currency}
+              value={currency}
+              className="flex justify-between gap-4"
+            >
+              <span>{currency}</span>
+              <span className="text-sm text-muted-foreground">
+                {currency === "USD" ? "/year" : "/month"}
+              </span>
             </DropdownMenuRadioItem>
           ))}
         </DropdownMenuRadioGroup>

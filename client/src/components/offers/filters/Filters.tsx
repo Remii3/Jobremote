@@ -62,7 +62,6 @@ export default function Filters({
     useGetAvailableTechnologies();
 
   function changeTextsHandler(key: keyof OfferFiltersType, text: string) {
-    console.log("asd", key, text);
     changeFilters(key, text);
   }
 
@@ -125,7 +124,7 @@ export default function Filters({
                       filters.minSalary === 0 ? 0 : filters.minSalary / 1000,
                       currency
                     )}
-                    k/year
+                    {currency === "USD" ? "/year" : "/month"}
                   </span>
                 </div>
                 <Slider
