@@ -614,6 +614,18 @@ export const webhook = async (req: Request, res: Response) => {
         }
       }
     }
+    if (event.type === "checkout.session.async_payment_failed") {
+      return res.status(404).json({
+        msg: `Payment failed ${event.id}`,
+        type: `${event.type} `,
+      });
+    }
+    if (event.type === "checkout.session.expired") {
+      return res.status(404).json({
+        msg: `Payment expired ${event.id}`,
+        type: `${event.type} `,
+      });
+    }
     return res.status(200).json({
       msg: `Webhook received ${event.id}`,
     });

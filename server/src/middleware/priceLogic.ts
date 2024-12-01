@@ -14,7 +14,7 @@ export async function priceLogic(
       .lean();
 
     if (!payment) {
-      next(new Error("Pricing code not found."));
+      next(new Error(`Pricing code ${req.body.pricing} not found.`));
     } else {
       res.locals.price = payment.price * 100;
       res.locals.activeMonths = payment.activeMonths;
