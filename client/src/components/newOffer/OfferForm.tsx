@@ -69,7 +69,6 @@ type OfferFormPropsTypes = {
   changeCurrentStep: (values: any) => void;
   selectedLogo: File[] | null;
   handleChangeLogo: (newLogo: File[] | null) => void;
-  technologies: string[];
   handleTechnologies: (tech: string) => void;
 };
 
@@ -79,7 +78,6 @@ export default function OfferForm({
   handleTechnologies,
   selectedLogo,
   handleChangeLogo,
-  technologies,
 }: OfferFormPropsTypes) {
   const [techOpen, setTechOpen] = useState<boolean>(false);
   const [showRequirements, setShowRequirements] = useState<boolean>(false);

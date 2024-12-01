@@ -15,7 +15,6 @@ function HireRemotely({ user, fetchUserData }: WithAuthProps) {
     handleTechnologies,
     offerForm,
     selectedLogo,
-    technologies,
     isPendingCreateOffer,
     modelForm,
   } = useHireRemotely({ user, fetchUserData });
@@ -36,7 +35,6 @@ function HireRemotely({ user, fetchUserData }: WithAuthProps) {
             changeCurrentStep={changeCurrentStepHandler}
             selectedLogo={selectedLogo}
             handleChangeLogo={handleChangeLogo}
-            technologies={technologies}
             handleTechnologies={handleTechnologies}
           />
         </div>
