@@ -10,9 +10,7 @@ export const CreateOfferSchema = z
     benefits: z.string().optional(),
     duties: z.string().optional(),
     experience: z.string().min(1, { message: "Experience is required" }),
-    employmentType: z
-      .string()
-      .min(1, { message: "Employment type is required" }),
+    employmentType: z.string().min(1, { message: "Employment is required" }),
     localization: z.string().min(1, { message: "Localization is required" }),
     contractType: z.string().min(1, { message: "Contract type is required" }),
     minSalary: z.coerce

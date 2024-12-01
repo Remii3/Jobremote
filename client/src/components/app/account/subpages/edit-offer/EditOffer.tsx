@@ -108,7 +108,7 @@ export default function EditOffer({
           />
           <SelectField
             control={form.control}
-            label="Employment type"
+            label="Employment"
             name="employmentType"
             options={EMPLOYMENTS}
           />

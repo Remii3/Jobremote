@@ -11,7 +11,7 @@ export const OfferSchema = z.object({
   experience: z.string().min(1, { message: "Experience is required" }),
   localization: z.string().min(1, { message: "Localization is required" }),
   contractType: z.string().min(1, { message: "Contract type is required" }),
-  employmentType: z.string().min(1, { message: "Employment type is required" }),
+  employmentType: z.string().min(1, { message: "Employment is required" }),
   maxSalary: z.coerce
     .number()
     .gt(0, { message: "Max salary must be greater than 0" }),

@@ -114,6 +114,8 @@
 .prose h3,
 .prose p,
 .prose strong,
-.prose a {
+.prose a,
+.prose ol,
+.prose ul {
   @apply text-foreground;
 }

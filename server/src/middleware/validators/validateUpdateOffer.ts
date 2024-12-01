@@ -10,9 +10,7 @@ const UpdateOfferSchema = z
     experience: z.string().min(1, { message: "Experience is required" }),
     localization: z.string().min(1, { message: "Localization is required" }),
     contractType: z.string().min(1, { message: "Contract type is required" }),
-    employmentType: z
-      .string()
-      .min(1, { message: "Employment type is required" }),
+    employmentType: z.string().min(1, { message: "Employment is required" }),
     maxSalary: z
       .number()
       .gt(0, { message: "Max salary must be greater than 0" }),
@@ -105,7 +103,6 @@ export function sanitizeUpdateOffer(
   }
 
   if (req.body.technologies) {
-    console.log("req.body.technologies validate", req.body.technologies);
     sanitizedBody.technologies = req.body.technologies.map((technology) =>
       sanitizeHtml(technology, {
         allowedTags: [],

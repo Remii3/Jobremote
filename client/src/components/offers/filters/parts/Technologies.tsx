@@ -66,7 +66,7 @@ export default function Technologies({
                           : "opacity-0"
                       )}
                     />
-                    {tech.name}
+                    <span className="w-full">{tech.name}</span>
                   </CommandItem>
                 ))}
               </CommandGroup>

@@ -79,7 +79,7 @@ export default function Localizations({
                             : "opacity-0"
                         )}
                       />
-                      {localization.name}
+                      <span className="w-full">{localization.name}</span>
                     </CommandItem>
                   );
                 })}

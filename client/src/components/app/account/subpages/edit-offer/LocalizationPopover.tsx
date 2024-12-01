@@ -68,7 +68,7 @@ export default function LocalizationPopover({
                             : "opacity-0"
                         )}
                       />
-                      {localization.name}
+                      <span className="w-full">{localization.name}</span>
                     </CommandItem>
                   ))}
                 </CommandGroup>

@@ -43,7 +43,7 @@ export default function MoreFilters({
   changeSalaryHandler,
   changeTextHandler,
 }: MoreFiltersTypes) {
-  const { formatCurrency, currency } = useCurrency();
+  const { formatCurrency, currency, salaryType } = useCurrency();
   const { avTechnologies } = useGetAvailableTechnologies();
   return (
     <div className="space-y-4 overflow-y-auto px-4 py-2 border-t flex flex-col">
@@ -56,7 +56,7 @@ export default function MoreFilters({
                 filters.minSalary ? Number(filters.minSalary) / 1000 : 0,
                 currency
               )}
-              k/year
+              k/{salaryType}
             </span>
           </div>
           <Slider

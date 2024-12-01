@@ -42,8 +42,8 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([
     {
-      id: "title",
-      desc: false,
+      id: "createdAt",
+      desc: true,
     },
   ]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -149,6 +149,33 @@ export function DataTable<TData, TValue>({
                               cell.getContext()
                             )}
                           </Badge>
+                        </TableCell>
+                      );
+                    }
+                    if (
+                      cell.column.id === "createdAt" &&
+                      typeof cell.getValue() === "string"
+                    ) {
+                      const createdAt = new Date(cell.getValue() as string);
+                      const formattedDate = createdAt.toLocaleDateString(
+                        undefined,
+                        {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                        }
+                      );
+                      const formattedTime = createdAt.toLocaleTimeString(
+                        undefined,
+                        { hour: "2-digit", minute: "2-digit", hour12: false }
+                      );
+
+                      return (
+                        <TableCell key={cell.id}>
+                          <div className="space-x-2">
+                            <span>{formattedDate}</span>
+                            <span>{formattedTime}</span>
+                          </div>
                         </TableCell>
                       );
                     }

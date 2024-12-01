@@ -181,7 +181,7 @@ export default function Offer({ offer }: OfferProps) {
               </div>
             </div>
           </div>
-          <div className="space-y-10 flex-grow">
+          <div className="px-4 space-y-10 flex-grow">
             <div className="px-4 lg:px-0">
               <h3 className="text-2xl font-medium mb-2">Tech stack</h3>
               <div className="flex gap-2 flex-wrap">

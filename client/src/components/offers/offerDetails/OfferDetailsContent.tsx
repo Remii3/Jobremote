@@ -125,7 +125,7 @@ export default function OfferDetailsContent({
                       type="button"
                       className="flex items-center gap-2 text-white font-medium p-0"
                       onClick={() =>
-                        changeFilters("keyword", offer.companyName)
+                        changeFilters("keyword", `Company:${offer.companyName}`)
                       }
                     >
                       <Building2 className="h-5 w-5" />

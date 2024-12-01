@@ -168,7 +168,7 @@ export default function OfferForm({
                 render={({ field }) => (
                   <FormItem className="w-full">
                     <FormLabel>
-                      Type of contract <span className="text-red-400">*</span>
+                      Contract <span className="text-red-400">*</span>
                     </FormLabel>
                     <Select
                       onValueChange={field.onChange}
@@ -246,7 +246,9 @@ export default function OfferForm({
                                         : "opacity-0"
                                     )}
                                   />
-                                  {localization.name}
+                                  <span className="w-full">
+                                    {localization.name}
+                                  </span>
                                 </CommandItem>
                               ))}
                             </CommandGroup>
@@ -295,7 +297,7 @@ export default function OfferForm({
                 render={({ field }) => (
                   <FormItem className="w-full">
                     <FormLabel>
-                      Employment type <span className="text-red-400">*</span>
+                      Employment <span className="text-red-400">*</span>
                     </FormLabel>
                     <Select
                       onValueChange={field.onChange}
@@ -304,7 +306,7 @@ export default function OfferForm({
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Employment type" />
+                          <SelectValue placeholder="Employment" />
                         </SelectTrigger>
                       </FormControl>
                       <FormMessage />
@@ -647,7 +649,7 @@ export default function OfferForm({
                                           : "opacity-0"
                                       )}
                                     />
-                                    {tech.name}
+                                    <span className="w-full">{tech.name}</span>
                                   </CommandItem>
                                 ))}
                             </CommandGroup>

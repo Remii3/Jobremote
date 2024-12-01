@@ -93,13 +93,35 @@ export const getOffers = async (
       const keywords = Array.isArray(queryFilters.keyword)
         ? queryFilters.keyword
         : [queryFilters.keyword];
-      filters.$and = keywords.map((kw: string) => ({
-        $or: [
-          { title: { $regex: kw, $options: "i" } },
-          { content: { $regex: kw, $options: "i" } },
-          { companyName: { $regex: kw, $options: "i" } },
-        ],
-      }));
+      const mandatoryFilters: any[] = [];
+      const optionalFilters: any[] = [];
+
+      keywords.forEach((kw: string) => {
+        if (kw.startsWith("Company:")) {
+          const companyNameKeyword = kw.replace("Company:", "").trim();
+          mandatoryFilters.push({
+            companyName: { $regex: companyNameKeyword, $options: "i" },
+          });
+        } else if (kw.startsWith("Title:")) {
+          const titleKeyword = kw.replace("Title:", "").trim();
+          mandatoryFilters.push({
+            title: { $regex: titleKeyword, $options: "i" },
+          });
+        } else {
+          optionalFilters.push({
+            $or: [
+              { title: { $regex: kw, $options: "i" } },
+              { content: { $regex: kw, $options: "i" } },
+              { companyName: { $regex: kw, $options: "i" } },
+            ],
+          });
+        }
+      });
+
+      filters.$and = [
+        ...mandatoryFilters,
+        ...(optionalFilters.length > 0 ? [{ $or: optionalFilters }] : []),
+      ];
     }
 
     if (queryFilters.minSalary && queryFilters.clientCurrency) {
@@ -231,6 +253,8 @@ export async function getSingleOffer(req: Request, res: Response) {
     const relatedOffers = await OfferModel.find({
       companyName: offer.companyName,
       _id: { $ne: offer._id },
+      isDeleted: false,
+      isPaid: true,
     })
       .limit(8)
       .lean();
@@ -238,6 +262,8 @@ export async function getSingleOffer(req: Request, res: Response) {
     const similarOffers = await OfferModel.find({
       technologies: { $in: offer.technologies },
       _id: { $ne: offer._id },
+      isDeleted: false,
+      isPaid: true,
     })
       .limit(8)
       .lean();
@@ -345,6 +371,7 @@ export const offerApply = async (
   res: Response
 ) => {
   const { description, email, name, offerId, userId } = req.body;
+
   const objectOfferId = new mongoose.Types.ObjectId(`${offerId}`);
   try {
     const offerData = await OfferModel.findById(objectOfferId, {
@@ -397,6 +424,7 @@ export const offerApply = async (
   }</strong> position you posted on our website!</p>
   
   <p><strong>Applicant Name:</strong> ${name}</p>
+  <p><strong>Applicant Email:</strong> ${email}</p>
   <p><strong>Message from the Applicant:</strong><br>
   "${description}"</p>
   
