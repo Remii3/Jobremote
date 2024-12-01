@@ -16,12 +16,15 @@ type SimilarOffersProps = {
 export default function SimilarOffers({ similarOffers }: SimilarOffersProps) {
   return (
     <div>
-      <h2>Similar</h2>
+      <h2 className="text-2xl font-medium mb-2">Similar</h2>
       {similarOffers.length > 0 ? (
-        <Carousel>
+        <Carousel className="relative">
           <CarouselContent>
             {similarOffers.map((offer) => (
-              <CarouselItem key={offer._id} className="basis-1/2 md:basis-1/3">
+              <CarouselItem
+                key={offer._id}
+                className="basis-full sm:basis-1/3 xl:basis-1/5"
+              >
                 <Link href={`/offer/${offer._id}`}>
                   <Card>
                     <CardHeader>
@@ -36,8 +39,8 @@ export default function SimilarOffers({ similarOffers }: SimilarOffersProps) {
               </CarouselItem>
             ))}
           </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
+          <CarouselPrevious className="-left-2" />
+          <CarouselNext className="-right-2" />
         </Carousel>
       ) : (
         <p className="text-muted-foreground">No similar offers</p>

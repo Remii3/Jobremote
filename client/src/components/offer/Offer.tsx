@@ -181,7 +181,7 @@ export default function Offer({ offer }: OfferProps) {
               </div>
             </div>
           </div>
-          <div className="space-y-10 px-4 flex-grow">
+          <div className="space-y-10 flex-grow">
             <div className="px-4 lg:px-0">
               <h3 className="text-2xl font-medium mb-2">Tech stack</h3>
               <div className="flex gap-2 flex-wrap">
@@ -366,7 +366,7 @@ export default function Offer({ offer }: OfferProps) {
             </div>
           </div>
         </div>
-        <div className="border-t border-t-input bg-background flex justify-between px-4 lg:px-4 py-4 h-[72px] w-full">
+        <div className="border-b border-b-input border-t border-t-input bg-background flex justify-between px-4 lg:px-4 py-4 h-[72px] w-full">
           <div>
             <div className="flex font-medium text-green-500">
               <span>{formattedMinPrice}</span>
@@ -376,14 +376,6 @@ export default function Offer({ offer }: OfferProps) {
             <span className="text-slate-500">{offer.companyName}</span>
           </div>
           <div className="flex items-center gap-1">
-            <Link
-              href={`/offer/${offer._id}`}
-              className={`${buttonVariants({
-                variant: "link",
-              })} `}
-            >
-              Show separate page
-            </Link>
             {offer.redirectLink ? (
               <Link
                 href={offer.redirectLink}

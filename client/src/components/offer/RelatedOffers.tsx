@@ -16,12 +16,15 @@ type RelatedOffersProps = {
 export default function RelatedOffers({ relatedOffers }: RelatedOffersProps) {
   return (
     <div>
-      <h2>Related</h2>
+      <h2 className="text-2xl font-medium mb-2">Related</h2>
       {relatedOffers.length > 0 ? (
         <Carousel className="relative">
           <CarouselContent>
             {relatedOffers.map((offer) => (
-              <CarouselItem key={offer._id} className="basis-1/2 md:basis-1/3">
+              <CarouselItem
+                key={offer._id}
+                className="basis-full sm:basis-1/3 xl:basis-1/5"
+              >
                 <Link href={`/offer/${offer._id}`}>
                   <Card>
                     <CardHeader>

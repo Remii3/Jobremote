@@ -16,7 +16,7 @@ export default function Header() {
           <small className="text-muted-foreground">Best job board</small>
           <ThemeSelector />
         </div>
-        <div className="hidden md:block">
+        <div className="hidden md:block space-x-3">
           <CurrencySelector />
           <SalaryTypeSelector />
         </div>

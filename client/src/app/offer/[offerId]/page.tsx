@@ -28,8 +28,8 @@ export default function OfferPage() {
       )}
       {error && <StaticBodyCenter>{error.message}</StaticBodyCenter>}
       {offerData && (
-        <div className="h-full w-full mx-auto p-4 pb-16">
-          <Breadcrumb className="mb-2 mx-auto max-w-screen-2xl">
+        <div className="h-full w-full mx-auto pt-4 pb-9">
+          <Breadcrumb className="mb-4 px-4 md:px-12 mx-auto max-w-screen-2xl">
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink href="/">Home</BreadcrumbLink>
@@ -40,12 +40,12 @@ export default function OfferPage() {
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
-          <section className="mx-auto max-w-screen-lg">
+          <section className="mx-auto max-w-screen-2xl px-4 md:px-12">
             <Offer offer={offerData.offer} />
           </section>
-          <div className="space-y-8 max-w-screen-2xl mx-auto my-8 md:px-12">
-            <RelatedOffers relatedOffers={offerData.relatedOffers} />
+          <div className="space-y-8 max-w-screen-2xl mx-auto pt-12 px-4 md:px-12">
             <SimilarOffers similarOffers={offerData.similarOffers} />
+            <RelatedOffers relatedOffers={offerData.relatedOffers} />
           </div>
         </div>
       )}
