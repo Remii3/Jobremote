@@ -13,13 +13,14 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useResetPassword } from "./resetPassword.hooks";
 import { useRouter } from "next/navigation";
+import { StaticBodyCenter } from "@/components/layout/StaticBody";
 
 export default function ResetPasswordPage() {
   const { form, handleSubmit, isPending } = useResetPassword();
   const router = useRouter();
 
   return (
-    <div className="h-full flex items-center justify-center">
+    <StaticBodyCenter>
       <div className="max-w-sm w-full space-y-2">
         <h2 className="text-3xl">Email reset</h2>
         <Separator />
@@ -30,7 +31,9 @@ export default function ResetPasswordPage() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>
+                    Email <span className="text-red-400">*</span>
+                  </FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -60,6 +63,6 @@ export default function ResetPasswordPage() {
           </form>
         </Form>
       </div>
-    </div>
+    </StaticBodyCenter>
   );
 }

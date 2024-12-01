@@ -105,6 +105,7 @@ export function sanitizeUpdateOffer(
   }
 
   if (req.body.technologies) {
+    console.log("req.body.technologies validate", req.body.technologies);
     sanitizedBody.technologies = req.body.technologies.map((technology) =>
       sanitizeHtml(technology, {
         allowedTags: [],

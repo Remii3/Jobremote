@@ -34,8 +34,9 @@ export type CreateOffer = {
   minSalary: number;
   minSalaryYear: number;
   maxSalaryYear: number;
-  technologies: string[];
+  technologies: string;
   currency: string;
+  userId: string;
   logo: {
     key: string;
     url: string;

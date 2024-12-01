@@ -198,9 +198,9 @@ export default function OfferForm({
                         <Button
                           variant="outline"
                           role="combobox"
-                          className="w-[200px] justify-between"
+                          className="w-full flex justify-between font-normal"
                         >
-                          Localizations
+                          {field.value ? field.value : "Localizations"}
                           <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
                         </Button>
                       </PopoverTrigger>
@@ -243,28 +243,6 @@ export default function OfferForm({
                         </Command>
                       </PopoverContent>
                     </Popover>
-                    {/* <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Localization" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <FormMessage />
-                      <SelectContent>
-                        {LOCALIZATIONS.map((localization) => (
-                          <SelectItem
-                            key={localization._id}
-                            value={localization.name}
-                          >
-                            {localization.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select> */}
                   </FormItem>
                 )}
               />
@@ -628,7 +606,7 @@ export default function OfferForm({
                           variant="outline"
                           role="combobox"
                           aria-expanded={techOpen}
-                          className="w-[300px] flex justify-between"
+                          className="w-[300px] flex justify-between font-normal"
                         >
                           Technologies
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />

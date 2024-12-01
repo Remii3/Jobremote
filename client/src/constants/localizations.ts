@@ -205,4 +205,8 @@ export const LOCALIZATIONS: LocalizationType[] = [
   { _id: "VU", name: "Vanuatu", region: "Oceania" },
   { _id: "WF", name: "Wallis and Futuna", region: "Oceania" },
   // ],
-];
+].sort((a, b) => {
+  if (a.name === "Worldwide") return -1;
+  if (b.name === "Worldwide") return 1;
+  return a.name.localeCompare(b.name);
+});

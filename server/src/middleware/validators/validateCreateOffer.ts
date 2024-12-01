@@ -19,7 +19,7 @@ const newOfferSchema = z.object({
     .number()
     .gt(0, { message: "Max salary year must be greater than 0" }),
   technologies: z
-    .array(z.string())
+    .string()
     .min(1, { message: "At least one technology is required" }),
   currency: z.enum(["USD", "EUR"]),
   logo: z
@@ -35,6 +35,7 @@ const newOfferSchema = z.object({
   benefits: z.string().optional(),
   requirements: z.string().optional(),
   duties: z.string().optional(),
+  userId: z.string().min(1, { message: "User ID is required" }),
 });
 
 const ckBodySanitizeBoiler = {
@@ -103,6 +104,7 @@ export function sanitizeCreateOffer(
     benefits,
     duties,
     requirements,
+    userId,
   } = req.body;
 
   const sanitizedBody = {
@@ -122,6 +124,10 @@ export function sanitizeCreateOffer(
       allowedTags: [],
       allowedAttributes: {},
     }),
+    userId: sanitizeHtml(userId, {
+      allowedTags: [],
+      allowedAttributes: {},
+    }),
     employmentType: sanitizeHtml(employmentType, {
       allowedTags: [],
       allowedAttributes: {},
@@ -134,12 +140,10 @@ export function sanitizeCreateOffer(
       allowedTags: [],
       allowedAttributes: {},
     }),
-    technologies: technologies.map((technology) =>
-      sanitizeHtml(technology, {
-        allowedTags: [],
-        allowedAttributes: {},
-      })
-    ),
+    technologies: sanitizeHtml(technologies, {
+      allowedTags: [],
+      allowedAttributes: {},
+    }),
     logo: logo
       ? {
           key: sanitizeHtml(logo.key, {

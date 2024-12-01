@@ -3,12 +3,13 @@
 import { Separator } from "@/components/ui/separator";
 import LoginForm from "../../components/app/login/LoginForm";
 import { useLoginPageHooks } from "./LoginPage.hooks";
+import { StaticBodyCenter } from "@/components/layout/StaticBody";
 
 export default function LoginPage() {
   const { form, loginIsPending, submitHandler } = useLoginPageHooks();
 
   return (
-    <div className="flex items-center justify-center h-full ">
+    <StaticBodyCenter>
       <div className="max-w-xs w-full space-y-2">
         <h2 className="text-3xl">Sign in</h2>
         <Separator />
@@ -18,6 +19,6 @@ export default function LoginPage() {
           form={form}
         />
       </div>
-    </div>
+    </StaticBodyCenter>
   );
 }

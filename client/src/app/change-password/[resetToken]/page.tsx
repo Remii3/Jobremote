@@ -16,6 +16,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 import { useChangePassword } from "./changePassword.hooks";
+import { StaticBodyCenter } from "@/components/layout/StaticBody";
 
 interface ChangePasswordPageProps {
   params: { resetToken: string };
@@ -37,7 +38,7 @@ export default function ChangePasswordPage({
   }
 
   return (
-    <div className="h-full flex items-center justify-center">
+    <StaticBodyCenter>
       <div className="max-w-sm w-full space-y-2">
         <h2 className="text-3xl">Password change</h2>
         <Separator />
@@ -49,7 +50,9 @@ export default function ChangePasswordPage({
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>New Password</FormLabel>
+                    <FormLabel>
+                      New Password <span className="text-red-400">*</span>
+                    </FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Input
@@ -84,7 +87,10 @@ export default function ChangePasswordPage({
                 name="passwordRepeat"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Repeat new password</FormLabel>
+                    <FormLabel>
+                      Repeat new password{" "}
+                      <span className="text-red-400">*</span>
+                    </FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Input
@@ -138,6 +144,6 @@ export default function ChangePasswordPage({
           </form>
         </Form>
       </div>
-    </div>
+    </StaticBodyCenter>
   );
 }

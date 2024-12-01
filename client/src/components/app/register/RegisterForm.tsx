@@ -38,7 +38,9 @@ export default function RegisterForm({
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel>
+                  Email <span className="text-red-400">*</span>
+                </FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
@@ -82,7 +84,8 @@ export default function RegisterForm({
                       />
                     </FormControl>
                     <FormLabel className="cursor-pointer text-sm">
-                      Privacy policy consent
+                      Privacy policy consent{" "}
+                      <span className="text-red-400">*</span>
                     </FormLabel>
                   </div>
                   <FormMessage />

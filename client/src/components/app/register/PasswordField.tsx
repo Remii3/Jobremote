@@ -28,7 +28,9 @@ export default function PasswordField({ form }: PasswordFieldProps) {
       name="password"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Password</FormLabel>
+          <FormLabel>
+            Password <span className="text-red-400">*</span>
+          </FormLabel>
           <FormControl>
             <div className="relative">
               <Input {...field} type={showPassword ? "text" : "password"} />

@@ -24,13 +24,16 @@ export default function PasswordRepeatField({
   function toggleShowPassword() {
     setShowPassword((prev) => !prev);
   }
+
   return (
     <FormField
       control={form.control}
       name="passwordRepeat"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Repeat Password</FormLabel>
+          <FormLabel>
+            Repeat Password <span className="text-red-400">*</span>
+          </FormLabel>
           <FormControl>
             <div className="relative">
               <Input {...field} type={showPassword ? "text" : "password"} />

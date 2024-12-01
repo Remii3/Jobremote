@@ -5,7 +5,7 @@ import { z } from "zod";
 import { loadStripe } from "@stripe/stripe-js";
 import { useToast } from "@/components/ui/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { UserType } from "@/types/types";
 import { handleError } from "@/lib/errorHandler";
 import fetchWithAuth from "@/lib/fetchWithAuth";
@@ -26,7 +26,6 @@ export const useHireRemotely = ({
   fetchUserData: () => void;
 }) => {
   const [selectedLogo, setSelectedLogo] = useState<File[] | null>(null);
-  const [technologies, setTechnologies] = useState<string[]>([]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -126,11 +125,23 @@ export const useHireRemotely = ({
     newOfferFormData.append("localization", offerValues.localization);
     newOfferFormData.append("minSalary", offerValues.minSalary.toString());
     newOfferFormData.append("maxSalary", offerValues.maxSalary.toString());
+    newOfferFormData.append(
+      "minSalaryYear",
+      offerValues.minSalaryYear.toString()
+    );
+    newOfferFormData.append(
+      "maxSalaryYear",
+      offerValues.maxSalaryYear.toString()
+    );
+
     newOfferFormData.append("currency", offerValues.currency);
     newOfferFormData.append("userId", user._id);
     newOfferFormData.append("companyName", offerValues.companyName);
     newOfferFormData.append("pricing", modelValues.pricing);
-    newOfferFormData.append("technologies", JSON.stringify(technologies));
+    newOfferFormData.append(
+      "technologies",
+      JSON.stringify(offerValues.technologies)
+    );
 
     handleCreateOffer(newOfferFormData);
   }
@@ -149,7 +160,6 @@ export const useHireRemotely = ({
     handleTechnologies,
     handleChangeLogo,
     selectedLogo,
-    technologies,
     handlePaymentFormSubmit,
     modelForm,
     isPendingCreateOffer,
