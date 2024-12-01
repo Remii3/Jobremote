@@ -577,40 +577,56 @@ export const webhook = async (req: Request, res: Response) => {
       const session = event.data.object;
       if (session.metadata) {
         if (session.metadata.type === "activation") {
-          const activeUntil = new Date(
-            new Date().setMonth(
-              new Date().getMonth() + Number(session.metadata.activeMonths)
-            )
-          );
+          try {
+            const activeUntil = new Date(
+              new Date().setMonth(
+                new Date().getMonth() + Number(session.metadata.activeMonths)
+              )
+            );
 
-          await OfferModel.findByIdAndUpdate(session.metadata.offerId, {
-            $set: {
-              isPaid: true,
-              activeUntil,
-            },
-          });
-          return res.status(200).json({
-            msg: `Webhook received ${event.id}`,
-            type: `${session.metadata.type} `,
-          });
+            await OfferModel.findByIdAndUpdate(session.metadata.offerId, {
+              $set: {
+                isPaid: true,
+                activeUntil,
+              },
+            });
+            return res.status(200).json({
+              msg: `Webhook received ${event.id}`,
+              type: `${session.metadata.type} `,
+            });
+          } catch (err) {
+            console.error(err);
+            return res.status(500).json({
+              msg: "We failed to activate your offer.",
+            });
+          }
         }
         if (session.metadata.type === "extend") {
-          const activeUntilDate = new Date(session.metadata.activeUntil);
-          const activeMonths = Number(session.metadata.activeMonths);
+          try {
+            const activeUntilDate = new Date(session.metadata.activeUntil);
+            const activeMonths = Number(session.metadata.activeMonths);
 
-          const activeUntil = new Date(
-            activeUntilDate.setMonth(activeUntilDate.getMonth() + activeMonths)
-          );
+            const activeUntil = new Date(
+              activeUntilDate.setMonth(
+                activeUntilDate.getMonth() + activeMonths
+              )
+            );
 
-          await OfferModel.findByIdAndUpdate(session.metadata.offerId, {
-            $set: {
-              activeUntil,
-            },
-          });
-          return res.status(200).json({
-            msg: `Webhook received ${event.id}`,
-            type: `${session.metadata.type} `,
-          });
+            await OfferModel.findByIdAndUpdate(session.metadata.offerId, {
+              $set: {
+                activeUntil,
+              },
+            });
+            return res.status(200).json({
+              msg: `Webhook received ${event.id}`,
+              type: `${session.metadata.type} `,
+            });
+          } catch (err) {
+            console.error(err);
+            return res.status(500).json({
+              msg: "We failed to extend your offer.",
+            });
+          }
         }
       }
     }

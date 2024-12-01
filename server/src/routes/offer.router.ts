@@ -1,5 +1,4 @@
 import multer from "multer";
-import bodyParser from "body-parser";
 import { priceLogic } from "../middleware/priceLogic";
 import {
   sanitizeCreateOffer,
@@ -17,7 +16,6 @@ import {
   offerApply,
   payForOffer,
   updateOffer,
-  webhook,
 } from "../controllers/offer.controller";
 import { authenticateUser } from "../middleware/authenticateUser";
 import {
@@ -82,13 +80,6 @@ router.post(
   "/:id/extend",
   [sanitizePayForOffer, validatePayForOffer, priceLogic],
   extendActiveOffer
-);
-
-// Webhook routes
-router.post(
-  "/webhook",
-  [bodyParser.raw({ type: "application/json" })],
-  webhook
 );
 
 export { router as offerRouter };
