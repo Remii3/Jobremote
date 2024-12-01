@@ -8,6 +8,7 @@ type TagListProps = {
   formatCurrency: (value: number, currency: AllowedCurrenciesType) => string;
   currency: AllowedCurrenciesType;
   changeSalaryHandler: (value: number) => void;
+  salaryType: string;
 };
 
 export default function TagList({
@@ -17,6 +18,7 @@ export default function TagList({
   currency,
   formatCurrency,
   changeSalaryHandler,
+  salaryType,
 }: TagListProps) {
   const checkIsFilterChanged = (filter: any) => {
     for (const key in filter) {
@@ -110,7 +112,7 @@ export default function TagList({
             <li className={badgeVariants({ variant: "outline" })}>
               <button type="button" onClick={() => changeSalaryHandler(0)}>
                 &gt;{formatCurrency(filters.minSalary / 1000, currency)}
-                k/y
+                k/{salaryType}
               </button>
             </li>
           )}

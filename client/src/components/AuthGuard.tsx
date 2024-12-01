@@ -3,6 +3,7 @@ import { WithAuthProps } from "@/types/types";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useEffect } from "react";
+import { StaticBodyCenter } from "./layout/StaticBody";
 
 export default function withAuth<T extends WithAuthProps>(
   Component: React.ComponentType<T>
@@ -19,9 +20,9 @@ export default function withAuth<T extends WithAuthProps>(
 
     if (userDataIsLoading || !user) {
       return (
-        <div className="h-full w-full flex items-center justify-center">
+        <StaticBodyCenter>
           <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
+        </StaticBodyCenter>
       );
     }
     return (

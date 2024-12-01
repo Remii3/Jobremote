@@ -17,7 +17,7 @@ export default function SidebarMenu({
   tabs,
 }: SidebarMenuPropsType) {
   return (
-    <div className="hidden md:flex flex-col justify-between md:col-span-1 md:row-span-2 space-y-6">
+    <div className="hidden md:flex md:sticky top-[99px] flex-col justify-between max-h-[814px] md:col-span-1 md:row-span-2 space-y-6">
       <ul className="space-y-4">
         {tabs.map((tab) => (
           <li key={tab.code}>

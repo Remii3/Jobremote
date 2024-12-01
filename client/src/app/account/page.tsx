@@ -11,7 +11,7 @@ function AccountPage({ user, fetchUserData, logOut }: WithAuthProps) {
   const { changeTab, currentTab, tabs } = useAccountTabs();
 
   return (
-    <div className="h-full w-full max-w-screen-2xl mx-auto content-start grid px-4 py-6 md:p-8 grid-cols-1 md:grid-cols-sideNav_1 md:gap-x-8 gap-y-0 grid-rows-[auto,auto,1fr] md:grid-rows-[auto,1fr]">
+    <div className="w-full max-w-screen-2xl mx-auto grid px-4 py-6 md:p-8 grid-cols-1 md:grid-cols-sideNav_1 md:gap-x-8 gap-y-0 grid-rows-[auto,auto,1fr] md:grid-rows-[auto,1fr]">
       <TabSelector tabs={tabs} currentTab={currentTab} changeTab={changeTab} />
       <SidebarMenu
         tabs={tabs}

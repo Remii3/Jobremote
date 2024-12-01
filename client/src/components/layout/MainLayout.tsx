@@ -20,7 +20,7 @@ export default function MainLayout({
         <UserContextProvider>
           <CurrencyProvider>
             <Header />
-            <main className="h-[calc(100vh-67px)]">{children}</main>
+            <main className="min-h-[calc(100vh-67px)] flex">{children}</main>
             <Toaster />
           </CurrencyProvider>
         </UserContextProvider>

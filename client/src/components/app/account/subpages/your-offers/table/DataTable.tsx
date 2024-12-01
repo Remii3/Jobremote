@@ -70,7 +70,7 @@ export function DataTable<TData, TValue>({
   });
 
   return (
-    <div className="md:col-span-4 md:col-start-2 px-2 flex flex-col max-h-[100%] overflow-hidden">
+    <div className="md:col-span-4 md:col-start-2 px-2 flex flex-col">
       <div className="flex items-center py-4">
         <Input
           placeholder="Filter titles..."
@@ -108,7 +108,7 @@ export function DataTable<TData, TValue>({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <Table className="min-w-[800px] ">
+      <Table className="min-w-[800px]">
         <TableHeader className="sticky top-0 left-0 right-0 bg-background">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
@@ -173,7 +173,7 @@ export function DataTable<TData, TValue>({
           )}
         </TableBody>
       </Table>
-      <div className="flex items-center justify-end space-x-2 py-4">
+      <div className="flex items-center justify-end space-x-2 pt-4">
         <div className="flex-1 text-sm text-muted-foreground">
           {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}{" "}
           pages.

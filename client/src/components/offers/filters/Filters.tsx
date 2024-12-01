@@ -55,7 +55,8 @@ export default function Filters({
   setSortOption,
   sortOption,
 }: FiltersPropsType) {
-  const { formatCurrency, currency, salaryType } = useCurrency();
+  const { formatCurrency, currency, salaryType, convertCurrency } =
+    useCurrency();
   const [showMoreFilters, setShowMoreFilters] = useState(false);
   const [textValue, setTextValue] = useState("");
   const { avTechnologies, avTechnologiesError, avTechnologiesIsLoading } =
@@ -205,6 +206,7 @@ export default function Filters({
         formatCurrency={formatCurrency}
         currency={currency}
         changeSalaryHandler={changeSalaryHandler}
+        salaryType={salaryType}
       />
     </>
   );

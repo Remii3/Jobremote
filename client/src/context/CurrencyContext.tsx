@@ -15,6 +15,13 @@ interface CurrencyContextTypes {
   allowedCurrencies: AllowedCurrenciesType[];
   salaryType: string;
   changeSalaryType: (newSalaryType: string) => void;
+  convertCurrency: ({
+    amount,
+    customCurrency,
+  }: {
+    amount: number;
+    customCurrency: string;
+  }) => number;
 }
 
 const CurrencyContext = createContext<CurrencyContextTypes | undefined>(
@@ -41,6 +48,18 @@ const CurrencyProvider = ({ children }: { children: React.ReactNode }) => {
     localStorage.setItem("currency", newCurrency);
   };
 
+  const convertCurrency = ({
+    amount,
+    customCurrency,
+  }: {
+    amount: number;
+    customCurrency: string;
+  }) => {
+    const productCurrencyRate =
+      currencyRates[customCurrency.toLowerCase()][currency.toLowerCase()];
+    return parseFloat((amount * productCurrencyRate).toFixed(4));
+  };
+
   const formatCurrency = (
     amount: number,
     productCurrency: AllowedCurrenciesType,
@@ -55,10 +74,10 @@ const CurrencyProvider = ({ children }: { children: React.ReactNode }) => {
     const locale = LOCALES[currency] || "en-US";
 
     if (convert && productCurrency !== currency) {
-      const productCurrencyRate =
-        currencyRates[productCurrency.toLowerCase()][currency.toLowerCase()];
-
-      preparedAmount = parseFloat((amount * productCurrencyRate).toFixed(4));
+      preparedAmount = convertCurrency({
+        amount: preparedAmount,
+        customCurrency: productCurrency,
+      });
       return new Intl.NumberFormat(locale, {
         style: "currency",
         currency,
@@ -130,6 +149,7 @@ const CurrencyProvider = ({ children }: { children: React.ReactNode }) => {
         allowedCurrencies,
         changeSalaryType,
         salaryType,
+        convertCurrency,
       }}
     >
       {children}
