@@ -17,6 +17,14 @@ function HireRemotely({ user, fetchUserData }: WithAuthProps) {
     selectedLogo,
     isPendingCreateOffer,
     modelForm,
+    bindSalaries,
+    handleBindSalaries,
+    handleShowBenefits,
+    handleShowDuties,
+    handleShowRequirements,
+    showBenefits,
+    showDuties,
+    showRequirements,
   } = useHireRemotely({ user, fetchUserData });
 
   const [currentStep, setCurrentStep] = useState(1);
@@ -36,6 +44,14 @@ function HireRemotely({ user, fetchUserData }: WithAuthProps) {
             selectedLogo={selectedLogo}
             handleChangeLogo={handleChangeLogo}
             handleTechnologies={handleTechnologies}
+            bindSalaries={bindSalaries}
+            handleBindSalaries={handleBindSalaries}
+            handleShowBenefits={handleShowBenefits}
+            handleShowDuties={handleShowDuties}
+            handleShowRequirements={handleShowRequirements}
+            showBenefits={showBenefits}
+            showDuties={showDuties}
+            showRequirements={showRequirements}
           />
         </div>
       )}

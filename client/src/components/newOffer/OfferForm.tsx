@@ -70,6 +70,14 @@ type OfferFormPropsTypes = {
   selectedLogo: File[] | null;
   handleChangeLogo: (newLogo: File[] | null) => void;
   handleTechnologies: (tech: string) => void;
+  bindSalaries: boolean;
+  handleBindSalaries: () => void;
+  handleShowBenefits: () => void;
+  handleShowDuties: () => void;
+  handleShowRequirements: () => void;
+  showBenefits: boolean;
+  showDuties: boolean;
+  showRequirements: boolean;
 };
 
 export default function OfferForm({
@@ -78,20 +86,21 @@ export default function OfferForm({
   handleTechnologies,
   selectedLogo,
   handleChangeLogo,
+  bindSalaries,
+  handleBindSalaries,
+  handleShowBenefits,
+  handleShowDuties,
+  handleShowRequirements,
+  showBenefits,
+  showDuties,
+  showRequirements,
 }: OfferFormPropsTypes) {
   const [techOpen, setTechOpen] = useState<boolean>(false);
-  const [showRequirements, setShowRequirements] = useState<boolean>(false);
-  const [showDuties, setShowDuties] = useState<boolean>(false);
-  const [showBenefits, setShowBenefits] = useState<boolean>(false);
-  const [bindSalaries, setBindSalaries] = useState<boolean>(true);
+  const [showLocalizationPopup, setShowLocalizationPopup] =
+    useState<boolean>(false);
 
   const { avTechnologies } = useGetAvailableTechnologies();
   const { allowedCurrencies } = useCurrency();
-
-  useEffect(() => {
-    console.log("FormState: ", form.formState);
-    console.log("FormState: is valid", form.formState.isValid);
-  }, [form.formState]);
 
   return (
     <div className="max-w-screen-2xl mx-auto ">
@@ -191,7 +200,10 @@ export default function OfferForm({
                     <FormLabel>
                       Localization <span className="text-red-400">*</span>
                     </FormLabel>
-                    <Popover>
+                    <Popover
+                      open={showLocalizationPopup}
+                      onOpenChange={setShowLocalizationPopup}
+                    >
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
@@ -221,9 +233,10 @@ export default function OfferForm({
                               {LOCALIZATIONS.map((localization) => (
                                 <CommandItem
                                   key={localization._id}
-                                  onSelect={() =>
-                                    field.onChange(localization.name)
-                                  }
+                                  onSelect={() => {
+                                    field.onChange(localization.name);
+                                    setShowLocalizationPopup(false);
+                                  }}
                                 >
                                   <Check
                                     className={cn(
@@ -343,9 +356,8 @@ export default function OfferForm({
                     htmlFor="showRequirementsSwitch"
                   >
                     <Switch
-                      onCheckedChange={() =>
-                        setShowRequirements(!showRequirements)
-                      }
+                      onCheckedChange={handleShowRequirements}
+                      checked={showRequirements}
                       id="showRequirementsSwitch"
                     />
                     Requirements
@@ -374,7 +386,8 @@ export default function OfferForm({
                     htmlFor="showDutiesSwitch"
                   >
                     <Switch
-                      onCheckedChange={() => setShowDuties(!showDuties)}
+                      onCheckedChange={handleShowDuties}
+                      checked={showDuties}
                       id="showDutiesSwitch"
                     />
                     Duties
@@ -403,7 +416,8 @@ export default function OfferForm({
                     htmlFor="showBenefitsSwitch"
                   >
                     <Switch
-                      onCheckedChange={() => setShowBenefits(!showBenefits)}
+                      onCheckedChange={handleShowBenefits}
+                      checked={showBenefits}
                       id="showBenefitsSwitch"
                     />
                     Benefits
@@ -584,7 +598,7 @@ export default function OfferForm({
               <Label className="flex gap-4 items-center">
                 <Switch
                   checked={bindSalaries}
-                  onCheckedChange={() => setBindSalaries((prev) => !prev)}
+                  onCheckedChange={handleBindSalaries}
                 />
                 <span className="text-nowrap">Bind salaries</span>
               </Label>

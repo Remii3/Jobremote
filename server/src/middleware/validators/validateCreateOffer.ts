@@ -10,12 +10,16 @@ const newOfferSchema = z.object({
   localization: z.string().min(1, { message: "Localization is required" }),
   contractType: z.string().min(1, { message: "Contract type is required" }),
   employmentType: z.string().min(1, { message: "Employment type is required" }),
-  maxSalary: z.number().gt(0, { message: "Max salary must be greater than 0" }),
-  minSalary: z.number().gt(0, { message: "Min salary must be greater than 0" }),
-  minSalaryYear: z
+  maxSalary: z.coerce
+    .number()
+    .gt(0, { message: "Max salary must be greater than 0" }),
+  minSalary: z.coerce
+    .number()
+    .gt(0, { message: "Min salary must be greater than 0" }),
+  minSalaryYear: z.coerce
     .number()
     .gt(0, { message: "Min salary year must be greater than 0" }),
-  maxSalaryYear: z
+  maxSalaryYear: z.coerce
     .number()
     .gt(0, { message: "Max salary year must be greater than 0" }),
   technologies: z

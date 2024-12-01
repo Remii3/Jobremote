@@ -26,6 +26,27 @@ export const useHireRemotely = ({
   fetchUserData: () => void;
 }) => {
   const [selectedLogo, setSelectedLogo] = useState<File[] | null>(null);
+  const [showDuties, setShowDuties] = useState<boolean>(false);
+  const [showBenefits, setShowBenefits] = useState<boolean>(false);
+  const [bindSalaries, setBindSalaries] = useState<boolean>(true);
+  const [showRequirements, setShowRequirements] = useState<boolean>(false);
+
+  function handleShowDuties() {
+    setShowDuties(!showDuties);
+  }
+
+  function handleShowBenefits() {
+    setShowBenefits(!showBenefits);
+  }
+
+  function handleShowRequirements() {
+    setShowRequirements(!showRequirements);
+  }
+
+  function handleBindSalaries() {
+    setBindSalaries(!bindSalaries);
+  }
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -163,5 +184,13 @@ export const useHireRemotely = ({
     handlePaymentFormSubmit,
     modelForm,
     isPendingCreateOffer,
+    handleShowDuties,
+    handleShowBenefits,
+    showDuties,
+    showBenefits,
+    showRequirements,
+    bindSalaries,
+    handleShowRequirements,
+    handleBindSalaries,
   };
 };
