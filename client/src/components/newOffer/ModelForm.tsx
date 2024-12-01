@@ -114,6 +114,7 @@ export default function ModelForm({
               onClick={() => changeCurrentStep(1)}
               size={"lg"}
               variant={"outline"}
+              type="button"
             >
               Back to edit data
             </Button>

@@ -136,7 +136,7 @@ export default function Offer({ offer }: OfferProps) {
                       variant={"ghost"}
                       className="rounded-sm text-white hover:bg-violet-400/60 hover:text-white border border-white/20"
                     >
-                      Show original
+                      {showOriginalPrice ? "Show original" : "Show preferred"}
                     </Button>
                   )}
                 </div>

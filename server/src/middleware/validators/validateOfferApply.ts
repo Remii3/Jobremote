@@ -9,11 +9,6 @@ const OfferApplySchema = z.object({
   userId: z.string(),
   description: z.string(),
   name: z.string(),
-  cv: z.object({
-    key: z.string(),
-    url: z.string(),
-    name: z.string(),
-  }),
 });
 
 export function validateOfferApply(

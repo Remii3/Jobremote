@@ -94,7 +94,6 @@ export const useHireRemotely = ({
         return res.data;
       },
       onSuccess: async (param) => {
-        fetchUserData();
         const stripe = await stripePromise;
         if (!stripe) return;
         const { error } = await stripe.redirectToCheckout({
@@ -104,6 +103,8 @@ export const useHireRemotely = ({
         if (error) {
           handleError(error, toast);
         }
+
+        fetchUserData();
         queryClient.invalidateQueries({ queryKey: ["offers-list"] });
         offerForm.reset();
       },
@@ -118,6 +119,7 @@ export const useHireRemotely = ({
 
     const offerValues = offerForm.getValues();
     const modelValues = modelForm.getValues();
+
     if (selectedLogo) {
       newOfferFormData.append("logo", selectedLogo[0]);
     }

@@ -98,7 +98,7 @@ export default function OfferDetailsContent({
       >
         <section className="space-y-6">
           <div className="space-y-6">
-            <div className="p-5 bg-gradient-to-br h-[142px] justify-between flex-wrap gap-2 flex items-center shadow from-indigo-500  to-violet-400  dark:from-indigo-800 dark:to-violet-700 lg:rounded-b-lg w-full">
+            <div className="p-5 bg-gradient-to-br min-h-[142px] justify-between flex-wrap gap-2 flex items-center shadow from-indigo-500  to-violet-400  dark:from-indigo-800 dark:to-violet-700 lg:rounded-b-lg w-full">
               <div className="flex gap-4">
                 {offer.logo?.url ? (
                   <div className="rounded-full overflow-hidden bg-background border border-input h-16 w-16">
@@ -150,7 +150,7 @@ export default function OfferDetailsContent({
                       variant={"ghost"}
                       className="rounded-sm text-white hover:bg-violet-400/60 hover:text-white border border-white/20"
                     >
-                      Show original
+                      {showOriginalPrice ? "Show original" : "Show preferred"}
                     </Button>
                   )}
                 </div>

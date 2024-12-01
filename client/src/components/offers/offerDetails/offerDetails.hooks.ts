@@ -50,6 +50,7 @@ export function useOfferDetails({ toggleSuccessApplied, offerId }: Props) {
     applyFormData.append("description", values.description || "");
     applyFormData.append("offerId", offerId);
     applyFormData.append("cv", values.cv[0]);
+
     if (user) {
       applyFormData.append("userId", user._id);
     }
