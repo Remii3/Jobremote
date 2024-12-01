@@ -55,7 +55,7 @@ export default function Filters({
   setSortOption,
   sortOption,
 }: FiltersPropsType) {
-  const { formatCurrency, currency } = useCurrency();
+  const { formatCurrency, currency, salaryType } = useCurrency();
   const [showMoreFilters, setShowMoreFilters] = useState(false);
   const [textValue, setTextValue] = useState("");
   const { avTechnologies, avTechnologiesError, avTechnologiesIsLoading } =
@@ -124,7 +124,7 @@ export default function Filters({
                       filters.minSalary === 0 ? 0 : filters.minSalary / 1000,
                       currency
                     )}
-                    {currency === "USD" ? "/year" : "/month"}
+                    k{salaryType === "yearly" ? "/year" : "/month"}
                   </span>
                 </div>
                 <Slider
@@ -149,13 +149,13 @@ export default function Filters({
           <Dialog open={showMoreFilters} onOpenChange={setShowMoreFilters}>
             <DialogTrigger asChild className="block">
               <Button variant={"outline"} className="flex ">
-                <span className="hidden sm:inline mr-1">More filters</span>
+                <span className="hidden sm:inline mr-1">All filters</span>
                 <Settings2 className="h-5 w-5" />
               </Button>
             </DialogTrigger>
             <DialogContent className="overflow-hidden p-0">
               <DialogHeader className="px-4 pt-4">
-                <DialogTitle>Fitlers</DialogTitle>
+                <DialogTitle>Filters</DialogTitle>
                 <DialogDescription className="sr-only">
                   Options for filters
                 </DialogDescription>

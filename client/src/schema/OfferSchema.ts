@@ -1,22 +1,38 @@
 import { z } from "zod";
 
+const currencies = ["USD", "EUR"] as const;
+
 export const CreateOfferSchema = z
   .object({
-    title: z.string(),
-    content: z.string(),
-    experience: z.string(),
-    employmentType: z.string(),
-    localization: z.string(),
-    contractType: z.string(),
+    title: z.string().min(1, { message: "Title is required" }),
+    content: z.string().min(1, { message: "Content is required" }),
+    requirements: z.string().optional(),
+    benefits: z.string().optional(),
+    duties: z.string().optional(),
+    experience: z.string().min(1, { message: "Experience is required" }),
+    employmentType: z
+      .string()
+      .min(1, { message: "Employment type is required" }),
+    localization: z.string().min(1, { message: "Localization is required" }),
+    contractType: z.string().min(1, { message: "Contract type is required" }),
     minSalary: z.coerce
       .number()
       .gt(0, { message: "Min salary must be greater than 0" }),
     maxSalary: z.coerce
       .number()
       .gt(0, { message: "Max salary must be greater than 0" }),
-    currency: z.string(),
-    companyName: z.string(),
+    minSalaryYear: z.coerce.number().gt(0, {
+      message: "Min salary year must be greater than 0",
+    }),
+    maxSalaryYear: z.coerce.number().gt(0, {
+      message: "Max salary year must be greater than 0",
+    }),
+    currency: z.enum(currencies),
+    companyName: z.string().min(1, { message: "Company name is required" }),
     redirectLink: z.string().optional(),
+    technologies: z
+      .array(z.string().min(1))
+      .min(1, { message: "At least one technology is required" }),
   })
   .refine(
     (data) => {
@@ -35,25 +51,41 @@ export const UpdateOfferSchema = z
   .object({
     title: z.string().optional(),
     content: z.string().optional(),
+    requirements: z.string().optional(),
+    benefits: z.string().optional(),
+    duties: z.string().optional(),
     experience: z.string().optional(),
     employmentType: z.string().optional(),
     companyName: z.string().optional(),
     contractType: z.string().optional(),
     localization: z.string().optional(),
-    minSalary: z
+    minSalary: z.coerce
       .number()
       .optional()
       .refine((data) => data === undefined || data > 0, {
         message: "Min salary must be greater than 0",
       }),
-    maxSalary: z
+    maxSalary: z.coerce
       .number()
       .optional()
       .refine((data) => data === undefined || data > 0, {
         message: "Max salary must be greater than 0",
       }),
+    minSalaryYear: z.coerce
+      .number()
+      .optional()
+      .refine((data) => data === undefined || data > 0, {
+        message: "Min salary must be greater than 0",
+      }),
+    maxSalaryYear: z.coerce
+      .number()
+      .optional()
+      .refine((data) => data === undefined || data > 0, {
+        message: "Max salary yearly must be greater than 0",
+      }),
     currency: z.string().optional(),
     redirectLink: z.string().optional(),
+    technologies: z.array(z.string()),
   })
   .refine(
     (data) => {

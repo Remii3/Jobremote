@@ -32,7 +32,7 @@ type YourOffersProps = {
 
 export default function YourOffers({ user, fetchUserData }: YourOffersProps) {
   const queryClient = useQueryClient();
-  const { formatCurrency, currency } = useCurrency();
+  const { formatCurrency, currency, salaryType } = useCurrency();
 
   const {
     userOffersList,
@@ -74,8 +74,14 @@ export default function YourOffers({ user, fetchUserData }: YourOffersProps) {
       accessorKey: "salary",
       header: () => <div className="text-right">Salary</div>,
       cell: ({ row }) => {
-        const minSalary = row.original.minSalary;
-        const maxSalary = row.original.maxSalary;
+        const minSalary =
+          salaryType === "yearly"
+            ? row.original.minSalaryYear
+            : row.original.minSalary;
+        const maxSalary =
+          salaryType === "yearly"
+            ? row.original.maxSalaryYear
+            : row.original.maxSalary;
         const formattedMin = formatCurrency(minSalary, currency);
         const formattedMax = formatCurrency(maxSalary, currency);
         return (

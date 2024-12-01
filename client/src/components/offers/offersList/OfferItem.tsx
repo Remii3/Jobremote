@@ -15,7 +15,7 @@ export default function OfferItem({
   offerData,
   isApplied,
 }: OfferItemTypes) {
-  const { formatCurrency } = useCurrency();
+  const { formatCurrency, salaryType } = useCurrency();
   const {
     title,
     logo,
@@ -29,6 +29,8 @@ export default function OfferItem({
     currency,
     createdAt,
     companyName,
+    minSalaryYear,
+    maxSalaryYear,
   } = offerData;
 
   function showOfferHandler() {
@@ -41,7 +43,8 @@ export default function OfferItem({
   );
 
   const isYoungerThan2Days = daysOld < 3;
-
+  const properMinSalary = salaryType === "yearly" ? minSalaryYear : minSalary;
+  const properMaxSalary = salaryType === "yearly" ? maxSalaryYear : maxSalary;
   return (
     <li>
       <button
@@ -88,12 +91,12 @@ export default function OfferItem({
           </div>
           <div className="flex gap-2 col-start-2 col-span-1 justify-end items-center">
             <span className="text-end font-medium text-green-500 hidden sm:inline">
-              {minSalary === maxSalary ? (
-                <span>{formatCurrency(minSalary, currency)}</span>
+              {properMinSalary === properMaxSalary ? (
+                <span>{formatCurrency(properMinSalary, currency)}</span>
               ) : (
                 <span>
-                  <span>{formatCurrency(minSalary, currency)}</span> -{" "}
-                  <span>{formatCurrency(maxSalary, currency)}</span>
+                  <span>{formatCurrency(properMinSalary, currency)}</span> -{" "}
+                  <span>{formatCurrency(properMaxSalary, currency)}</span>
                 </span>
               )}
             </span>
@@ -112,12 +115,12 @@ export default function OfferItem({
               </div>
             </div>
             <span className="text-start font-medium text-green-500 inline sm:hidden col-start-1 row-start-2">
-              {minSalary === maxSalary ? (
-                <span>{formatCurrency(minSalary, currency)}</span>
+              {properMinSalary === properMaxSalary ? (
+                <span>{formatCurrency(properMinSalary, currency)}</span>
               ) : (
                 <span>
-                  <span>{formatCurrency(minSalary, currency)}</span> -{" "}
-                  <span>{formatCurrency(maxSalary, currency)}</span>
+                  <span>{formatCurrency(properMinSalary, currency)}</span> -{" "}
+                  <span>{formatCurrency(properMaxSalary, currency)}</span>
                 </span>
               )}
             </span>

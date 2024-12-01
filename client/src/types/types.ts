@@ -1,15 +1,22 @@
 export type AllowedCurrenciesType = "USD" | "EUR";
 
+export type AllowedSalaryTypes = "yearly" | "monthly";
+
 export type OfferType = {
   _id: string;
   title: string;
   content: string;
+  requirements: string;
+  benefits: string;
+  duties: string;
   experience: string;
   localization: string;
   contractType: string;
   employmentType: string;
   maxSalary: number;
   minSalary: number;
+  minSalaryYear: number;
+  maxSalaryYear: number;
   currency: AllowedCurrenciesType;
   technologies: string[];
   logo: { key: string; url: string; name: string } | null;

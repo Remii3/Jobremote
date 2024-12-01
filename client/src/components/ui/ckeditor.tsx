@@ -20,10 +20,12 @@ export function OfferCkEditor({
   value,
   onChange,
   onBlur,
+  placeholder,
 }: {
-  value: string;
+  value: string | undefined;
   onChange: (value: string) => void;
   onBlur: () => void;
+  placeholder?: string;
 }) {
   return (
     <CKEditor
@@ -78,7 +80,7 @@ export function OfferCkEditor({
             },
           ],
         },
-        placeholder: "Your offer description...",
+        placeholder: placeholder || "Your offer description...",
       }}
       data={value || ""}
       onChange={(event, editor) => {

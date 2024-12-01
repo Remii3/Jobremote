@@ -12,7 +12,15 @@ const newOfferSchema = z.object({
   employmentType: z.string().min(1, { message: "Employment type is required" }),
   maxSalary: z.number().gt(0, { message: "Max salary must be greater than 0" }),
   minSalary: z.number().gt(0, { message: "Min salary must be greater than 0" }),
-  technologies: z.array(z.string()),
+  minSalaryYear: z
+    .number()
+    .gt(0, { message: "Min salary year must be greater than 0" }),
+  maxSalaryYear: z
+    .number()
+    .gt(0, { message: "Max salary year must be greater than 0" }),
+  technologies: z
+    .array(z.string())
+    .min(1, { message: "At least one technology is required" }),
   currency: z.enum(["USD", "EUR"]),
   logo: z
     .object({
@@ -23,8 +31,40 @@ const newOfferSchema = z.object({
     .nullable(),
   companyName: z.string().min(1, { message: "Company name is required" }),
   pricing: z.string(),
-  redirectLink: z.string(),
+  redirectLink: z.string().optional(),
+  benefits: z.string().optional(),
+  requirements: z.string().optional(),
+  duties: z.string().optional(),
 });
+
+const ckBodySanitizeBoiler = {
+  allowedTags: [
+    "p",
+    "h2",
+    "h3",
+    "h4",
+    "ul",
+    "li",
+    "ol",
+    "a",
+    "i",
+    "u",
+    "s",
+    "strong",
+    "blockquote",
+  ],
+  allowedAttributes: {
+    "*": ["style", "class", "id"],
+    a: ["href", "name", "target"],
+  },
+  allowedSchemes: ["http", "https", "mailto", "tel"],
+  allowedSchemesByTag: {
+    a: ["http", "https", "mailto", "tel"],
+  },
+  transformTags: {
+    a: sanitizeHtml.simpleTransform("a", { rel: "nofollow" }),
+  },
+};
 
 export function validateCreateOffer(
   req: Request<{}, {}, CreateOffer>,
@@ -60,6 +100,9 @@ export function sanitizeCreateOffer(
     redirectLink,
     technologies,
     title,
+    benefits,
+    duties,
+    requirements,
   } = req.body;
 
   const sanitizedBody = {
@@ -115,14 +158,13 @@ export function sanitizeCreateOffer(
       : null,
     maxSalary: Number(maxSalary),
     minSalary: Number(minSalary),
+    minSalaryYear: Number(req.body.minSalaryYear),
+    maxSalaryYear: Number(req.body.maxSalaryYear),
     pricing: sanitizeHtml(pricing, {
       allowedTags: [],
       allowedAttributes: {},
     }),
-    redirectLink: sanitizeHtml(redirectLink, {
-      allowedTags: [],
-      allowedAttributes: {},
-    }),
+
     content: sanitizeHtml(content, {
       allowedTags: [
         "p",
@@ -152,6 +194,25 @@ export function sanitizeCreateOffer(
       },
     }),
   };
+
+  if (benefits) {
+    req.body.benefits = sanitizeHtml(benefits, ckBodySanitizeBoiler);
+  }
+
+  if (requirements) {
+    req.body.requirements = sanitizeHtml(requirements, ckBodySanitizeBoiler);
+  }
+
+  if (duties) {
+    req.body.duties = sanitizeHtml(duties, ckBodySanitizeBoiler);
+  }
+
+  if (redirectLink) {
+    req.body.redirectLink = sanitizeHtml(redirectLink, {
+      allowedTags: [],
+      allowedAttributes: {},
+    });
+  }
 
   req.body = sanitizedBody;
 

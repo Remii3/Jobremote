@@ -5,6 +5,9 @@ export const OfferSchema = z.object({
   _id: z.instanceof(Types.ObjectId),
   title: z.string().min(1, { message: "Title is required" }),
   content: z.string().min(1, { message: "Content is required" }),
+  requirements: z.string().optional(),
+  benefits: z.string().optional(),
+  duties: z.string().optional(),
   experience: z.string().min(1, { message: "Experience is required" }),
   localization: z.string().min(1, { message: "Localization is required" }),
   contractType: z.string().min(1, { message: "Contract type is required" }),
@@ -15,6 +18,12 @@ export const OfferSchema = z.object({
   minSalary: z.coerce
     .number()
     .gt(0, { message: "Min salary must be greater than 0" }),
+  minSalaryYear: z.coerce
+    .number()
+    .gt(0, { message: "Min salary year must be greater than 0" }),
+  maxSalaryYear: z.coerce.number().gt(0, {
+    message: "Max salary year must be greater than 0",
+  }),
   technologies: z.array(z.string()),
   currency: z.enum(["USD", "EUR"]),
   logo: z

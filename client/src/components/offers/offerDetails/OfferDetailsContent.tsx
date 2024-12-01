@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/extension/file-upload";
 import Link from "next/link";
 import { useOfferDetails } from "./offerDetails.hooks";
+import { useMemo } from "react";
 
 interface OfferDetailsContentProps {
   offer: OfferType;
@@ -58,65 +59,104 @@ export default function OfferDetailsContent({
   toggleSuccessApplied,
   changeFilters,
 }: OfferDetailsContentProps) {
-  const { form, isPendingApplyForOffer, submitApplicationHandler } =
-    useOfferDetails({ toggleSuccessApplied, offerId: offer._id });
-  const { formatCurrency, currency } = useCurrency();
+  const {
+    form,
+    isPendingApplyForOffer,
+    submitApplicationHandler,
+    showOriginalPrice,
+    toggleOriginalPrice,
+  } = useOfferDetails({ toggleSuccessApplied, offerId: offer._id });
+  const { formatCurrency, currency, salaryType } = useCurrency();
+
+  const properMinSalary =
+    salaryType === "yearly" ? offer.minSalaryYear : offer.minSalary;
+  const properMaxSalary =
+    salaryType === "yearly" ? offer.maxSalaryYear : offer.maxSalary;
+
+  const formattedMinPrice = useMemo(() => {
+    if (showOriginalPrice) {
+      return formatCurrency(properMinSalary, offer.currency, false);
+    } else {
+      return formatCurrency(properMinSalary, offer.currency);
+    }
+  }, [showOriginalPrice, formatCurrency, properMinSalary, offer.currency]);
+
+  const formattedMaxPrice = useMemo(() => {
+    if (showOriginalPrice) {
+      return formatCurrency(properMaxSalary, offer.currency, false);
+    } else {
+      return formatCurrency(properMaxSalary, offer.currency);
+    }
+  }, [showOriginalPrice, formatCurrency, properMaxSalary, offer.currency]);
 
   return (
     <Form {...form}>
       <form
-        className="space-y-4 flex flex-col h-full pt-4"
+        className="space-y-4 flex flex-col h-full"
         onSubmit={form.handleSubmit(submitApplicationHandler)}
         encType="multipart/form-data"
       >
         <section className="space-y-6">
-          <div className="px-4 space-y-6">
-            <div className="lg:p-[25px] p-4 bg-gradient-to-br shadow from-indigo-500  to-violet-400  dark:from-indigo-800 dark:to-violet-700 lg:rounded-lg w-full space-y-4">
-              <div className="flex gap-2 justify-between flex-wrap ">
-                <div className="flex gap-4">
-                  {offer.logo?.url ? (
-                    <div className="rounded-full overflow-hidden bg-background border border-input">
-                      <Image
-                        src={offer.logo.url}
-                        alt="Company logo"
-                        height={60}
-                        width={60}
-                        className="object-scale-down h-16 w-16 object-center"
-                      />
-                    </div>
-                  ) : (
-                    <div className="rounded-full overflow-hidden bg-background border border-input">
-                      <div className="h-16 w-16 bg-muted"></div>
-                    </div>
-                  )}
-                  <div className="space-y-2">
-                    <h2 className="text-2xl font-semibold text-white">
-                      {offer.title}
-                    </h2>
-                    <div className="flex gap-4">
-                      <Button
-                        variant={"link"}
-                        type="button"
-                        className="flex items-center gap-2 text-white font-medium p-0"
-                        onClick={() =>
-                          changeFilters("keyword", offer.companyName)
-                        }
-                      >
-                        <Building2 className="h-5 w-5" />
-                        <span>{offer.companyName}</span>
-                      </Button>
-                    </div>
+          <div className="space-y-6">
+            <div className="p-5 bg-gradient-to-br h-[142px] justify-between flex-wrap gap-2 flex items-center shadow from-indigo-500  to-violet-400  dark:from-indigo-800 dark:to-violet-700 lg:rounded-b-lg w-full">
+              <div className="flex gap-4">
+                {offer.logo?.url ? (
+                  <div className="rounded-full overflow-hidden bg-background border border-input h-16 w-16">
+                    <Image
+                      src={offer.logo.url}
+                      alt="Company logo"
+                      height={60}
+                      width={60}
+                      className="object-scale-down h-16 w-16 object-center"
+                    />
+                  </div>
+                ) : (
+                  <div className="rounded-full overflow-hidden bg-background border border-input h-16 w-16">
+                    <div className="h-16 w-16 bg-muted"></div>
+                  </div>
+                )}
+                <div className="space-y-2">
+                  <h2 className="text-2xl font-semibold text-white">
+                    {offer.title}
+                  </h2>
+                  <div className="flex gap-4">
+                    <Button
+                      variant={"link"}
+                      type="button"
+                      className="flex items-center gap-2 text-white font-medium p-0"
+                      onClick={() =>
+                        changeFilters("keyword", offer.companyName)
+                      }
+                    >
+                      <Building2 className="h-5 w-5" />
+                      <span>{offer.companyName}</span>
+                    </Button>
                   </div>
                 </div>
-                <p className="p-3 bg-violet-600/50 dark:bg-violet-800/50 font-medium text-lg text-white flex items-center rounded-md">
-                  <Wallet className="h-6 w-6 mr-2" />
-                  <span>{formatCurrency(offer.minSalary, offer.currency)}</span>
-                  <span className="px-1">-</span>
-                  <span>{formatCurrency(offer.maxSalary, offer.currency)}</span>
-                </p>
+              </div>
+              <div className="py-3 px-5 bg-gradient-to-br from-violet-500/30 to-indigo-500/20  dark:to-indigo-500/30 dark:from-violet-400/20 font-medium text-lg text-white flex items-center gap-4 rounded-md backdrop-blur-md  shadow-black/30">
+                <div className="flex flex-col gap-3 items-center">
+                  <span className="flex items-center gap-2">
+                    <Wallet className="h-6 w-6 inline-block" />
+                    <span>
+                      <span>{formattedMinPrice}</span>
+                      <span className="px-1">-</span>
+                      <span>{formattedMaxPrice}</span>
+                    </span>
+                  </span>
+                  {currency !== offer.currency && (
+                    <Button
+                      onClick={toggleOriginalPrice}
+                      variant={"ghost"}
+                      className="rounded-sm text-white hover:bg-violet-400/60 hover:text-white border border-white/20"
+                    >
+                      Show original
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
-            <div className="px-4 lg:px-0 grid gap-6 grid-rows-2 grid-cols-2 sm:grid-rows-1 sm:grid-cols-4 lg:grid-rows-2 lg:grid-cols-2 xl:grid-rows-1 xl:grid-cols-4">
+            <div className="px-4 grid gap-6 grid-rows-2 grid-cols-2 sm:grid-rows-1 sm:grid-cols-4 lg:grid-rows-2 lg:grid-cols-2 xl:grid-rows-1 xl:grid-cols-4">
               <div className="flex bg-green-50 dark:bg-green-700/50 rounded-md p-3 items-center justify-start h-20 shadow">
                 <FileText className="h-full w-10 text-teal-400/90 mr-2" />
                 <p className="flex flex-col">
@@ -172,15 +212,47 @@ export default function OfferDetailsContent({
               </div>
             </div>
             <div className="px-4 lg:px-0">
-              <h3 className="text-2xl font-medium mb-2">Job description</h3>
+              <h3 className="text-2xl font-medium mb-2">Description</h3>
               <div
-                id="offerContent"
                 tabIndex={0}
                 aria-label="Scrollable offer content"
                 className="prose max-w-[85ch] text-foreground"
                 dangerouslySetInnerHTML={{ __html: offer.content }}
               />
             </div>
+            {offer.requirements && (
+              <div className="px-4 lg:px-0">
+                <h3 className="text-2xl font-medium mb-2">Requirements</h3>
+                <div
+                  tabIndex={0}
+                  aria-label="Scrollable offer content"
+                  className="prose max-w-[85ch] text-foreground"
+                  dangerouslySetInnerHTML={{ __html: offer.requirements }}
+                />
+              </div>
+            )}
+            {offer.benefits && (
+              <div className="px-4 lg:px-0">
+                <h3 className="text-2xl font-medium mb-2">Benefits</h3>
+                <div
+                  tabIndex={0}
+                  aria-label="Scrollable offer content"
+                  className="prose max-w-[85ch] text-foreground"
+                  dangerouslySetInnerHTML={{ __html: offer.benefits }}
+                />
+              </div>
+            )}
+            {offer.duties && (
+              <div className="px-4 lg:px-0">
+                <h3 className="text-2xl font-medium mb-2">Duties</h3>
+                <div
+                  tabIndex={0}
+                  aria-label="Scrollable offer content"
+                  className="prose max-w-[85ch] text-foreground"
+                  dangerouslySetInnerHTML={{ __html: offer.duties }}
+                />
+              </div>
+            )}
             <div className="px-4 lg:px-0">
               <h3 className="text-2xl font-medium mb-2">Apply for this job</h3>
               {offer.redirectLink ? (
@@ -312,9 +384,9 @@ export default function OfferDetailsContent({
         <div className="sticky bottom-0 right-0 border-t border-t-input bg-background flex justify-between px-4 lg:px-4 py-4 h-[72px] w-full">
           <div>
             <div className="flex font-medium text-green-500">
-              <span>{formatCurrency(offer.minSalary, offer.currency)}</span>
+              <span>{formattedMinPrice}</span>
               <span className="px-1">-</span>
-              <span>{formatCurrency(offer.maxSalary, offer.currency)}</span>
+              <span>{formattedMaxPrice}</span>
             </div>
             <span className="text-slate-500">{offer.companyName}</span>
           </div>

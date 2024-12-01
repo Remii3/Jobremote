@@ -1,4 +1,10 @@
-export const LOCALIZATIONS = [
+type LocalizationType = {
+  _id: string;
+  name: string;
+  region: string;
+};
+
+export const LOCALIZATIONS: LocalizationType[] = [
   // Worldwide: [
   { _id: "WW", name: "Worldwide", region: "Worldwide" },
   // ],

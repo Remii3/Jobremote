@@ -33,6 +33,7 @@ export default function Localizations({
   avLocalizations,
 }: LocalizationsProps) {
   const [localizationOpen, setLocalizationOpen] = useState(false);
+
   return (
     <>
       <Popover open={localizationOpen} onOpenChange={setLocalizationOpen}>
@@ -48,30 +49,40 @@ export default function Localizations({
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[200px] p-0">
-          <Command>
+          <Command
+            filter={(value, search) => {
+              if (
+                value.toLocaleLowerCase().includes(search.toLocaleLowerCase())
+              )
+                return 1;
+              return 0;
+            }}
+          >
             <CommandInput placeholder="Search localization..." />
             <CommandList>
               <CommandEmpty>No localization found.</CommandEmpty>
               <CommandGroup>
-                {avLocalizations.map((localization) => (
-                  <CommandItem
-                    key={localization._id}
-                    value={localization.name}
-                    onSelect={(currentValue) => {
-                      changeTextsHandler("localization", currentValue);
-                    }}
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        localizations.includes(localization.name)
-                          ? "opacity-100"
-                          : "opacity-0"
-                      )}
-                    />
-                    {localization.name}
-                  </CommandItem>
-                ))}
+                {avLocalizations.map((localization) => {
+                  return (
+                    <CommandItem
+                      key={localization._id}
+                      value={localization.name}
+                      onSelect={(currentValue) => {
+                        changeTextsHandler("localization", currentValue);
+                      }}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          localizations.includes(localization.name)
+                            ? "opacity-100"
+                            : "opacity-0"
+                        )}
+                      />
+                      {localization.name}
+                    </CommandItem>
+                  );
+                })}
               </CommandGroup>
             </CommandList>
           </Command>

@@ -15,6 +15,18 @@ const offerSchema = new Schema<OfferType>(
       type: String,
       required: true,
     },
+    benefits: {
+      type: String,
+      default: "",
+    },
+    requirements: {
+      type: String,
+      default: "",
+    },
+    duties: {
+      type: String,
+      default: "",
+    },
     experience: {
       type: String,
       required: true,
@@ -36,6 +48,14 @@ const offerSchema = new Schema<OfferType>(
       required: true,
     },
     minSalary: {
+      type: Number,
+      required: true,
+    },
+    minSalaryYear: {
+      type: Number,
+      required: true,
+    },
+    maxSalaryYear: {
       type: Number,
       required: true,
     },

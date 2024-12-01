@@ -23,12 +23,17 @@ export type PasswordChange = {
 export type CreateOffer = {
   title: string;
   content: string;
+  requirements?: string;
+  benefits?: string;
+  duties?: string;
   experience: string;
   localization: string;
   contractType: string;
   employmentType: string;
   maxSalary: number;
   minSalary: number;
+  minSalaryYear: number;
+  maxSalaryYear: number;
   technologies: string[];
   currency: string;
   logo: {
@@ -38,7 +43,7 @@ export type CreateOffer = {
   } | null;
   companyName: string;
   pricing: string;
-  redirectLink: string;
+  redirectLink?: string;
 };
 
 export type UpdateOffer = {
@@ -95,5 +100,7 @@ export type GetOffers = {
     keyword: string[];
     contractType: string[];
     minSalary: string;
+    clientCurrency: string;
+    salaryType: string;
   };
 };

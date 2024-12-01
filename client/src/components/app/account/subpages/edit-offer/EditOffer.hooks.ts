@@ -24,9 +24,6 @@ export function useEditOffer({
 }: EditOfferProps) {
   const { toast } = useToast();
   const [selectedLogo, setSelectedLogo] = useState<File[] | null>(null);
-  const [technologies, setTechnologies] = useState<string[]>(
-    offerData.technologies
-  );
 
   const [techOpen, setTechOpen] = useState(false);
   const [localizationOpen, setLocalizationOpen] = useState(false);
@@ -45,6 +42,7 @@ export function useEditOffer({
       maxSalary: offerData.maxSalary,
       currency: offerData.currency,
       redirectLink: offerData.redirectLink || "",
+      technologies: offerData.technologies,
     },
   });
 
@@ -74,17 +72,6 @@ export function useEditOffer({
       formData.append(key, value as string);
     });
 
-    const arrayAreEqual = (arr1: string[], arr2: string[]) => {
-      if (arr1.length === arr2.length) return true;
-      return arr1.every((tech) => arr2.includes(tech));
-    };
-
-    const techChanged = !arrayAreEqual(technologies, offerData.technologies);
-
-    if (techChanged) {
-      formData.append("technologies", JSON.stringify(technologies));
-    }
-
     if (selectedLogo) {
       formData.append("logo", selectedLogo[0]);
     }
@@ -111,17 +98,18 @@ export function useEditOffer({
         maxSalary: offerData.maxSalary,
         currency: offerData.currency,
         redirectLink: offerData.redirectLink,
+        technologies: offerData.technologies,
       });
     }
   }, [form, offerData]);
 
   function handleTechnologies(technology: string) {
-    setTechnologies((prevState) => {
-      if (prevState.includes(technology)) {
-        return prevState.filter((tech) => tech !== technology);
-      }
-      return [...prevState, technology];
-    });
+    const technologies = form.getValues().technologies || [];
+    const updated = technologies.includes(technology)
+      ? technologies.filter((tech) => tech !== technology)
+      : [...technologies, technology];
+
+    form.setValue("technologies", updated);
   }
 
   function changeTechOpenHandler(newVal: boolean) {
@@ -138,7 +126,6 @@ export function useEditOffer({
     updateOfferIsLoading,
     handleChangeLogo,
     selectedLogo,
-    technologies,
     handleTechnologies,
     techOpen,
     changeTechOpenHandler,

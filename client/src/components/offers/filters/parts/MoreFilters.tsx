@@ -47,7 +47,7 @@ export default function MoreFilters({
   const { avTechnologies } = useGetAvailableTechnologies();
   return (
     <div className="space-y-4 overflow-y-auto px-4 py-2 border-t flex flex-col">
-      <FilterComponent label="Salary" className="block lg:hidden">
+      <FilterComponent label="Salary">
         <div className="space-y-2">
           <div className="flex justify-between gap-3 mb-3">
             <span className="text-sm">Minimum</span>
@@ -68,10 +68,7 @@ export default function MoreFilters({
           />
         </div>
       </FilterComponent>
-      <FilterComponent
-        label="Localizations & Technologies"
-        className="block lg:hidden"
-      >
+      <FilterComponent label="Localizations & Technologies">
         <div className="grid grid-cols-2 gap-2">
           <Localizations
             localizations={filters.localization}

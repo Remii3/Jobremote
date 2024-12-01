@@ -42,7 +42,15 @@ export default function LocalizationPopover({
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-[200px] p-0">
-            <Command>
+            <Command
+              filter={(value, search) => {
+                if (
+                  value.toLocaleLowerCase().includes(search.toLocaleLowerCase())
+                )
+                  return 1;
+                return 0;
+              }}
+            >
               <CommandInput placeholder="Search localization..." />
               <CommandList>
                 <CommandEmpty>No localization found.</CommandEmpty>

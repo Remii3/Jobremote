@@ -66,7 +66,7 @@ export const createOffer = async (req: Request, res: Response) => {
     });
 
     return res.status(201).json({
-      msg: "Your new offer is successfuly posted.",
+      msg: "Your new offer is successfully posted.",
       sessionId: session.id,
     });
   } catch (err) {
@@ -87,46 +87,70 @@ export const getOffers = async (
   const skip = (page - 1) * limit;
   try {
     const filters: any = {};
+    const queryFilters = req.query.filters || {};
 
-    type FilterKeys = {
-      employmentType: string[];
-      localization: string[];
-      experience: string[];
-      technologies: string[];
-      keyword: string[];
-      contractType: string[];
-      minSalary: string;
-    };
+    if (queryFilters.keyword) {
+      const keywords = Array.isArray(queryFilters.keyword)
+        ? queryFilters.keyword
+        : [queryFilters.keyword];
+      filters.$and = keywords.map((kw: string) => ({
+        $or: [
+          { title: { $regex: kw, $options: "i" } },
+          { content: { $regex: kw, $options: "i" } },
+          { companyName: { $regex: kw, $options: "i" } },
+        ],
+      }));
+    }
 
-    const queryFilters = req.query.filters as FilterKeys;
+    if (queryFilters.minSalary && queryFilters.clientCurrency) {
+      const userMinSalary = parseFloat(queryFilters.minSalary);
 
-    const filterKeys = {
-      employmentType: "$in",
-      localization: "$in",
-      experience: "$in",
-      technologies: "$in",
-      contractType: "$in",
-      minSalary: "$gte",
-      keyword: "$and",
-    };
-
-    Object.entries(filterKeys).forEach(([key, operator]) => {
-      const filterValue = queryFilters[key as keyof FilterKeys] as string[];
-
-      if (filterValue && filterValue.length > 0) {
-        if (key === "keyword") {
-          filters[operator] = filterValue.map((kw: string) => ({
-            $or: [
-              { title: { $regex: kw, $options: "i" } },
-              { content: { $regex: kw, $options: "i" } },
-              { companyName: { $regex: kw, $options: "i" } },
-            ],
-          }));
-        } else {
-          filters[key] = { [operator as string]: filterValue };
-        }
+      if (req.query.filters.salaryType === "yearly") {
+        filters.minSalaryYear = { $gte: userMinSalary };
+      } else {
+        filters.minSalary = { $gte: userMinSalary };
       }
-    });
+    }
+
+    if (queryFilters.employmentType) {
+      filters.employmentType = {
+        $in: Array.isArray(queryFilters.employmentType)
+          ? queryFilters.employmentType
+          : [queryFilters.employmentType],
+      };
+    }
+
+    if (queryFilters.localization) {
+      filters.localization = {
+        $in: Array.isArray(queryFilters.localization)
+          ? queryFilters.localization
+          : [queryFilters.localization],
+      };
+    }
+
+    if (queryFilters.experience) {
+      filters.experience = {
+        $in: Array.isArray(queryFilters.experience)
+          ? queryFilters.experience
+          : [queryFilters.experience],
+      };
+    }
+
+    if (queryFilters.technologies) {
+      filters.technologies = {
+        $in: Array.isArray(queryFilters.technologies)
+          ? queryFilters.technologies
+          : [queryFilters.technologies],
+      };
+    }
+
+    if (queryFilters.contractType) {
+      filters.contractType = {
+        $in: Array.isArray(queryFilters.contractType)
+          ? queryFilters.contractType
+          : [queryFilters.contractType],
+      };
+    }
 
     filters.isDeleted = false;
     filters.isPaid = true;
@@ -134,10 +158,18 @@ export const getOffers = async (
 
     switch (req.query.sort) {
       case "salary_highest":
-        sortValue = { minSalary: -1 };
+        if (req.query.filters.salaryType === "yearly") {
+          sortValue = { minSalaryYear: -1 };
+        } else {
+          sortValue = { minSalary: -1 };
+        }
         break;
       case "salary_lowest":
-        sortValue = { minSalary: 1 };
+        if (req.query.filters.salaryType === "yearly") {
+          sortValue = { minSalaryYear: 1 };
+        } else {
+          sortValue = { minSalary: 1 };
+        }
         break;
       case "latest":
         sortValue = { createdAt: -1 };

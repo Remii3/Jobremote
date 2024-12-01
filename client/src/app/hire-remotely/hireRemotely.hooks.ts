@@ -1,4 +1,3 @@
-import { axiosInstance } from "@/lib/utils";
 import { ClientModelFormSchema, CreateOfferSchema } from "@/schema/OfferSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -6,7 +5,7 @@ import { z } from "zod";
 import { loadStripe } from "@stripe/stripe-js";
 import { useToast } from "@/components/ui/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { UserType } from "@/types/types";
 import { handleError } from "@/lib/errorHandler";
 import fetchWithAuth from "@/lib/fetchWithAuth";
@@ -41,14 +40,20 @@ export const useHireRemotely = ({
       title: "",
       content: "",
       experience: "",
+      requirements: "",
+      benefits: "",
+      duties: "",
       employmentType: "",
       localization: "",
       maxSalary: 0,
-      currency: "USD",
       minSalary: 0,
+      maxSalaryYear: 0,
+      minSalaryYear: 0,
+      currency: "USD",
       contractType: "",
       companyName: "",
       redirectLink: "",
+      technologies: [],
     },
   });
 
@@ -96,8 +101,21 @@ export const useHireRemotely = ({
     if (selectedLogo) {
       newOfferFormData.append("logo", selectedLogo[0]);
     }
-    if (technologies) {
-      newOfferFormData.append("technologies", JSON.stringify(technologies));
+
+    if (offerValues.redirectLink) {
+      newOfferFormData.append("redirectLink", offerValues.redirectLink);
+    }
+
+    if (offerValues.requirements) {
+      newOfferFormData.append("requirements", offerValues.requirements);
+    }
+
+    if (offerValues.benefits) {
+      newOfferFormData.append("benefits", offerValues.benefits);
+    }
+
+    if (offerValues.duties) {
+      newOfferFormData.append("duties", offerValues.duties);
     }
 
     newOfferFormData.append("title", offerValues.title);
@@ -112,18 +130,18 @@ export const useHireRemotely = ({
     newOfferFormData.append("userId", user._id);
     newOfferFormData.append("companyName", offerValues.companyName);
     newOfferFormData.append("pricing", modelValues.pricing);
+    newOfferFormData.append("technologies", JSON.stringify(technologies));
 
     handleCreateOffer(newOfferFormData);
   }
 
   function handleTechnologies(technology: string) {
-    setTechnologies((prevState) => {
-      if (prevState.includes(technology)) {
-        return prevState.filter((tech) => tech !== technology);
-      } else {
-        return [...prevState, technology];
-      }
-    });
+    const technologies = offerForm.getValues().technologies || [];
+    const updated = technologies.includes(technology)
+      ? technologies.filter((tech) => tech !== technology)
+      : [...technologies, technology];
+
+    offerForm.setValue("technologies", updated);
   }
 
   return {

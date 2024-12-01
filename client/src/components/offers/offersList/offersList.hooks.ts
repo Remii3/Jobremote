@@ -4,11 +4,12 @@ import { axiosInstance, cleanEmptyData } from "@/lib/utils";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef } from "react";
 import { debounce } from "lodash";
+import { useCurrency } from "@/context/CurrencyContext";
 
 export const useOffersList = ({ sortOption, filters }: any) => {
   const { toast } = useToast();
   const observerRef = useRef<null | HTMLDivElement>(null);
-
+  const { currency, salaryType } = useCurrency();
   const {
     data,
     error,
@@ -19,12 +20,15 @@ export const useOffersList = ({ sortOption, filters }: any) => {
     fetchNextPage: offersFetchNextPage,
     refetch: offersRefetch,
   } = useInfiniteQuery({
-    queryKey: ["offers-list"],
+    queryKey: ["offers-list", salaryType],
     queryFn: async ({ pageParam = 1 }) => {
-      console.log("Filters", cleanEmptyData(filters));
       const res = await axiosInstance.get(`/offers`, {
         params: {
-          filters: cleanEmptyData(filters),
+          filters: {
+            ...cleanEmptyData(filters),
+            clientCurrency: currency,
+            salaryType,
+          },
           sort: sortOption,
           limit: "10",
           page: pageParam.toString(),

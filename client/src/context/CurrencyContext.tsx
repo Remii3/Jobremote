@@ -2,12 +2,19 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { AllowedCurrenciesType } from "@/types/types";
 import { allowedCurrencies } from "@/constants/constant";
+import { formatDate } from "@/lib/utils";
 
 interface CurrencyContextTypes {
   currency: AllowedCurrenciesType;
   changeCurrency: (newCurrency: AllowedCurrenciesType) => void;
-  formatCurrency: (amount: number, currency: AllowedCurrenciesType) => string;
+  formatCurrency: (
+    amount: number,
+    currency: AllowedCurrenciesType,
+    convert?: boolean
+  ) => string;
   allowedCurrencies: AllowedCurrenciesType[];
+  salaryType: string;
+  changeSalaryType: (newSalaryType: string) => void;
 }
 
 const CurrencyContext = createContext<CurrencyContextTypes | undefined>(
@@ -21,9 +28,14 @@ const LOCALES = {
 
 const CurrencyProvider = ({ children }: { children: React.ReactNode }) => {
   const [currency, setCurrency] = useState<AllowedCurrenciesType>("USD");
-  const [currencyRates, setCurrencyRates] = useState<{ [key: string]: number }>(
-    {}
-  );
+  const [salaryType, setSalaryType] = useState<string>("yearly");
+  const [currencyRates, setCurrencyRates] = useState<any>(null);
+
+  const changeSalaryType = (newSalaryType: string) => {
+    setSalaryType(newSalaryType);
+    localStorage.setItem("salaryType", newSalaryType);
+  };
+
   const changeCurrency = (newCurrency: AllowedCurrenciesType) => {
     setCurrency(newCurrency);
     localStorage.setItem("currency", newCurrency);
@@ -31,57 +43,94 @@ const CurrencyProvider = ({ children }: { children: React.ReactNode }) => {
 
   const formatCurrency = (
     amount: number,
-    productCurrency: AllowedCurrenciesType
+    productCurrency: AllowedCurrenciesType,
+    convert: boolean = true
   ) => {
     if (amount < 0 || typeof amount !== "number") return "N/A";
 
-    if (!productCurrency || !currency) return amount.toString();
+    if (!productCurrency || !currency || !currencyRates)
+      return amount.toString();
 
-    const productCurrencyRate = currencyRates[productCurrency.toLowerCase()];
-    const targetCurrencyRate = currencyRates[currency.toLowerCase()];
-    if (!productCurrencyRate || !targetCurrencyRate) return "N/A";
-
-    let preparedAmount = amount === 0 ? 0 : amount / productCurrencyRate; // Convert to base unit (USD equivalent)
-
-    if (currency === "USD") {
-      if (productCurrency !== "USD") {
-        preparedAmount *= 12;
-      }
-    } else {
-      if (productCurrency === "USD") {
-        preparedAmount /= 12;
-      }
-      preparedAmount *= targetCurrencyRate;
-    }
-
+    let preparedAmount = amount === 0 ? 0 : amount;
     const locale = LOCALES[currency] || "en-US";
 
-    return new Intl.NumberFormat(locale, {
-      style: "currency",
-      currency,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(preparedAmount);
+    if (convert && productCurrency !== currency) {
+      const productCurrencyRate =
+        currencyRates[productCurrency.toLowerCase()][currency.toLowerCase()];
+
+      preparedAmount = parseFloat((amount * productCurrencyRate).toFixed(4));
+      return new Intl.NumberFormat(locale, {
+        style: "currency",
+        currency,
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }).format(preparedAmount);
+    } else {
+      return new Intl.NumberFormat(locale, {
+        style: "currency",
+        currency: productCurrency,
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }).format(preparedAmount);
+    }
   };
 
   useEffect(() => {
     const fetchCurrencyRates = async () => {
-      const response = await fetch(
-        `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/${currency.toLowerCase()}.json`
-      );
-      const data = await response.json();
-      setCurrencyRates(data[currency.toLowerCase()]);
+      const urls = [
+        `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@${formatDate(
+          new Date()
+        )}/v1/currencies/usd.json`,
+        `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@${formatDate(
+          new Date()
+        )}/v1/currencies/eur.json`,
+      ];
+      const responses = await Promise.all(urls.map((url) => fetch(url)));
+
+      if (responses.some((res) => !res.ok)) {
+        throw new Error("Failed to fetch one or more currency rates");
+      }
+
+      const data = await Promise.all(responses.map((res) => res.json()));
+
+      const rates = data.reduce((acc, item) => {
+        const keys = Object.keys(item).filter((key) => key !== "date");
+
+        keys.forEach((key) => {
+          acc[key] = item[key];
+        });
+
+        return acc;
+      }, {});
+
+      setCurrencyRates(rates);
     };
     fetchCurrencyRates();
 
-    if (localStorage.getItem("currency") !== currency) {
+    if (
+      localStorage.getItem("currency") &&
+      localStorage.getItem("currency") !== currency
+    ) {
       setCurrency(localStorage.getItem("currency") as AllowedCurrenciesType);
     }
-  }, [currency]);
+    if (
+      localStorage.getItem("salaryType") &&
+      localStorage.getItem("salaryType") !== salaryType
+    ) {
+      setSalaryType(localStorage.getItem("salaryType") as string);
+    }
+  }, [currency, salaryType]);
 
   return (
     <CurrencyContext.Provider
-      value={{ currency, changeCurrency, formatCurrency, allowedCurrencies }}
+      value={{
+        currency,
+        changeCurrency,
+        formatCurrency,
+        allowedCurrencies,
+        changeSalaryType,
+        salaryType,
+      }}
     >
       {children}
     </CurrencyContext.Provider>

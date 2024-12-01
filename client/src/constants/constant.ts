@@ -1,6 +1,10 @@
-import { AllowedCurrenciesType } from "@/types/types";
+import { AllowedCurrenciesType, AllowedSalaryTypes } from "@/types/types";
 
 export const allowedCurrencies = ["USD", "EUR"] as AllowedCurrenciesType[];
+export const CONSTANT_SALARY_TYPE = [
+  "yearly",
+  "monthly",
+] as AllowedSalaryTypes[];
 
 export const TOAST_TITLES = {
   SUCCESS: "Success",

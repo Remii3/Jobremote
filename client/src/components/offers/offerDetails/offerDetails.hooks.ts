@@ -5,7 +5,7 @@ import { axiosInstance } from "@/lib/utils";
 import { applicationSchema } from "@/schema/OfferSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -17,6 +17,7 @@ type Props = {
 export function useOfferDetails({ toggleSuccessApplied, offerId }: Props) {
   const { user, fetchUserData } = useUser();
   const { toast } = useToast();
+  const [showOriginalPrice, setShowOriginalPrice] = useState(false);
 
   const form = useForm<z.infer<typeof applicationSchema>>({
     resolver: zodResolver(applicationSchema),
@@ -55,6 +56,10 @@ export function useOfferDetails({ toggleSuccessApplied, offerId }: Props) {
     handleOfferApply(applyFormData);
   }
 
+  function toggleOriginalPrice() {
+    setShowOriginalPrice((prev) => !prev);
+  }
+
   useEffect(() => {
     if (user) {
       form.reset({
@@ -69,5 +74,7 @@ export function useOfferDetails({ toggleSuccessApplied, offerId }: Props) {
     form,
     submitApplicationHandler,
     isPendingApplyForOffer,
+    showOriginalPrice,
+    toggleOriginalPrice,
   };
 }

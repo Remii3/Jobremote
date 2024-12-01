@@ -13,6 +13,7 @@ import CurrencySelector from "../ui/currency-selector";
 import ThemeSelector from "../ui/theme-selector";
 import { useUser } from "@/context/UserContext";
 import { useState } from "react";
+import SalaryTypeSelector from "../ui/salaryTypeSelector";
 
 export default function Nav() {
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -113,6 +114,7 @@ export default function Nav() {
             <div className="flex items-center justify-between">
               <CurrencySelector />
               <ThemeSelector />
+              <SalaryTypeSelector />
             </div>
           </div>
         </SheetContent>

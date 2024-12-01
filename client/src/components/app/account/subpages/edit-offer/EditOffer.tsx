@@ -54,6 +54,7 @@ export default function EditOffer({
     handleSubmit,
     selectedLogo,
     updateOfferIsLoading,
+    handleTechnologies,
   } = useEditOffer({
     offerData,
     handleChangeCurrentEditOffer,
@@ -153,6 +154,10 @@ export default function EditOffer({
         {avTechnologies && (
           <TechnologySelection
             availableTechnologies={avTechnologies.technologies}
+            control={form.control}
+            label="Technologies"
+            name="technologies"
+            handleTechnologies={handleTechnologies}
           />
         )}
         <div>

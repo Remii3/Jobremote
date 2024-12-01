@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import CurrencySelector from "../ui/currency-selector";
 import ThemeSelector from "../ui/theme-selector";
+import SalaryTypeSelector from "../ui/salaryTypeSelector";
 
 export default function Header() {
   return (
@@ -17,6 +18,7 @@ export default function Header() {
         </div>
         <div className="hidden md:block">
           <CurrencySelector />
+          <SalaryTypeSelector />
         </div>
       </div>
       <Nav />
