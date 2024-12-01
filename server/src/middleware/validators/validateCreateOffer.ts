@@ -112,6 +112,7 @@ export function sanitizeCreateOffer(
   } = req.body;
 
   const sanitizedBody = {
+    ...req.body,
     title: sanitizeHtml(title, {
       allowedTags: [],
       allowedAttributes: {},
@@ -173,34 +174,7 @@ export function sanitizeCreateOffer(
       allowedAttributes: {},
     }),
 
-    content: sanitizeHtml(content, {
-      allowedTags: [
-        "p",
-        "h2",
-        "h3",
-        "h4",
-        "ul",
-        "li",
-        "ol",
-        "a",
-        "i",
-        "u",
-        "s",
-        "strong",
-        "blockquote",
-      ],
-      allowedAttributes: {
-        "*": ["style", "class", "id"],
-        a: ["href", "name", "target"],
-      },
-      allowedSchemes: ["http", "https", "mailto", "tel"],
-      allowedSchemesByTag: {
-        a: ["http", "https", "mailto", "tel"],
-      },
-      transformTags: {
-        a: sanitizeHtml.simpleTransform("a", { rel: "nofollow" }),
-      },
-    }),
+    content: sanitizeHtml(content, ckBodySanitizeBoiler),
   };
 
   if (benefits) {
@@ -221,7 +195,6 @@ export function sanitizeCreateOffer(
       allowedAttributes: {},
     });
   }
-
   req.body = sanitizedBody;
 
   next();
