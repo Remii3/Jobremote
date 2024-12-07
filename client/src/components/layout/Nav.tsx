@@ -42,7 +42,7 @@ export default function Nav() {
         )}
         {user && !userDataIsLoading && (
           <Link
-            href={"/account"}
+            href={"/account/details"}
             className={buttonVariants({ variant: "outline" })}
           >
             Profile
@@ -88,7 +88,7 @@ export default function Nav() {
                 <>
                   <li>
                     <Link
-                      href="/account"
+                      href="/account/details"
                       onClick={toggleSheet}
                       className={`${buttonVariants({
                         variant: "outline",

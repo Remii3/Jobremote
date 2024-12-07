@@ -19,7 +19,7 @@ export default function TabSelector({
 }: TabSelectorPropsType) {
   return (
     <Select onValueChange={changeTab}>
-      <SelectTrigger className="md:hidden mb-6">
+      <SelectTrigger className="md:hidden mb-6 sticky top-[91px] z-30">
         {tabs.find((tab) => tab.code === currentTab)?.name}
       </SelectTrigger>
       <SelectContent>

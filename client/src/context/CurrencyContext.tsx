@@ -2,7 +2,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { AllowedCurrenciesType } from "@/types/types";
 import { allowedCurrencies } from "@/constants/constant";
-import { formatDate } from "@/lib/utils";
 
 interface CurrencyContextTypes {
   currency: AllowedCurrenciesType;
@@ -97,12 +96,8 @@ const CurrencyProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const fetchCurrencyRates = async () => {
       const urls = [
-        `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@${formatDate(
-          new Date()
-        )}/v1/currencies/usd.json`,
-        `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@${formatDate(
-          new Date()
-        )}/v1/currencies/eur.json`,
+        `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json`,
+        `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/eur.json`,
       ];
       const responses = await Promise.all(urls.map((url) => fetch(url)));
 

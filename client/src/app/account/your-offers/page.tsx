@@ -1,21 +1,23 @@
+"use client";
+
 import { AdminOfferType, OfferType, UserType } from "@/types/types";
 import { ArrowLeft } from "lucide-react";
 import React, { useState } from "react";
-import EditOffer from "../edit-offer/EditOffer";
 
-import { Separator } from "../../../../ui/separator";
+import { Separator } from "@/components/ui/separator";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { useYourOffers } from "./YourOffers.hooks";
 import { Skeleton } from "@/components/ui/skeleton";
-import { DataTable } from "./table/DataTable";
+import { DataTable } from "@/components/app/account/subpages/your-offers/table/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
-import OfferAction from "./OfferAction";
+import OfferAction from "@/components/app/account/subpages/your-offers/OfferAction";
 import { useCurrency } from "@/context/CurrencyContext";
+import withAuth from "@/components/AuthGuard";
 
 export type Payment = {
   id: string;
@@ -30,7 +32,7 @@ type YourOffersProps = {
   fetchUserData: () => void;
 };
 
-export default function YourOffers({ user, fetchUserData }: YourOffersProps) {
+function YourOffersPage({ fetchUserData, user }: YourOffersProps) {
   const queryClient = useQueryClient();
   const { formatCurrency, currency, salaryType } = useCurrency();
 
@@ -149,10 +151,9 @@ export default function YourOffers({ user, fetchUserData }: YourOffersProps) {
       },
     },
   ];
-
   return (
     <>
-      {selectedOffer && (
+      {/* {selectedOffer && (
         <>
           <div className="px-2 md:col-span-4">
             <div className="flex gap-4 items-center">
@@ -177,28 +178,30 @@ export default function YourOffers({ user, fetchUserData }: YourOffersProps) {
             queryClient={queryClient}
           />
         </>
-      )}
-      {!selectedOffer && (
-        <>
-          <div className="md:col-span-4 px-2">
-            <h2 className="text-3xl font-semibold">Your offers</h2>
-            <span className="text-muted-foreground text-sm">
-              Manage your offers
-            </span>
-            <Separator className="my-4" />
+      )} */}
+      {/* {!selectedOffer && ( */}
+      <>
+        <div className="md:col-span-4 px-2">
+          <h2 className="text-3xl font-semibold">Your offers</h2>
+          <span className="text-muted-foreground text-sm">
+            Manage your offers
+          </span>
+          <Separator className="my-4" />
+        </div>
+        {userOffersIsPending && (
+          <div className="md:col-span-4 md:col-start-2 px-2 space-y-4">
+            <Skeleton className="w-full h-[70px] bg-muted/50" />
+            <Skeleton className="w-full h-[70px] bg-muted/50" />
+            <Skeleton className="w-full h-[70px] bg-muted/50" />
           </div>
-          {userOffersIsPending && (
-            <div className="md:col-span-4 md:col-start-2 px-2 space-y-4">
-              <Skeleton className="w-full h-[70px] bg-muted/50" />
-              <Skeleton className="w-full h-[70px] bg-muted/50" />
-              <Skeleton className="w-full h-[70px] bg-muted/50" />
-            </div>
-          )}
-          {userOffersList && paymentList && (
-            <DataTable columns={columns} data={userOffersList.offers} />
-          )}
-        </>
-      )}
+        )}
+        {userOffersList && paymentList && (
+          <DataTable columns={columns} data={userOffersList.offers} />
+        )}
+      </>
+      {/* )} */}
     </>
   );
 }
+
+export default withAuth(YourOffersPage);

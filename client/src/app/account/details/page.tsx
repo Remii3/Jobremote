@@ -1,4 +1,6 @@
-import { Separator } from "../../../../ui/separator";
+"use client";
+
+import { Separator } from "@/components/ui/separator";
 import {
   Form,
   FormField,
@@ -6,19 +8,20 @@ import {
   FormLabel,
   FormMessage,
   FormRootError,
-} from "../../../../ui/form";
-import { Input } from "../../../../ui/input";
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { UserType } from "@/types/types";
-import { Button } from "../../../../ui/button";
-import { Textarea } from "../../../../ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { useDetails } from "./Details.hooks";
+import withAuth from "@/components/AuthGuard";
 
 type DetailsType = {
   user: UserType;
   fetchUserData: () => void;
 };
 
-export default function Details({ user, fetchUserData }: DetailsType) {
+function DetailsPage({ fetchUserData, user }: DetailsType) {
   const { form, handleSubmit, isPending } = useDetails({ user, fetchUserData });
   return (
     <div className="px-2 md:col-span-4">
@@ -69,3 +72,4 @@ export default function Details({ user, fetchUserData }: DetailsType) {
     </div>
   );
 }
+export default withAuth(DetailsPage);

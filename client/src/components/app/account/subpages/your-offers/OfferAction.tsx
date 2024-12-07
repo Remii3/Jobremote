@@ -1,8 +1,9 @@
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { SquarePen, Wallet } from "lucide-react";
 import DeleteOfferDialog from "./DeleteOfferDialog";
 import { AdminOfferType, OfferType } from "@/types/types";
 import ExtendOfferDialog from "./ExtendOfferDialog";
+import Link from "next/link";
 
 type OfferActionProps = {
   offer: AdminOfferType;
@@ -53,15 +54,12 @@ export default function OfferAction({
 }: OfferActionProps) {
   return (
     <>
-      <Button
-        onClick={() => {
-          onEditChange(offer);
-        }}
-        variant={"outline"}
-        size={"icon"}
+      <Link
+        className={`${buttonVariants({ variant: "outline", size: "icon" })}`}
+        href={`/account/your-offers/edit/${offer._id}`}
       >
         <SquarePen className="h-5 w-5" />
-      </Button>
+      </Link>
       {offer.isPaid ? (
         <ExtendOfferDialog
           offer={offer}

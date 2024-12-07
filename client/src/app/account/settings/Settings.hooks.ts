@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { getOnlyDirtyFormFields } from "@/lib/utils";
 import { useEffect } from "react";
-import { useToast } from "../../../../ui/use-toast";
+import { useToast } from "../../../components/ui/use-toast";
 import { TOAST_TITLES } from "@/constants/constant";
 import { UserType } from "@/types/types";
 import { useMutation } from "@tanstack/react-query";

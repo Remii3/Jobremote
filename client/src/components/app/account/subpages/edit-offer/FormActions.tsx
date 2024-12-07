@@ -1,14 +1,13 @@
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import Link from "next/link";
 
 interface FormActionsProps {
   isLoading: boolean;
-  handleCancel: () => void;
   disabledSubmit: boolean;
 }
 
 export default function FormActions({
   isLoading,
-  handleCancel,
   disabledSubmit,
 }: FormActionsProps) {
   return (
@@ -21,9 +20,14 @@ export default function FormActions({
       >
         Update Offer
       </Button>
-      <Button type="button" variant="outline" onClick={handleCancel}>
+      <Link
+        className={`${buttonVariants({
+          variant: "outline",
+        })}`}
+        href={`/account/your-offers`}
+      >
         Go Back
-      </Button>
+      </Link>
     </div>
   );
 }

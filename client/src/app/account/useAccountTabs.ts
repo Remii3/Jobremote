@@ -1,5 +1,5 @@
-import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import { useMemo } from "react";
 
 const tabs: { code: string; name: string }[] = [
   { name: "Details", code: "details" },
@@ -8,34 +8,15 @@ const tabs: { code: string; name: string }[] = [
 ];
 
 export function useAccountTabs() {
-  const searchParams = useSearchParams();
   const router = useRouter();
+  const pathname = usePathname();
 
-  const initialTab = searchParams.get("tab") || "details";
-  const [currentTab, setCurrentTab] = useState(initialTab);
-
-  useEffect(() => {
-    const tabFromParams = searchParams.get("tab");
-    if (tabFromParams && tabFromParams !== currentTab) {
-      setCurrentTab(tabFromParams);
-    }
-  }, [searchParams, currentTab]);
+  const currentTab = useMemo(() => pathname.split("/")[2], [pathname]);
 
   function changeTab(tab: string) {
     if (tab === currentTab) return;
-
-    const tabFromParams = new URLSearchParams(searchParams);
-    tabFromParams.set("tab", tab);
-    router.replace(`/account?${tabFromParams.toString()}`);
+    router.replace(`/account/${tab}`);
   }
-
-  useEffect(() => {
-    if (!searchParams.get("tab")) {
-      const tabFromParams = new URLSearchParams(searchParams);
-      tabFromParams.set("tab", currentTab);
-      router.replace(`/account?${tabFromParams.toString()}`);
-    }
-  }, [searchParams, router, currentTab]);
 
   return {
     currentTab,
