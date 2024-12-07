@@ -145,7 +145,6 @@ export function useEditOffer({ offerId }: EditOfferProps) {
   function changeLocalizationOpenHandler(newVal: boolean) {
     setLocalizationOpen(newVal);
   }
-  console.log("Form values: ", form.getValues());
   return {
     offerData,
     isPending,
