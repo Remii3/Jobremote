@@ -6,7 +6,7 @@ import { TOAST_TITLES } from "@/constants/constant";
 import { useEffect, useState } from "react";
 import { OfferType } from "@/types/types";
 import { z } from "zod";
-import { UpdateOfferSchema } from "@/schema/OfferSchema";
+import { CreateOfferSchema } from "@/schema/OfferSchema";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { handleError } from "@/lib/errorHandler";
 import fetchWithAuth from "@/lib/fetchWithAuth";
@@ -24,6 +24,7 @@ export function useEditOffer({ offerId }: EditOfferProps) {
   const { toast } = useToast();
   const [selectedLogo, setSelectedLogo] = useState<File[] | null>(null);
   const queryClient = useQueryClient();
+  const [bindSalaries, setBindSalaries] = useState<boolean>(true);
 
   const [techOpen, setTechOpen] = useState(false);
   const [localizationOpen, setLocalizationOpen] = useState(false);
@@ -41,8 +42,8 @@ export function useEditOffer({ offerId }: EditOfferProps) {
     },
   });
 
-  const form = useForm<z.infer<typeof UpdateOfferSchema>>({
-    resolver: zodResolver(UpdateOfferSchema),
+  const form = useForm<z.infer<typeof CreateOfferSchema>>({
+    resolver: zodResolver(CreateOfferSchema),
     defaultValues: {
       title: "",
       content: "",
@@ -53,7 +54,7 @@ export function useEditOffer({ offerId }: EditOfferProps) {
       localization: "",
       minSalary: 0,
       maxSalary: 0,
-      currency: "",
+      currency: "USD",
       redirectLink: "",
       technologies: [],
       maxSalaryYear: 0,
@@ -82,7 +83,7 @@ export function useEditOffer({ offerId }: EditOfferProps) {
     },
   });
 
-  function handleSubmit(values: z.infer<typeof UpdateOfferSchema>) {
+  function handleSubmit(values: z.infer<typeof CreateOfferSchema>) {
     const updatedFieldsValues = getOnlyDirtyFormFields(values, form);
     const formData = new FormData();
     Object.entries(updatedFieldsValues).forEach(([key, value]) => {
@@ -102,35 +103,38 @@ export function useEditOffer({ offerId }: EditOfferProps) {
   }
 
   useEffect(() => {
-    if (offerData) {
-      form.reset({
-        title: offerData.title,
-        content: offerData.content,
-        experience: offerData.experience,
-        employmentType: offerData.employmentType,
-        companyName: offerData.companyName,
-        contractType: offerData.contractType,
-        localization: offerData.localization,
-        minSalary: offerData.minSalary,
-        maxSalary: offerData.maxSalary,
-        currency: offerData.currency,
-        redirectLink: offerData.redirectLink ? offerData.redirectLink : "",
-        technologies: offerData.technologies,
-        benefits: offerData.benefits,
-        duties: offerData.duties,
-        requirements: offerData.requirements,
-        maxSalaryYear: offerData.maxSalaryYear,
-        minSalaryYear: offerData.minSalaryYear,
-      });
-    }
+    if (!offerData) return;
+    form.reset((values) => ({
+      ...values,
+      title: offerData.title || "",
+      content: offerData.content || "",
+      experience: offerData.experience || "",
+      employmentType: offerData.employmentType || "",
+      companyName: offerData.companyName || "",
+      contractType: offerData.contractType || "",
+      localization: offerData.localization || "",
+      minSalary: offerData.minSalary ?? 0,
+      maxSalary: offerData.maxSalary ?? 0,
+      currency: offerData.currency || "",
+      redirectLink: offerData.redirectLink || "",
+      technologies: offerData.technologies || [],
+      benefits: offerData.benefits || "",
+      duties: offerData.duties || "",
+      requirements: offerData.requirements || "",
+      maxSalaryYear: offerData.maxSalaryYear ?? 0,
+      minSalaryYear: offerData.minSalaryYear ?? 0,
+    }));
   }, [form, offerData]);
+
+  function handleBindSalaries() {
+    setBindSalaries(!bindSalaries);
+  }
 
   function handleTechnologies(technology: string) {
     const technologies = form.getValues().technologies || [];
     const updated = technologies.includes(technology)
       ? technologies.filter((tech) => tech !== technology)
       : [...technologies, technology];
-
     form.setValue("technologies", updated);
   }
 
@@ -141,7 +145,7 @@ export function useEditOffer({ offerId }: EditOfferProps) {
   function changeLocalizationOpenHandler(newVal: boolean) {
     setLocalizationOpen(newVal);
   }
-  console.log(form.getValues());
+  console.log("Form values: ", form.getValues());
   return {
     offerData,
     isPending,
@@ -157,5 +161,7 @@ export function useEditOffer({ offerId }: EditOfferProps) {
     changeTechOpenHandler,
     localizationOpen,
     changeLocalizationOpenHandler,
+    bindSalaries,
+    handleBindSalaries,
   };
 }

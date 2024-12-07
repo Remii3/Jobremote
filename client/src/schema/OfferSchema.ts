@@ -45,59 +45,6 @@ export const CreateOfferSchema = z
     }
   );
 
-export const UpdateOfferSchema = z
-  .object({
-    title: z.string().optional(),
-    content: z.string().optional(),
-    requirements: z.string().optional(),
-    benefits: z.string().optional(),
-    duties: z.string().optional(),
-    experience: z.string().optional(),
-    employmentType: z.string().optional(),
-    companyName: z.string().optional(),
-    contractType: z.string().optional(),
-    localization: z.string().optional(),
-    minSalary: z.coerce
-      .number()
-      .optional()
-      .refine((data) => data === undefined || data > 0, {
-        message: "Min salary must be greater than 0",
-      }),
-    maxSalary: z.coerce
-      .number()
-      .optional()
-      .refine((data) => data === undefined || data > 0, {
-        message: "Max salary must be greater than 0",
-      }),
-    minSalaryYear: z.coerce
-      .number()
-      .optional()
-      .refine((data) => data === undefined || data > 0, {
-        message: "Min salary must be greater than 0",
-      }),
-    maxSalaryYear: z.coerce
-      .number()
-      .optional()
-      .refine((data) => data === undefined || data > 0, {
-        message: "Max salary yearly must be greater than 0",
-      }),
-    currency: z.string().optional(),
-    redirectLink: z.string().optional(),
-    technologies: z.array(z.string()),
-  })
-  .refine(
-    (data) => {
-      if (data.minSalary !== undefined && data.maxSalary !== undefined) {
-        return data.minSalary < data.maxSalary;
-      }
-      return true;
-    },
-    {
-      message: "Min salary must be lower than max salary",
-      path: ["minSalary"],
-    }
-  );
-
 export const ClientModelFormSchema = z.object({
   pricing: z.string(),
 });

@@ -21,7 +21,6 @@ import TextField from "@/components/app/account/subpages/edit-offer/TextField";
 import AvatarSection from "@/components/app/account/subpages/edit-offer/AvatarSection";
 import SelectField from "@/components/app/account/subpages/edit-offer/SelectField";
 import LocalizationPopover from "@/components/app/account/subpages/edit-offer/LocalizationPopover";
-import TechnologySelection from "@/components/app/account/subpages/edit-offer/TechnologySelection";
 import FormActions from "@/components/app/account/subpages/edit-offer/FormActions";
 import SelectCurrencyField from "@/components/app/account/subpages/edit-offer/SelectCurrencyField";
 import { EXPERIENCES } from "@/constants/experiences";
@@ -29,6 +28,26 @@ import { EMPLOYMENTS } from "@/constants/employments";
 import { CONTRACTS } from "@/constants/contracts";
 import { useParams } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { Check, ChevronsUpDown } from "lucide-react";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 
 const OfferCkEditor = dynamic(
   () => import("@/components/ui/ckeditor").then((mod) => mod.OfferCkEditor),
@@ -37,6 +56,7 @@ const OfferCkEditor = dynamic(
 
 export default function EditOfferPage() {
   const { offerId } = useParams() as { offerId: string };
+  const [techOpen, setTechOpen] = useState<boolean>(false);
 
   const { avTechnologies } = useGetAvailableTechnologies();
   const { allowedCurrencies } = useCurrency();
@@ -50,6 +70,8 @@ export default function EditOfferPage() {
     selectedLogo,
     updateOfferIsLoading,
     handleTechnologies,
+    bindSalaries,
+    handleBindSalaries,
   } = useEditOffer({
     offerId,
   });
@@ -132,34 +154,278 @@ export default function EditOfferPage() {
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="requirements"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Requirements</FormLabel>
+                  <FormControl>
+                    <OfferCkEditor
+                      value={field.value || ""}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="duties"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Duties</FormLabel>
+                  <FormControl>
+                    <OfferCkEditor
+                      value={field.value || ""}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="benefits"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Benefits</FormLabel>
+                  <FormControl>
+                    <OfferCkEditor
+                      value={field.value || ""}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <div className="flex gap-8 flex-col md:flex-row">
-              <TextField
-                name="minSalary"
-                label="Min Salary"
+              <FormField
                 control={form.control}
-                type="number"
+                name="minSalary"
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <FormLabel>
+                      Min salary <span className="text-red-400">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="number"
+                        onBlur={() => {
+                          if (
+                            bindSalaries &&
+                            form.getValues("minSalaryYear") !==
+                              form.getValues("minSalary")! * 12
+                          ) {
+                            form.setValue("minSalaryYear", field.value! * 12);
+                          }
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
+              <FormField
+                control={form.control}
+                name="maxSalary"
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <FormLabel>
+                      Max salary <span className="text-red-400">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        min={0}
+                        type="number"
+                        onBlur={() => {
+                          if (
+                            bindSalaries &&
+                            form.getValues("maxSalaryYear") !==
+                              parseFloat(
+                                (form.getValues("maxSalary")! * 12).toFixed(2)
+                              )
+                          ) {
+                            form.setValue("maxSalaryYear", field.value! * 12);
+                          }
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <SelectCurrencyField
                 name="currency"
                 label="Currency"
                 options={allowedCurrencies}
                 control={form.control}
               />
-
-              <TextField
+            </div>
+            <div className="flex gap-8 flex-col md:flex-row">
+              <FormField
                 control={form.control}
-                label="Max salary"
-                name="maxSalary"
-                type="number"
+                name="minSalaryYear"
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <FormLabel>
+                      Min salary/ year<span className="text-red-400">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="number"
+                        onBlur={() => {
+                          if (
+                            bindSalaries &&
+                            form.getValues("minSalary") !==
+                              parseFloat(
+                                (form.getValues("minSalaryYear")! / 12).toFixed(
+                                  2
+                                )
+                              )
+                          ) {
+                            form.setValue(
+                              "minSalary",
+                              parseFloat((field.value! / 12).toFixed(2))
+                            );
+                          }
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
+              <FormField
+                control={form.control}
+                name="maxSalaryYear"
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <FormLabel>
+                      Max salary/ year <span className="text-red-400">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="number"
+                        min={0}
+                        onBlur={() => {
+                          if (
+                            bindSalaries &&
+                            form.getValues("maxSalary") !==
+                              parseFloat(
+                                (form.getValues("maxSalaryYear")! / 12).toFixed(
+                                  2
+                                )
+                              )
+                          ) {
+                            form.setValue(
+                              "maxSalary",
+                              parseFloat((field.value! / 12).toFixed(2))
+                            );
+                          }
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Label className="flex gap-4 items-center">
+                <Switch
+                  checked={bindSalaries}
+                  onCheckedChange={handleBindSalaries}
+                />
+                <span className="text-nowrap">Bind salaries</span>
+              </Label>
             </div>
             {avTechnologies && (
-              <TechnologySelection
-                availableTechnologies={avTechnologies.technologies}
+              <FormField
                 control={form.control}
-                label="Technologies"
                 name="technologies"
-                handleTechnologies={handleTechnologies}
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <FormLabel>Technologies</FormLabel>
+                    <FormControl>
+                      <Popover
+                        open={techOpen}
+                        onOpenChange={() => setTechOpen((prev) => !prev)}
+                      >
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={techOpen}
+                            className="w-[300px] flex justify-between"
+                          >
+                            Technology
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[300px] p-0">
+                          <Command>
+                            <CommandInput placeholder="Search technology..." />
+                            <CommandList>
+                              <CommandEmpty>No technology found.</CommandEmpty>
+                              <CommandGroup>
+                                {avTechnologies.technologies.map(
+                                  (tech: { _id: string; name: string }) => {
+                                    return (
+                                      <CommandItem
+                                        key={tech._id}
+                                        onSelect={() =>
+                                          handleTechnologies(tech.name)
+                                        }
+                                      >
+                                        <Check
+                                          className={cn(
+                                            "mr-2 h-4 w-4",
+                                            field.value.includes(tech.name)
+                                              ? "opacity-100"
+                                              : "opacity-0"
+                                          )}
+                                        />
+                                        <span className="w-full">
+                                          {tech.name}
+                                        </span>
+                                      </CommandItem>
+                                    );
+                                  }
+                                )}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                    </FormControl>
+                    <FormMessage />
+                    {field.value.length > 0 && (
+                      <ul className="flex gap-4 pt-2">
+                        {field.value.map((tech: string) => (
+                          <li key={tech}>
+                            <Badge
+                              variant="outline"
+                              className="py-1 px-3 cursor-pointer"
+                              onClick={() => handleTechnologies(tech)}
+                            >
+                              {tech}
+                            </Badge>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </FormItem>
+                )}
               />
             )}
             <div>

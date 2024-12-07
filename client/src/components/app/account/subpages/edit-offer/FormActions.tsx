@@ -17,6 +17,7 @@ export default function FormActions({
         variant="default"
         isLoading={isLoading}
         disabled={disabledSubmit}
+        showLoader
       >
         Update Offer
       </Button>

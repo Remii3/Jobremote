@@ -32,11 +32,17 @@ export default function SelectField({
       control={control}
       name={name}
       render={({ field }) => {
-        console.log(field.value);
         return (
           <FormItem className="w-full">
             <FormLabel>{label}</FormLabel>
-            <Select value={field.value} onValueChange={field.onChange}>
+            <Select
+              value={field.value}
+              onValueChange={(value) => {
+                if (value !== field.value) {
+                  field.onChange(value);
+                }
+              }}
+            >
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder={label} />
