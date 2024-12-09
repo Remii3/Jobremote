@@ -9,6 +9,13 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { OfferType } from "@/types/types";
 import { Wallet } from "lucide-react";
 import { useState } from "react";
@@ -60,6 +67,7 @@ export default function ExtendOfferDialog({
           </DialogDescription>
         </DialogHeader>
         <form
+          className="space-y-4"
           onSubmit={(e) => {
             e.preventDefault();
             extendOfferDurationHandler({
@@ -70,22 +78,23 @@ export default function ExtendOfferDialog({
             });
           }}
         >
-          <select
+          <Select
             name="pricing"
-            onChange={(value) => {
-              changeSelectedPricingHandler(value.target.value);
+            onValueChange={(value) => {
+              changeSelectedPricingHandler(value);
             }}
-            defaultValue={""}
           >
-            <option value={""} disabled>
-              Select payment type
-            </option>
-            {paymentList.map((paymentType) => (
-              <option key={paymentType.code} value={paymentType.code}>
-                {paymentType.name}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger>
+              <SelectValue placeholder="Select payment type" />
+            </SelectTrigger>
+            <SelectContent>
+              {paymentList.map((paymentType) => (
+                <SelectItem key={paymentType.code} value={paymentType.code}>
+                  {paymentType.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <DialogFooter>
             <DialogClose>Cancel</DialogClose>
             <Button type="submit" disabled={!selectedPricing}>
